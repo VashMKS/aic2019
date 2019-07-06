@@ -13,13 +13,13 @@ public class Tools {
     }
 
     //Returns a random direction
-    Direction RandomDir() {
+    Direction randomDir() {
         int randomNum = (int)(Math.random()*8);
         return data.dirs[randomNum];
     }
 
     //Return a general direction towards the favourite direction
-    Direction GeneralDir(Direction favDir){
+    Direction generalDir(Direction favDir){
         UnitController uc = data.uc;
         for (int k = 0; k < 8 && !uc.canMove(favDir); ++k) {
             if (k%2 == 0) for (int j = 0; j < k; ++j) favDir = favDir.rotateLeft();
@@ -29,7 +29,7 @@ public class Tools {
     }
 
     //Returns the barycenter of a number of locations
-    Location Barycenter(Location[] locs) {
+    Location barycenter(Location[] locs) {
         Location b = new Location(0,0);
         for (Location loc : locs) {
             b.x = b.x + loc.x;
@@ -41,7 +41,7 @@ public class Tools {
     }
 
     //Returns the barycenter of nearby allied units of a given type
-    Location Barycenter(UnitType type){
+    Location barycenter(UnitType type){
         UnitInfo[] units = data.uc.senseUnits(data.allyTeam, false );
         Location b = new Location(0,0);
         int n = 0;
@@ -58,7 +58,7 @@ public class Tools {
     }
 
     //Returns the location with certain barycentric coordinates in the barycentric reference B
-    Location BarCoord(Location[] B, int[] coord) {
+    Location barCoord(Location[] B, int[] coord) {
         int s = 0;
         Location R = new Location(0,0);
         for (int i = 0; i < B.length; i++) {
@@ -72,17 +72,17 @@ public class Tools {
     }
 
     //Turn a pair of coordinates into an integer
-    int Encrypt(int x, int y) {
+    int encrypt(int x, int y) {
         return x*1000 + y;
     }
 
     //Decrypt a location from an integer
-    Location Decrypt(int n) {
+    Location decrypt(int n) {
         return new Location(n/1000, n%1000);
     }
 
     //True if no friendly units are in that location
-    boolean NoFriendlyUnitsAt(Location loc) {
+    boolean noFriendlyUnitsAt(Location loc) {
         if (data.uc.getLocation().isEqual(loc)) return false;
         UnitInfo[] nearbyAllies = data.uc.senseUnits(data.allyTeam, false);
         for (UnitInfo unit : nearbyAllies) {
@@ -92,7 +92,7 @@ public class Tools {
     }
 
     //Returns the # of allies of a given type in a squared radius
-    int MatesAround(int radius, UnitType type) {
+    int matesAround(int radius, UnitType type) {
         UnitInfo[] unitsNear = data.uc.senseUnits(data.uc.getLocation(), radius, data.allyTeam);
         int i = 0;
         for (UnitInfo unit : unitsNear)
@@ -101,7 +101,7 @@ public class Tools {
     }
 
     //Returns the number of adjacent units
-    int Adjacent(UnitInfo[] units) {
+    int adjacent(UnitInfo[] units) {
         Location myLoc = data.uc.getLocation();
         int count = 0;
         for (Direction dir : data.dirs) {
@@ -113,7 +113,7 @@ public class Tools {
     }
 
     //Returns the number of adjacent units of the given type
-    int Adjacent(UnitInfo[] units, UnitType type) {
+    int adjacent(UnitInfo[] units, UnitType type) {
         Location myLoc = data.uc.getLocation();
         int count = 0;
         for (Direction dir : data.dirs) {
@@ -126,11 +126,19 @@ public class Tools {
         return count;
     }
 
-    boolean AreAdjacent(Location loc1, Location loc2) {
+    boolean areAdjacent(Location loc1, Location loc2) {
         for (Direction dir : data.dirs) {
             if (loc1.add(dir).isEqual(loc2)) return true;
         }
         return false;
+    }
+
+    boolean reportedMine(Location loc){
+        for(int i = 0; i < data.nMines; ++i){
+            Location mineLoc = decrypt(uc.read(1001+2*i));
+            if (loc == mineLoc) return false;
+        }
+        return true;
     }
 
 }
