@@ -1,6 +1,8 @@
-package alpha1;
+package alpha2;
 
-import aic2019.*;
+import aic2019.UnitController;
+
+import java.awt.*;
 
 public class Explorer extends CombatUnit {
 
@@ -19,6 +21,8 @@ public class Explorer extends CombatUnit {
 
             report();
 
+            move();
+
             uc.yield();
         }
     }
@@ -33,5 +37,10 @@ public class Explorer extends CombatUnit {
         uc.write(data.unitResetCh, 0);
         //uc.write(data.combatUnitResetCh, 0);
         uc.write(data.explorerResetCh, 0);
+    }
+
+    @Override
+    void move() {
+        super.move();
     }
 }

@@ -1,6 +1,4 @@
-package alpha1;
-
-import aic2019.*;
+package alpha2;
 
 public class CombatUnit extends MovingUnit {
 

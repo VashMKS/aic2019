@@ -1,6 +1,9 @@
-package alpha1;
+package alpha2;
 
-import aic2019.*;
+import aic2019.Location;
+import aic2019.ResourceInfo;
+import aic2019.TownInfo;
+import aic2019.UnitController;
 
 public class Unit {
 
@@ -14,14 +17,22 @@ public class Unit {
         reportEnvironment();
     }
 
+    // overrided for each different unit
     void reportMyself() {
     }
 
+    // report enemies on sight
     void reportEnemies () {
     }
 
+    // report mines, towns, terrain, etc
     void reportEnvironment() {
+        reportMines();
+        reportTowns();
+        reportMap();
+    }
 
+    void reportMines(){
         ResourceInfo[] minesAround = uc.senseResources();
         //uc.println("sense mines successful, mines found: " + minesAround.length);
         if(minesAround.length > 0) {
@@ -38,7 +49,9 @@ public class Unit {
                 }
             }
         }
+    };
 
+    void reportTowns(){
         TownInfo[] townsAround = uc.senseTowns();
         //uc.println("sense towns completed, towns found: " + townsAround.length);
         if(townsAround.length > 0) {
@@ -51,7 +64,8 @@ public class Unit {
                 }
             }
         }
+    };
 
-    }
+    void reportMap(){};
 
 }

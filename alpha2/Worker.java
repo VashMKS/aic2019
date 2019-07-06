@@ -1,6 +1,9 @@
-package alpha1;
+package alpha2;
 
-import aic2019.*;
+import aic2019.Direction;
+import aic2019.Location;
+import aic2019.UnitController;
+import aic2019.UnitType;
 
 public class Worker extends MovingUnit {
 

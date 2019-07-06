@@ -1,4 +1,4 @@
-package alpha1;
+package alpha2;
 
 import aic2019.*;
 
@@ -20,7 +20,7 @@ public class Data {
     int combatUnitCh, combatUnitReportCh, combatUnitResetCh;    // Ch 30, 31, 32
 
     int nMineCh = 1000;                                         // Ch 1000
-    int nTownCh = 6000;                                      // Ch 6000
+    int nTownCh = 6000;                                         // Ch 6000
 
     int enemyFoundCh = 51;      // Ch 51
     int enemyLocCh = 52;        // Ch 52
@@ -65,8 +65,6 @@ public class Data {
     boolean miner;
     boolean townsFolk;
     boolean delivering;
-    Location[] mines;
-    int[] mineInfo;
 
     public Data (UnitController _uc) {
         uc = _uc;
@@ -180,7 +178,6 @@ public class Data {
                 miner = true;
                 return;
             }
-
         }
     }
 

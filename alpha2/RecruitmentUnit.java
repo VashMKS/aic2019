@@ -1,6 +1,8 @@
-package alpha1;
+package alpha2;
 
-import aic2019.*;
+import aic2019.Direction;
+import aic2019.UnitInfo;
+import aic2019.UnitType;
 
 public class RecruitmentUnit extends Structure {
 

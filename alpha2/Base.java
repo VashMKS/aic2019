@@ -1,6 +1,6 @@
-package alpha1;
+package alpha2;
 
-import aic2019.*;
+import aic2019.UnitController;
 
 public class Base extends RecruitmentUnit {
 
@@ -22,8 +22,14 @@ public class Base extends RecruitmentUnit {
 
             spawnUnits();
 
+            attack();
+
             uc.yield();
         }
+
+    }
+
+    void attack() {
 
     }
 
