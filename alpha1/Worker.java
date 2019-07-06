@@ -15,31 +15,10 @@ public class Worker extends MovingUnit {
         while (true){
 
             data.Update();
-
             report();
 
-            /*Generate a random number from 0 to 7, both included*/
-            int randomNumber = (int)(Math.random()*8);
-
-            /*Get corresponding direction*/
-            Direction dir = Direction.values()[randomNumber];
-
-            /*move in direction dir if possible*/
-            if (uc.canMove(dir)) uc.move(dir);
-
-            /*If this unit is a base, try spawning a soldier at direction dir*/
-            if (uc.getType() == UnitType.BASE) {
-                if (uc.canSpawn(dir, UnitType.SOLDIER)) uc.spawn(dir, UnitType.SOLDIER);
-            }
-
-            /*Else, go through all visible units and attack the first one you see*/
-            else {
-                /*Sense all units not from my team, which includes opponent and neutral units*/
-                UnitInfo[] visibleEnemies = uc.senseUnits(uc.getTeam(), true);
-                for (int i = 0; i < visibleEnemies.length; ++i) {
-                    if (uc.canAttack(visibleEnemies[i].getLocation())) uc.attack(visibleEnemies[i].getLocation());
-                }
-            }
+            deliver();
+            move();
 
             uc.yield(); //End of turn
         }
@@ -55,5 +34,38 @@ public class Worker extends MovingUnit {
         uc.write(data.unitResetCh, 0);
         uc.write(data.workerResetCh, 0);
     }
+
+    void deliver(){
+
+        if(tools.matesAround(2, UnitType.BASE) > 0){
+            Direction d = uc.getLocation().directionTo(data.allyBase);
+            if(uc.canDeposit(d)) {
+                uc.deposit(d);
+                data.delivering = false;
+            }
+
+        }
+
+    }
+
+
+    void move(){
+
+        Location myMine = tools.decrypt(data.myMine);
+        Location target = myMine;
+
+        if(uc.getLocation() == myMine && tools.matesAround(2, UnitType.WORKER) > 0){
+            //TODO: mirar que el worker adjacent esta asignat a la teva mina
+            target = data.allyBase;
+            data.delivering = true;
+        }
+
+        if (! data.delivering) target = data.allyBase;
+
+        movement.moveTo(target);
+
+    }
+
+
 
 }

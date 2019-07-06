@@ -50,6 +50,7 @@ public class Data {
     Direction[] dirs;
     UnitType[] types;
     Location enemyBase;
+    Location allyBase;
     int currentRound;
     int VP;
     int enemyVP;
@@ -63,6 +64,7 @@ public class Data {
     int myMine;
     boolean miner;
     boolean townFolk;
+    boolean delivering;
 
     public Data (UnitController _uc) {
         uc = _uc;
@@ -72,11 +74,12 @@ public class Data {
         types = UnitType.values();
         currentRound = uc.getRound();
         enemyBase = enemyTeam.getInitialLocation();
+        allyBase = allyTeam.getInitialLocation();
         turnsAlive = 0;
 
         //Worker stuff
         if (uc.getType() == UnitType.WORKER) {
-            miner = false; townFolk = false;
+            miner = false; townFolk = false; delivering = false;
             assignMine();
             if (!miner) assignTown();
         }
@@ -180,6 +183,8 @@ public class Data {
     }
 
     void assignTown(){
+
+        townFolk = true;
 
     }
 
