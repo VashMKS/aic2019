@@ -19,6 +19,8 @@ public class Data {
     int towerCh, towerReportCh, towerResetCh;                   // Ch 27, 28, 29
     int combatUnitCh, combatUnitReportCh, combatUnitResetCh;    // Ch 30, 31, 32
 
+    int nMineCh = 1000;                                         // Ch 1000
+
     int enemyFoundCh = 51;      // Ch 51
     int enemyLocCh = 52;        // Ch 52
     int enemyContactCh = 53;    // Ch 53
@@ -35,6 +37,7 @@ public class Data {
     int nCatapult;
     int nBarracks;
     int nTower;
+    int nMine;
 
     boolean enemyFound;
     int enemyLoc;
@@ -135,6 +138,7 @@ public class Data {
         nBarracks = uc.read(barracksCh);
         nTower = uc.read(towerCh);
         nCombatUnit = uc.read(combatUnitCh);
+        nMine = uc.read(nMineCh);
 
         enemyFound = (uc.read(enemyFoundCh) == 1);
         enemyLoc = uc.read(enemyLocCh);

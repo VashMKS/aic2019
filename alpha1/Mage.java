@@ -13,9 +13,26 @@ public class Mage extends CombatUnit {
     void run() {
 
         while (true) {
+
+            data.Update();
+
+            report();
+
             uc.yield();
         }
 
+    }
+
+    @Override
+    void reportMyself() {
+        // Report to the Comm Channel
+        uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
+        uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh)+1);
+        uc.write(data.mageReportCh, uc.read(data.mageReportCh)+1);
+        // Reset Next Slot
+        uc.write(data.unitResetCh, 0);
+        uc.write(data.combatUnitResetCh, 0);
+        uc.write(data.mageResetCh, 0);
     }
 
 }

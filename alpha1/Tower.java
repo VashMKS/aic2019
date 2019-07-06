@@ -12,6 +12,11 @@ public class Tower extends Structure {
     void run() {
 
         while (true) {
+
+            data.Update();
+
+            report();
+
             uc.yield();
         }
     }

@@ -14,6 +14,10 @@ public class Base extends Structure {
 
         while (true) {
 
+            data.Update();
+
+            report();
+
             trySpawnWorker();
 
             uc.yield();
