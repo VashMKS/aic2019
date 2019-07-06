@@ -135,10 +135,19 @@ public class Tools {
 
     boolean reportedMine(Location loc){
         for(int i = 0; i < data.nMine; ++i){
-            Location mineLoc = decrypt(uc.read(1001+2*i));
+            Location mineLoc = decrypt(uc.read(data.nMineCh + 1 +2*i));
             if (loc == mineLoc) return false;
         }
         return true;
     }
+
+    boolean reportedTown(Location loc){
+        for(int i = 0; i < data.nTown; ++i){
+            Location townLoc = decrypt(uc.read(data.nTownCh + 1 +2*i));
+            if (loc == townLoc) return false;
+        }
+        return true;
+    }
+
 
 }

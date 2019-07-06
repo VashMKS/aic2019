@@ -26,17 +26,26 @@ public class Unit {
         if(minesAround.length > 0) {
             for (ResourceInfo mineInfo : minesAround){
                 Location mineLoc = mineInfo.getLocation();
+
                 if (! tools.reportedMine( mineLoc )){
-                    uc.write(1001 + 2*data.nMine, tools.encrypt(mineLoc.x,mineLoc.y) );
-                    uc.write((1001 + 2*data.nMine)+1, 0 ); //TODO: write the type
-                    uc.write(1000, data.nMine+1);
-
+                    uc.write(data.nMineCh + 1 + 2*data.nMine, tools.encrypt(mineLoc.x,mineLoc.y) );
+                    uc.write(data.nMineCh, data.nMine+1);
                 }
-
             }
-
-
         }
+
+        TownInfo[] townsAround = uc.senseTowns();
+        if(townsAround.length > 0) {
+            for (TownInfo townInfo : townsAround){
+                Location townLoc = townInfo.getLocation();
+                if (! tools.reportedTown( townLoc )){
+                    uc.write(data.nTownCh + 1 + 2*data.nTown, tools.encrypt(townLoc.x,townLoc.y) );
+                    uc.write(data.nTownCh, data.nTown+1);
+                }
+            }
+        }
+
+
 
     }
 
