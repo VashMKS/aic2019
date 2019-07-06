@@ -18,6 +18,8 @@ public class Soldier extends CombatUnit {
 
             report();
 
+            movement.moveTo(data.enemyBase);
+
             uc.yield();
         }
 
