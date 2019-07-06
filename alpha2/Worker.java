@@ -5,8 +5,6 @@ import aic2019.Location;
 import aic2019.UnitController;
 import aic2019.UnitType;
 
-import java.awt.*;
-
 public class Worker extends MovingUnit {
 
     public Worker (UnitController _uc) {
@@ -24,9 +22,9 @@ public class Worker extends MovingUnit {
 
             report();
 
-            deliver();
-
             gather();
+
+            deliver();
 
             move();
 
@@ -62,26 +60,46 @@ public class Worker extends MovingUnit {
         if(uc.canGather()) uc.gather();
     }
 
+   //@Override
+    void move() {
 
-    void move(){
+        Direction dir = tools.randomDir();
+        Location target = uc.getLocation().add(dir);
 
-        if(data.delivering)uc.println("I'm delivering!");
-        else uc.println("I'm Gathering!");
+        if (data.miner) {
 
-        Location myMine = tools.decrypt(data.myMine);
-        Location target = myMine;
+            uc.println("My assigned mine is " + data.myMine);
 
-        if (data.delivering) {
-            target = data.allyBase;
+            if (uc.getIron() + uc.getWood() + uc.getCrystal() > 0) {
+                target = data.allyBase;
+            } else {
+                target = tools.decrypt(data.myMine);
+            }
+
+            uc.println("I must go to: " + target.x + " " + target.y);
+
+            /*
+            Location myMine = tools.decrypt(data.myMine);
+            target = myMine;
+
+            // if done gathering go back to base
+            // TODO: deliver to the base or the nearest safe town
+            if (data.delivering) target = data.allyBase;
+
+            uc.println(uc.getLocation().x + ' ' + uc.getLocation().y + " - " + myMine.x + ' ' + myMine.y);
+
+            if (uc.getLocation().isEqual(myMine) ) {
+                uc.println("I'm mining here");
+                uc.println("I have " + tools.matesAround(2, UnitType.WORKER) + " mates around");
+            }
+
+
+            if(uc.getLocation().isEqual(myMine) && tools.matesAround(2, UnitType.WORKER) > 0) {
+                //TODO: mirar que el worker adjacent esta assignat a la teva mina
+                target = data.allyBase;
+                data.delivering = true;
+            }*/
         }
-
-        if(uc.getLocation().isEqual(myMine) && tools.matesAround(2, UnitType.WORKER) > 0) {
-            //TODO: mirar que el worker adjacent esta asignat a la teva mina
-            target = data.allyBase;
-            data.delivering = true;
-        }
-
-
 
         movement.moveTo(target);
 

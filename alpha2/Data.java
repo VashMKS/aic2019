@@ -7,24 +7,24 @@ public class Data {
     UnitController uc;
 
     // Comm Channels
-    int UnitsCh, unitReportCh, unitResetCh;                     // Ch 0, 1, 2
-    int workerCh, workerReportCh, workerResetCh;                // Ch 3, 4, 5
-    int explorerCh, explorerReportCh, explorerResetCh;          // Ch 6, 7, 8
-    int soldierCh, soldierReportCh, soldierResetCh;             // Ch 9, 10, 11
-    int archerCh, archerReportCh, archerResetCh;                // Ch 12, 13, 14
-    int knightCh, knightReportCh, knightResetCh;                // Ch 15, 16, 17
-    int mageCh, mageReportCh, mageResetCh;                      // Ch 18, 19, 20
-    int catapultCh, catapultReportCh, catapultResetCh;          // Ch 21, 22, 23
-    int barracksCh, barracksReportCh, barracksResetCh;          // Ch 24, 25, 26
-    int towerCh, towerReportCh, towerResetCh;                   // Ch 27, 28, 29
-    int combatUnitCh, combatUnitReportCh, combatUnitResetCh;    // Ch 30, 31, 32
+    int UnitsCh,        unitReportCh,       unitResetCh;        // Ch 0, 1, 2
+    int workerCh,       workerReportCh,     workerResetCh;      // Ch 3, 4, 5
+    int explorerCh,     explorerReportCh,   explorerResetCh;    // Ch 6, 7, 8
+    int soldierCh,      soldierReportCh,    soldierResetCh;     // Ch 9, 10, 11
+    int archerCh,       archerReportCh,     archerResetCh;      // Ch 12, 13, 14
+    int knightCh,       knightReportCh,     knightResetCh;      // Ch 15, 16, 17
+    int mageCh,         mageReportCh,       mageResetCh;        // Ch 18, 19, 20
+    int catapultCh,     catapultReportCh,   catapultResetCh;    // Ch 21, 22, 23
+    int barracksCh,     barracksReportCh,   barracksResetCh;    // Ch 24, 25, 26
+    int towerCh,        towerReportCh,      towerResetCh;       // Ch 27, 28, 29
+    int combatUnitCh,   combatUnitReportCh, combatUnitResetCh;  // Ch 30, 31, 32
 
     int nMineCh = 1000;                                         // Ch 1000
     int nTownCh = 6000;                                         // Ch 6000
 
-    int enemyFoundCh = 51;      // Ch 51
-    int enemyLocCh = 52;        // Ch 52
-    int enemyContactCh = 53;    // Ch 53
+    int enemyFoundCh = 51;                                      // Ch 51
+    int enemyLocCh = 52;                                        // Ch 52
+    int enemyContactCh = 53;                                    // Ch 53
 
     // Comm Info
     int nUnits;
@@ -79,7 +79,9 @@ public class Data {
 
         //Worker stuff
         if (uc.getType() == UnitType.WORKER) {
-            miner = false; townsFolk = false; delivering = false;
+            miner = false;
+            townsFolk = false;
+            delivering = false;
             assignMine();
             if (!miner) assignTown();
         }
@@ -172,9 +174,11 @@ public class Data {
 
     void assignMine(){
         for(int i = 0; i < nMine; ++i) {
-            if ( uc.read(nMineCh + 2 + 2*i) < 2) {
-                uc.write(nMineCh + 2 +2*i, uc.read(nMineCh + 2 + 2*i) + 1);
-                myMine =  uc.read(nMineCh + 1 + 2*i) ;
+            int minersChannel = nMineCh + 2 + 2*i;
+            if (uc.read(minersChannel) < 2) {
+                uc.write(minersChannel, uc.read(minersChannel) + 1);
+                int mineLocChannel = nMineCh + 1 + 2*i;
+                myMine =  uc.read(mineLocChannel) ;
                 miner = true;
                 return;
             }

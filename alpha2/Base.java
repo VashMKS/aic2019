@@ -12,6 +12,8 @@ public class Base extends RecruitmentUnit {
 
     void run() {
 
+        uc.println("base is at: " + uc.getLocation().x + " " + uc.getLocation().y);
+
         while (true) {
 
             data.Update();
@@ -19,6 +21,12 @@ public class Base extends RecruitmentUnit {
             // uc.println("current number of mines: " + data.nMine);
 
             report();
+
+            for (int i = 0; i < data.nMine; i++) {
+                int mineLocChannel = data.nMineCh + 1 + 2*i;
+                int minepos = uc.read(mineLocChannel);
+                uc.println("mine number " + i + " is at: " + minepos);
+            }
 
             spawnUnits();
 

@@ -1,5 +1,6 @@
 package alpha2;
 
+import aic2019.Direction;
 import aic2019.UnitController;
 
 import java.awt.*;
@@ -39,8 +40,9 @@ public class Explorer extends CombatUnit {
         uc.write(data.explorerResetCh, 0);
     }
 
-    @Override
+    //@Override
     void move() {
-        super.move();
+        Direction dir = tools.randomDir();
+        if (uc.canMove(dir)) uc.move(dir);
     }
 }

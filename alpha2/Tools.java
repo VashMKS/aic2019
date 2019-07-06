@@ -138,7 +138,8 @@ public class Tools {
         //uc.println("let's check if this mine has been reported");
         for(int i = 0; i < data.nMine; i++) {
             //uc.println("*checks list*");
-            Location mineLoc = decrypt(uc.read(data.nMineCh + 1 + 2*i));
+            int mineLocChannel = data.nMineCh + 1 + 2*i;
+            Location mineLoc = decrypt(uc.read(mineLocChannel));
             if (loc.isEqual(mineLoc)) {
                 //uc.println("found it!");
                 return true;
