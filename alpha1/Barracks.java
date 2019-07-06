@@ -2,7 +2,7 @@ package alpha1;
 
 import aic2019.*;
 
-public class Barracks extends Structure {
+public class Barracks extends RecruitmentUnit {
 
     public Barracks (UnitController _uc) {
         this.uc = _uc;
@@ -17,6 +17,8 @@ public class Barracks extends Structure {
             data.Update();
 
             report();
+
+            spawnUnits();
 
             uc.yield();
 

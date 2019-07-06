@@ -134,7 +134,7 @@ public class Tools {
     }
 
     boolean reportedMine(Location loc){
-        for(int i = 0; i < data.nMines; ++i){
+        for(int i = 0; i < data.nMine; ++i){
             Location mineLoc = decrypt(uc.read(1001+2*i));
             if (loc == mineLoc) return false;
         }

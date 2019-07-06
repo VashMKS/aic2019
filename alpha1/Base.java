@@ -2,7 +2,7 @@ package alpha1;
 
 import aic2019.*;
 
-public class Base extends Structure {
+public class Base extends RecruitmentUnit {
 
     public Base (UnitController _uc) {
         this.uc = _uc;
@@ -18,21 +18,11 @@ public class Base extends Structure {
 
             report();
 
-            trySpawnWorker();
+            spawnUnits();
 
             uc.yield();
         }
 
-    }
-
-    void trySpawnWorker() {
-
-        uc.println("hello world");
-        for (Direction dir : data.dirs) {
-            if (uc.canSpawn(dir, UnitType.WORKER)) {
-                uc.spawn(dir, UnitType.WORKER);
-            }
-        }
     }
 
 }
