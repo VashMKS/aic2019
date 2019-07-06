@@ -5,6 +5,8 @@ import aic2019.Location;
 import aic2019.UnitController;
 import aic2019.UnitType;
 
+import java.awt.*;
+
 public class Worker extends MovingUnit {
 
     public Worker (UnitController _uc) {
@@ -23,6 +25,8 @@ public class Worker extends MovingUnit {
             report();
 
             deliver();
+
+            gather();
 
             move();
 
@@ -54,19 +58,30 @@ public class Worker extends MovingUnit {
 
     }
 
+    void gather(){
+        if(uc.canGather()) uc.gather();
+    }
+
 
     void move(){
+
+        if(data.delivering)uc.println("I'm delivering!");
+        else uc.println("I'm Gathering!");
 
         Location myMine = tools.decrypt(data.myMine);
         Location target = myMine;
 
-        if(uc.getLocation() == myMine && tools.matesAround(2, UnitType.WORKER) > 0){
+        if (data.delivering) {
+            target = data.allyBase;
+        }
+
+        if(uc.getLocation().isEqual(myMine) && tools.matesAround(2, UnitType.WORKER) > 0) {
             //TODO: mirar que el worker adjacent esta asignat a la teva mina
             target = data.allyBase;
             data.delivering = true;
         }
 
-        if (! data.delivering) target = data.allyBase;
+
 
         movement.moveTo(target);
 
