@@ -2,9 +2,9 @@ package alpha1;
 
 import aic2019.*;
 
-public class Knight extends CombatUnit {
+public class Archer extends CombatUnit {
 
-    public Knight (UnitController _uc) {
+    public Archer (UnitController _uc) {
         this.uc = _uc;
         this.data = new Data(uc);
         this.tools = new Tools(uc, data);
@@ -14,11 +14,6 @@ public class Knight extends CombatUnit {
     void run() {
 
         while (true) {
-
-            data.Update();
-
-            report();
-
             uc.yield();
         }
 
@@ -29,11 +24,11 @@ public class Knight extends CombatUnit {
         // Report to the Comm Channel
         uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
         uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh)+1);
-        uc.write(data.knightReportCh, uc.read(data.knightReportCh)+1);
+        uc.write(data.archerReportCh, uc.read(data.archerReportCh)+1);
         // Reset Next Slot
         uc.write(data.unitResetCh, 0);
         uc.write(data.combatUnitResetCh, 0);
-        uc.write(data.knightResetCh, 0);
+        uc.write(data.archerResetCh, 0);
     }
 
 }
