@@ -59,6 +59,11 @@ public class Data {
     final int INF = Integer.MAX_VALUE;
     boolean enemyContact;
 
+    //Worker Parameters
+    int myMine;
+    boolean miner;
+    boolean townFolk;
+
     public Data (UnitController _uc) {
         uc = _uc;
         allyTeam = uc.getTeam();
@@ -68,6 +73,13 @@ public class Data {
         currentRound = uc.getRound();
         enemyBase = enemyTeam.getInitialLocation();
         turnsAlive = 0;
+
+        //Worker stuff
+        if (uc.getType() == UnitType.WORKER) {
+            miner = false; townFolk = false;
+            assignMine();
+            if (!miner) assignTown();
+        }
     }
 
     // This function is called once per turn
@@ -152,6 +164,22 @@ public class Data {
         }
 
         enemyContact = (uc.read(enemyContactCh) == 1);
+
+    }
+
+    void assignMine(){
+        for(int i = 0; i < nMine; ++i){
+            if ( (uc.read(nMineCh + 2 +2*i)) < 2){
+                uc.write(nMineCh + 2 +2*i, uc.read(nMineCh + 2 + 2*i) + 1);
+                myMine =  uc.read(nMineCh + 1 + 2*i) ;
+                miner = true;
+                return;
+            }
+
+        }
+    }
+
+    void assignTown(){
 
     }
 
