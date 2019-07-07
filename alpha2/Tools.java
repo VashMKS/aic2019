@@ -92,8 +92,16 @@ public class Tools {
     }
 
     //Returns the # of allies of a given type in a squared radius
-    int matesAround(int radius, UnitType type) {
+    int alliesAround(int radius, UnitType type) {
         UnitInfo[] unitsNear = data.uc.senseUnits(data.uc.getLocation(), radius, data.allyTeam);
+        int i = 0;
+        for (UnitInfo unit : unitsNear)
+            if (unit.getType() == type) i++;
+        return i;
+    }
+
+    int enemiesAround(int radius, UnitType type) {
+        UnitInfo[] unitsNear = data.uc.senseUnits(data.uc.getLocation(), radius, data.allyTeam, true);
         int i = 0;
         for (UnitInfo unit : unitsNear)
             if (unit.getType() == type) i++;
@@ -162,5 +170,35 @@ public class Tools {
         return false;
     }
 
+    int attackPriorityStructure(UnitInfo unit ) {
+
+        if(unit.getType() == UnitType.BASE)     return 10;
+        if(unit.getType() == UnitType.BARRACKS) return 9;
+        if(unit.getType() == UnitType.TOWER)    return 8;
+        if(unit.getType() == UnitType.CATAPULT) return 7;
+        if(unit.getType() == UnitType.MAGE)     return 6;
+        if(unit.getType() == UnitType.SOLDIER)  return 5;
+        if(unit.getType() == UnitType.ARCHER)   return 4;
+        if(unit.getType() == UnitType.KNIGHT)   return 3;
+        if(unit.getType() == UnitType.EXPLORER) return 2;
+        if(unit.getType() == UnitType.WORKER)   return 1;
+        return 0;
+
+
+    }
+
+    int areaAttackPriority(Location loc){
+        UnitInfo[] unitsNearLoc = uc.senseUnits(loc, 2);
+        int priority = 0;
+        for (UnitInfo unit : unitsNearLoc)
+            if(unit.getTeam().equals(data.allyTeam)) priority -= 100;
+            else{
+                int p = attackPriorityStructure(unit);
+                p = p * (unit.getType().maxHealth/unit.getHealth());
+                priority += p;
+            }
+        return priority;
+
+    }
 
 }

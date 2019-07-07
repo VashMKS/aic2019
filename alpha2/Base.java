@@ -2,6 +2,7 @@ package alpha2;
 
 import aic2019.Location;
 import aic2019.UnitController;
+import aic2019.UnitInfo;
 
 public class Base extends RecruitmentUnit {
 
@@ -43,7 +44,31 @@ public class Base extends RecruitmentUnit {
 
     }
 
-    void attack() {
+    void attack(){
+
+        UnitInfo[] unitsAround = uc.senseUnits();
+        Location target = uc.getLocation();
+        int priority = 0;
+
+        for (UnitInfo unit : unitsAround) {
+
+            if (!unit.getTeam().equals(data.allyTeam)) {
+
+                //TODO: falta mirar les caselles al voltant de les unitats enemigues
+                int unitPriority = tools.areaAttackPriority( unit.getLocation() );
+                //uc.println("My target is at " + unit.getLocation().x + " " + unit.getLocation().y + " with priority " + unitPriority );
+
+                if (unitPriority > priority) {
+                    priority = unitPriority;
+                    target = unit.getLocation();
+                }
+            }
+        }
+
+        if (! target.isEqual(uc.getLocation()) && uc.canAttack(target) ){
+            //uc.println("I'm about to attack " + target.x + " " + target.y );
+            uc.attack(target);
+        }
 
     }
 
