@@ -32,6 +32,7 @@ public class Unit {
         reportMap();
     }
 
+    // scans for mines and reports new findings to the comm channels
     void reportMines() {
         ResourceInfo[] minesAround = uc.senseResources();
         //uc.println("sense mines successful, mines found: " + minesAround.length);
@@ -52,6 +53,7 @@ public class Unit {
         }
     }
 
+    // scans for towns and reports findings to the comm channels
     void reportTowns() {
         TownInfo[] townsAround = uc.senseTowns();
         //uc.println("sense towns completed, towns found: " + townsAround.length);

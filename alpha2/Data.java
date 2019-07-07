@@ -5,6 +5,7 @@ import aic2019.*;
 public class Data {
 
     UnitController uc;
+    Tools tools;
 
     // Comm Channels
     int UnitsCh,        unitReportCh,       unitResetCh;        // Ch 0, 1, 2
@@ -38,8 +39,16 @@ public class Data {
     int nCatapult;
     int nBarracks;
     int nTower;
+
     int nMine;
+    int nMineLastTurn;
+    Location[] mineLocations;
+    int[] minersAssigned;
+
     int nTown;
+    int nTownLastTurn;
+    Location[] townLocations;
+    int[] townsfolkAssigned;
 
     boolean enemyFound;
     int enemyLoc;
@@ -63,11 +72,12 @@ public class Data {
     //Worker Parameters
     int myMine;
     boolean miner;
-    boolean townsFolk;
+    boolean townsfolk;
     boolean delivering;
 
     public Data (UnitController _uc) {
         uc = _uc;
+        tools = new Tools(uc, this);
         allyTeam = uc.getTeam();
         enemyTeam = uc.getOpponent();
         dirs = Direction.values();
@@ -77,10 +87,10 @@ public class Data {
         allyBase = allyTeam.getInitialLocation();
         turnsAlive = 0;
 
-        //Worker stuff
+        // Worker specific variables
         if (uc.getType() == UnitType.WORKER) {
             miner = false;
-            townsFolk = false;
+            townsfolk = false;
             delivering = false;
             assignMine();
             if (!miner) assignTown();
@@ -101,64 +111,76 @@ public class Data {
         int y = (currentRound+1)%3;
         int z = (currentRound+2)%3;
 
-        unitReportCh = x;
-        unitResetCh = y;
-        UnitsCh = z;
-
-        workerReportCh = 3 + x;
-        workerResetCh = 3 + y;
-        workerCh = 3 + z;
-
-        explorerReportCh = 6 + x;
-        explorerResetCh = 6 + y;
-        explorerCh = 6 + z;
-
-        soldierReportCh = 9 + x;
-        soldierResetCh = 9 + y;
-        soldierCh = 9 + x;
-
-        archerReportCh = 12 + x;
-        archerResetCh = 12 + y;
-        archerCh = 12 + z;
-
-        knightReportCh = 15 + x;
-        knightResetCh = 15 + y;
-        knightCh = 15 + z;
-
-        mageReportCh = 18 + x;
-        mageResetCh = 18 + y;
-        mageCh = 18 + z;
-
-        catapultReportCh = 21 + x;
-        catapultResetCh = 21 + y;
-        catapultCh = 21 + z;
-
-        barracksReportCh = 24 + x;
-        barracksResetCh = 24 + y;
-        barracksCh = 24 + z;
-
-        towerReportCh = 27 + x;
-        towerResetCh = 27 + y;
-        towerCh = 27 + z;
-
-        combatUnitReportCh = 30 + x;
-        combatUnitResetCh = 30 + y;
-        combatUnitCh = 30 + z;
+        unitReportCh        = x;
+        unitResetCh         = y;
+        UnitsCh             = z;
+        workerReportCh      = 3 + x;
+        workerResetCh       = 3 + y;
+        workerCh            = 3 + z;
+        explorerReportCh    = 6 + x;
+        explorerResetCh     = 6 + y;
+        explorerCh          = 6 + z;
+        soldierReportCh     = 9 + x;
+        soldierResetCh      = 9 + y;
+        soldierCh           = 9 + x;
+        archerReportCh      = 12 + x;
+        archerResetCh       = 12 + y;
+        archerCh            = 12 + z;
+        knightReportCh      = 15 + x;
+        knightResetCh       = 15 + y;
+        knightCh            = 15 + z;
+        mageReportCh        = 18 + x;
+        mageResetCh         = 18 + y;
+        mageCh              = 18 + z;
+        catapultReportCh    = 21 + x;
+        catapultResetCh     = 21 + y;
+        catapultCh          = 21 + z;
+        barracksReportCh    = 24 + x;
+        barracksResetCh     = 24 + y;
+        barracksCh          = 24 + z;
+        towerReportCh       = 27 + x;
+        towerResetCh        = 27 + y;
+        towerCh             = 27 + z;
+        combatUnitReportCh  = 30 + x;
+        combatUnitResetCh   = 30 + y;
+        combatUnitCh        = 30 + z;
 
         // Fetch Comm Info
-        nUnits = uc.read(UnitsCh);
-        nWorker = uc.read(workerCh);
-        nExplorer = uc.read(explorerCh);
-        nSoldier = uc.read(soldierCh);
-        nArcher = uc.read(archerCh);
-        nKnight = uc.read(knightCh);
-        nMage = uc.read(mageCh);
-        nCatapult = uc.read(catapultCh);
-        nBarracks = uc.read(barracksCh);
-        nTower = uc.read(towerCh);
+        nUnits      = uc.read(UnitsCh);
         nCombatUnit = uc.read(combatUnitCh);
-        nMine = uc.read(nMineCh);
-        nTown = uc.read(nTownCh);
+        nWorker     = uc.read(workerCh);
+        nExplorer   = uc.read(explorerCh);
+        nSoldier    = uc.read(soldierCh);
+        nArcher     = uc.read(archerCh);
+        nKnight     = uc.read(knightCh);
+        nMage       = uc.read(mageCh);
+        nCatapult   = uc.read(catapultCh);
+        nBarracks   = uc.read(barracksCh);
+        nTower      = uc.read(towerCh);
+
+        nMineLastTurn   = nMine;
+        nMine           = uc.read(nMineCh);
+        mineLocations   = new Location[nMine];
+        minersAssigned  = new int[nMine];
+        for (int i = nMineLastTurn; i < nMine; i++) {
+            int mineLocChannel = nMineCh + 1 + 2*i;
+            Location mineLoc = tools.decrypt(uc.read(mineLocChannel));
+            mineLocations[i] = mineLoc;
+            int minersChannel = mineLocChannel + 1;
+            minersAssigned[i] = uc.read(minersChannel);
+        }
+
+        nTownLastTurn       = nTown;
+        nTown               = uc.read(nTownCh);
+        townLocations       = new Location[nTown];
+        townsfolkAssigned   = new int[nTown];
+        for (int i = 0; i < nTown; i++) {
+            int townLocChannel = nTownCh + 1 + 2*i;
+            Location townLoc = tools.decrypt(uc.read(townLocChannel));
+            townLocations[i] = townLoc;
+            int townsfolkChannel = townLocChannel + 1;
+            townsfolkAssigned[i] = uc.read(townsfolkChannel);
+        }
 
         enemyFound = (uc.read(enemyFoundCh) == 1);
         enemyLoc = uc.read(enemyLocCh);
@@ -187,7 +209,7 @@ public class Data {
 
     void assignTown(){
 
-        townsFolk = true;
+        townsfolk = true;
 
     }
 

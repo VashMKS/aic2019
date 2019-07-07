@@ -7,9 +7,9 @@ public class MovingUnit extends Unit {
     Movement movement;
 
     // random movement as placeholder
-    /*void move() {
+    void move() {
         Direction dir = tools.randomDir();
         if (uc.canMove(dir)) uc.move(dir);
-    }*/
+    }
 
 }

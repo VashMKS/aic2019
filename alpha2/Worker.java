@@ -60,7 +60,7 @@ public class Worker extends MovingUnit {
         if(uc.canGather()) uc.gather();
     }
 
-   //@Override
+   @Override
     void move() {
 
         Direction dir = tools.randomDir();
