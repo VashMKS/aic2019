@@ -1,10 +1,8 @@
 package alpha2;
 
-import aic2019.Location;
-import aic2019.UnitController;
-import aic2019.UnitInfo;
+import aic2019.*;
 
-public class Base extends RecruitmentUnit {
+public class Base extends RecruitmentUnit implements StructureCombat {
 
     public Base (UnitController _uc) {
         this.uc = _uc;
@@ -44,7 +42,7 @@ public class Base extends RecruitmentUnit {
 
     }
 
-    void attack(){
+    public void attack() {
 
         UnitInfo[] unitsAround = uc.senseUnits();
         Location target = uc.getLocation();
@@ -65,11 +63,15 @@ public class Base extends RecruitmentUnit {
             }
         }
 
-        if (! target.isEqual(uc.getLocation()) && uc.canAttack(target) ){
+        if (!target.isEqual(uc.getLocation()) && uc.canAttack(target) ){
             //uc.println("I'm about to attack " + target.x + " " + target.y );
             uc.attack(target);
         }
 
+    }
+
+    public int targetPriority(UnitInfo unit) {
+        return 0;
     }
 
 }

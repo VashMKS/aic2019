@@ -87,13 +87,11 @@ public class Data {
         allyBase = allyTeam.getInitialLocation();
         turnsAlive = 0;
 
-        // Worker specific variables
+        // Worker specific
         if (uc.getType() == UnitType.WORKER) {
             miner = false;
             townsfolk = false;
             delivering = false;
-            assignMine();
-            if (!miner) assignTown();
         }
     }
 
@@ -192,6 +190,11 @@ public class Data {
 
         enemyContact = (uc.read(enemyContactCh) == 1);
 
+    }
+
+    void UpdateWorker() {
+        if (!miner) assignMine();
+        if (!miner && ! townsfolk) assignTown();
     }
 
     void assignMine(){

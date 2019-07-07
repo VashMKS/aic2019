@@ -19,6 +19,7 @@ public class Worker extends MovingUnit {
         while (true){
 
             data.Update();
+            data.UpdateWorker();
 
             report();
 
@@ -44,16 +45,13 @@ public class Worker extends MovingUnit {
     }
 
     void deliver(){
-
-        if(tools.matesAround(2, UnitType.BASE) > 0){
+        if(tools.alliesAround(2, UnitType.BASE) > 0){
             Direction d = uc.getLocation().directionTo(data.allyBase);
             if(uc.canDeposit(d)) {
                 uc.deposit(d);
                 data.delivering = false;
             }
-
         }
-
     }
 
     void gather(){
@@ -68,15 +66,17 @@ public class Worker extends MovingUnit {
 
         if (data.miner) {
 
-            uc.println("My assigned mine is " + data.myMine);
-
-            if (uc.getIron() + uc.getWood() + uc.getCrystal() > 0) {
+            if (uc.getWood() + 3*uc.getIron() + 10*uc.getCrystal() > 10) {
                 target = data.allyBase;
+                data.delivering = true;
             } else {
                 target = tools.decrypt(data.myMine);
             }
 
-            uc.println("I must go to: " + target.x + " " + target.y);
+            if (data.currentRound%100 == 6) {
+                uc.println("My assigned mine is " + data.myMine);
+                uc.println("currently heading towards (" + target.x + ", " + target.y + ")");
+            }
 
             /*
             Location myMine = tools.decrypt(data.myMine);
@@ -90,11 +90,11 @@ public class Worker extends MovingUnit {
 
             if (uc.getLocation().isEqual(myMine) ) {
                 uc.println("I'm mining here");
-                uc.println("I have " + tools.matesAround(2, UnitType.WORKER) + " mates around");
+                uc.println("I have " + tools.alliesAround(2, UnitType.WORKER) + " mates around");
             }
 
 
-            if(uc.getLocation().isEqual(myMine) && tools.matesAround(2, UnitType.WORKER) > 0) {
+            if(uc.getLocation().isEqual(myMine) && tools.alliesAround(2, UnitType.WORKER) > 0) {
                 //TODO: mirar que el worker adjacent esta assignat a la teva mina
                 target = data.allyBase;
                 data.delivering = true;

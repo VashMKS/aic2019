@@ -12,6 +12,7 @@ public class Explorer extends CombatUnit {
         this.data = new Data(uc);
         this.tools = new Tools(uc, data);
         this.movement = new Movement(uc, data);
+        this.combat = new Combat(uc, data,tools, movement);
     }
 
     void run() {

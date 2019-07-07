@@ -1,10 +1,8 @@
 package alpha2;
 
-import aic2019.Location;
-import aic2019.UnitController;
-import aic2019.UnitInfo;
+import aic2019.*;
 
-public class Tower extends Structure {
+public class Tower extends Structure implements StructureCombat {
 
     public Tower (UnitController _uc) {
         this.uc = _uc;
@@ -26,7 +24,7 @@ public class Tower extends Structure {
         }
     }
 
-    void attack(){
+    public void attack(){
 
         UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
         Location target = null;
@@ -42,8 +40,12 @@ public class Tower extends Structure {
             }
         }
 
-        if (! target.isEqual(null) && uc.canAttack(target) ) uc.attack(target);
+        if (!target.isEqual(null) && uc.canAttack(target) ) uc.attack(target);
 
+    }
+
+    public int targetPriority(UnitInfo unit) {
+        return 0;
     }
 
 }
