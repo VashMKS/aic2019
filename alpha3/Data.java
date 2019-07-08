@@ -8,17 +8,20 @@ public class Data {
     Tools tools;
 
     // Comm Channels (dynamic)
-    int UnitsCh,        unitReportCh,       unitResetCh;        // Ch 0, 1, 2
-    int workerCh,       workerReportCh,     workerResetCh;      // Ch 3, 4, 5
-    int explorerCh,     explorerReportCh,   explorerResetCh;    // Ch 6, 7, 8
-    int soldierCh,      soldierReportCh,    soldierResetCh;     // Ch 9, 10, 11
-    int archerCh,       archerReportCh,     archerResetCh;      // Ch 12, 13, 14
-    int knightCh,       knightReportCh,     knightResetCh;      // Ch 15, 16, 17
-    int mageCh,         mageReportCh,       mageResetCh;        // Ch 18, 19, 20
-    int catapultCh,     catapultReportCh,   catapultResetCh;    // Ch 21, 22, 23
-    int barracksCh,     barracksReportCh,   barracksResetCh;    // Ch 24, 25, 26
-    int towerCh,        towerReportCh,      towerResetCh;       // Ch 27, 28, 29
-    int combatUnitCh,   combatUnitReportCh, combatUnitResetCh;  // Ch 30, 31, 32
+    int UnitsCh,            unitReportCh,           unitResetCh;            // Ch 0, 1, 2
+    int workerCh,           workerReportCh,         workerResetCh;          // Ch 3, 4, 5
+    int explorerCh,         explorerReportCh,       explorerResetCh;        // Ch 6, 7, 8
+    int soldierCh,          soldierReportCh,        soldierResetCh;         // Ch 9, 10, 11
+    int archerCh,           archerReportCh,         archerResetCh;          // Ch 12, 13, 14
+    int knightCh,           knightReportCh,         knightResetCh;          // Ch 15, 16, 17
+    int mageCh,             mageReportCh,           mageResetCh;            // Ch 18, 19, 20
+    int catapultCh,         catapultReportCh,       catapultResetCh;        // Ch 21, 22, 23
+    int barracksCh,         barracksReportCh,       barracksResetCh;        // Ch 24, 25, 26
+    int towerCh,            towerReportCh,          towerResetCh;           // Ch 27, 28, 29
+    int combatUnitCh,       combatUnitReportCh,     combatUnitResetCh;      // Ch 30, 31, 32
+    int requestWoodCh,      requestWoodReportCh,    requestWoodResetCh;     // Ch 33, 34, 35
+    int requestIronCh,      requestIronReportCh,    requestIronResetCh;     // Ch 36, 37, 38
+    int requestCrystalCh,   requestCrystalReportCh, requestCrystalResetCh;  // Ch 39, 40, 41
 
     // Comm Channels (static)
     int enemyFoundCh    = 100;                                  // Ch 100
@@ -190,39 +193,48 @@ public class Data {
         int y = (currentRound+1)%3;
         int z = (currentRound+2)%3;
 
-        unitReportCh        = x;
-        unitResetCh         = y;
-        UnitsCh             = z;
-        workerReportCh      = 3 + x;
-        workerResetCh       = 3 + y;
-        workerCh            = 3 + z;
-        explorerReportCh    = 6 + x;
-        explorerResetCh     = 6 + y;
-        explorerCh          = 6 + z;
-        soldierReportCh     = 9 + x;
-        soldierResetCh      = 9 + y;
-        soldierCh           = 9 + x;
-        archerReportCh      = 12 + x;
-        archerResetCh       = 12 + y;
-        archerCh            = 12 + z;
-        knightReportCh      = 15 + x;
-        knightResetCh       = 15 + y;
-        knightCh            = 15 + z;
-        mageReportCh        = 18 + x;
-        mageResetCh         = 18 + y;
-        mageCh              = 18 + z;
-        catapultReportCh    = 21 + x;
-        catapultResetCh     = 21 + y;
-        catapultCh          = 21 + z;
-        barracksReportCh    = 24 + x;
-        barracksResetCh     = 24 + y;
-        barracksCh          = 24 + z;
-        towerReportCh       = 27 + x;
-        towerResetCh        = 27 + y;
-        towerCh             = 27 + z;
-        combatUnitReportCh  = 30 + x;
-        combatUnitResetCh   = 30 + y;
-        combatUnitCh        = 30 + z;
+        unitReportCh            = x;
+        unitResetCh             = y;
+        UnitsCh                 = z;
+        workerReportCh          = 3 + x;
+        workerResetCh           = 3 + y;
+        workerCh                = 3 + z;
+        explorerReportCh        = 6 + x;
+        explorerResetCh         = 6 + y;
+        explorerCh              = 6 + z;
+        soldierReportCh         = 9 + x;
+        soldierResetCh          = 9 + y;
+        soldierCh               = 9 + x;
+        archerReportCh          = 12 + x;
+        archerResetCh           = 12 + y;
+        archerCh                = 12 + z;
+        knightReportCh          = 15 + x;
+        knightResetCh           = 15 + y;
+        knightCh                = 15 + z;
+        mageReportCh            = 18 + x;
+        mageResetCh             = 18 + y;
+        mageCh                  = 18 + z;
+        catapultReportCh        = 21 + x;
+        catapultResetCh         = 21 + y;
+        catapultCh              = 21 + z;
+        barracksReportCh        = 24 + x;
+        barracksResetCh         = 24 + y;
+        barracksCh              = 24 + z;
+        towerReportCh           = 27 + x;
+        towerResetCh            = 27 + y;
+        towerCh                 = 27 + z;
+        combatUnitReportCh      = 30 + x;
+        combatUnitResetCh       = 30 + y;
+        combatUnitCh            = 30 + z;
+        requestWoodReportCh     = 33 + x;
+        requestWoodResetCh      = 33 + y;
+        requestWoodCh           = 33 + z;
+        requestIronReportCh     = 36 + x;
+        requestIronResetCh      = 36 + y;
+        requestIronCh           = 36 + z;
+        requestCrystalReportCh  = 39 + x;
+        requestCrystalResetCh   = 39 + y;
+        requestCrystalCh        = 39 + z;
     }
 
     void updateUnitInfo() {
