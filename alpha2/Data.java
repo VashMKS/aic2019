@@ -7,7 +7,7 @@ public class Data {
     UnitController uc;
     Tools tools;
 
-    // Comm Channels
+    // Comm Channels (dynamic)
     int UnitsCh,        unitReportCh,       unitResetCh;        // Ch 0, 1, 2
     int workerCh,       workerReportCh,     workerResetCh;      // Ch 3, 4, 5
     int explorerCh,     explorerReportCh,   explorerResetCh;    // Ch 6, 7, 8
@@ -20,14 +20,31 @@ public class Data {
     int towerCh,        towerReportCh,      towerResetCh;       // Ch 27, 28, 29
     int combatUnitCh,   combatUnitReportCh, combatUnitResetCh;  // Ch 30, 31, 32
 
-    int nMineCh = 1000;                                         // Ch 1000
-    int nTownCh = 6000;                                         // Ch 6000
+    // Comm Channels (static)
+    int enemyFoundCh    = 100;                                  // Ch 100
+    int enemyLocCh      = 101;                                  // Ch 101
+    int enemyContactCh  = 102;                                  // Ch 102
+    int nMineCh         = 1000;                                 // Ch 1000
+    int nTownCh         = 6000;                                 // Ch 6000
 
-    int enemyFoundCh = 51;                                      // Ch 51
-    int enemyLocCh = 52;                                        // Ch 52
-    int enemyContactCh = 53;                                    // Ch 53
+    // General Info
+    final int INF = Integer.MAX_VALUE;
+    final float ironMultiplier = GameConstants.INITIAL_IRON_VALUE;
+    final float crystalMultiplier = GameConstants.INITIAL_CRYSTAL_VALUE;
+    int ID;
+    Team allyTeam;
+    Team enemyTeam;
+    Direction[] dirs;
+    UnitType[] types;
+    Location enemyBase;
+    Location allyBase;
+    int currentRound;
+    int VP;
+    int enemyVP;
+    int spawnRound;
+    int turnsAlive;
 
-    // Comm Info
+    // Unit Info
     int nUnits;
     int nCombatUnit;
     int nWorker;
@@ -40,71 +57,135 @@ public class Data {
     int nBarracks;
     int nTower;
 
+    // Mine Info
     int nMine;
-    int nMineLastTurn;
+    int nMinesLastKnown;
     Location[] mineLocations;
-    int[] minersAssigned;
+    int[] miners;
 
+    // Town Info
     int nTown;
     int nTownLastTurn;
     Location[] townLocations;
-    int[] townsfolkAssigned;
+    int[] townsfolk;
 
+    // Enemy Intel
     boolean enemyFound;
-    int enemyLoc;
-
-    // Random Info
-    Team allyTeam;
-    Team enemyTeam;
-    Direction[] dirs;
-    UnitType[] types;
-    Location enemyBase;
-    Location allyBase;
-    int currentRound;
-    int VP;
-    int enemyVP;
-    int turnsAlive;
-
-    // Parameters
-    final int INF = Integer.MAX_VALUE;
+    Location enemyLoc;
     boolean enemyContact;
 
-    //Worker Parameters
-    int myMine;
-    boolean miner;
-    boolean townsfolk;
-    boolean delivering;
+    //Worker variables
+    Location myMine;
+    boolean isMiner;
+    boolean isTownsfolk;
+    boolean onDelivery;
 
+    // Constructor
     public Data (UnitController _uc) {
         uc = _uc;
         tools = new Tools(uc, this);
+        ID = uc.getInfo().getID();
         allyTeam = uc.getTeam();
         enemyTeam = uc.getOpponent();
         dirs = Direction.values();
         types = UnitType.values();
         currentRound = uc.getRound();
+        spawnRound = currentRound;
         enemyBase = enemyTeam.getInitialLocation();
         allyBase = allyTeam.getInitialLocation();
         turnsAlive = 0;
 
-        // Worker specific
+        // Worker constructor
         if (uc.getType() == UnitType.WORKER) {
-            miner = false;
-            townsfolk = false;
-            delivering = false;
+            isMiner = false;
+            isTownsfolk = false;
+            onDelivery = false;
         }
     }
 
     // This function is called once per turn
-    public void Update() {
+    public void update() {
+        updateRound();
+        updateChannels();
+        updateUnitInfo();
+        updateMines();
+        updateTowns();
+        updateEnemyIntel();
+    }
 
-        // General Updates
-        turnsAlive += 1;
+    void updateMines() {
+        //nMinesLastKnown = nMine; // no use for it unless we use ArrayList instead of Array
+        nMine           = uc.read(nMineCh);
+        mineLocations   = new Location[nMine];
+        miners          = new int[nMine];
+        for (int i = 0; i < nMine; i++) {
+            int mineLocChannel = nMineCh + 2*i + 1;
+            Location mineLoc = tools.decrypt(uc.read(mineLocChannel));
+            mineLocations[i] = mineLoc;
+            int minersChannel = nMineCh + 2*i + 2;
+            miners[i] = uc.read(minersChannel);
+        }
+    }
+
+    void updateTowns() {
+        //nTownLastKnown  = nTown; // no use for it unless we use ArrayList instead of Array
+        nTown           = uc.read(nTownCh);
+        townLocations   = new Location[nTown];
+        townsfolk       = new int[nTown];
+        for (int i = 0; i < nTown; i++) {
+            int townLocChannel = nTownCh + 2*i + 1;
+            Location townLoc = tools.decrypt(uc.read(townLocChannel));
+            townLocations[i] = townLoc;
+            int townsfolkChannel = nTownCh + 2*i + 2;
+            townsfolk[i] = uc.read(townsfolkChannel);
+        }
+    }
+
+    void updateWorker() {
+        if (!isMiner) assignMine();
+        if (!isMiner && !isTownsfolk) assignTown();
+    }
+
+    void assignMine() {
+        for(int i = 0; i < nMine; ++i) {
+            if (miners[i] < 2) {
+                int minersChannel = nMineCh + 2 + 2*i;
+                uc.write(minersChannel, uc.read(minersChannel) + 1);
+                miners[i] = miners[i] + 1;
+                myMine =  mineLocations[i];
+                uc.println("Worker ID" + ID + " assigned as isMiner at (" + myMine.x + ", " + myMine.y + ")");
+                isMiner = true;
+                return;
+            }
+        }
+    }
+
+    void assignTown() {
+
+        isTownsfolk = true;
+
+    }
+
+    void updateEnemyIntel() {
+        enemyFound = (uc.read(enemyFoundCh) == 1);
+        enemyLoc = tools.decrypt(uc.read(enemyLocCh));
+
+        // Reset enemyContact every 100 rounds
+        if (currentRound%100 == 0) {
+            uc.write(enemyContactCh, 0);
+        }
+
+        enemyContact = (uc.read(enemyContactCh) == 1);
+    }
+
+    void updateRound() {
+        currentRound = uc.getRound();
+        turnsAlive = currentRound - spawnRound;
         VP = allyTeam.getVictoryPoints();
         enemyVP = enemyTeam.getVictoryPoints();
+    }
 
-        // Update Comm Channels
-        currentRound = uc.getRound();
+    void updateChannels() {
         int x = currentRound%3;
         int y = (currentRound+1)%3;
         int z = (currentRound+2)%3;
@@ -142,8 +223,9 @@ public class Data {
         combatUnitReportCh  = 30 + x;
         combatUnitResetCh   = 30 + y;
         combatUnitCh        = 30 + z;
+    }
 
-        // Fetch Comm Info
+    void updateUnitInfo() {
         nUnits      = uc.read(UnitsCh);
         nCombatUnit = uc.read(combatUnitCh);
         nWorker     = uc.read(workerCh);
@@ -155,65 +237,6 @@ public class Data {
         nCatapult   = uc.read(catapultCh);
         nBarracks   = uc.read(barracksCh);
         nTower      = uc.read(towerCh);
-
-        nMineLastTurn   = nMine;
-        nMine           = uc.read(nMineCh);
-        mineLocations   = new Location[nMine];
-        minersAssigned  = new int[nMine];
-        for (int i = nMineLastTurn; i < nMine; i++) {
-            int mineLocChannel = nMineCh + 1 + 2*i;
-            Location mineLoc = tools.decrypt(uc.read(mineLocChannel));
-            mineLocations[i] = mineLoc;
-            int minersChannel = mineLocChannel + 1;
-            minersAssigned[i] = uc.read(minersChannel);
-        }
-
-        nTownLastTurn       = nTown;
-        nTown               = uc.read(nTownCh);
-        townLocations       = new Location[nTown];
-        townsfolkAssigned   = new int[nTown];
-        for (int i = 0; i < nTown; i++) {
-            int townLocChannel = nTownCh + 1 + 2*i;
-            Location townLoc = tools.decrypt(uc.read(townLocChannel));
-            townLocations[i] = townLoc;
-            int townsfolkChannel = townLocChannel + 1;
-            townsfolkAssigned[i] = uc.read(townsfolkChannel);
-        }
-
-        enemyFound = (uc.read(enemyFoundCh) == 1);
-        enemyLoc = uc.read(enemyLocCh);
-
-        // Reset enemyContact every 100 rounds
-        if (currentRound%100 == 0) {
-            uc.write(enemyContactCh, 0);
-        }
-
-        enemyContact = (uc.read(enemyContactCh) == 1);
-
-    }
-
-    void UpdateWorker() {
-        if (!miner) assignMine();
-        if (!miner && ! townsfolk) assignTown();
-    }
-
-    void assignMine(){
-        for(int i = 0; i < nMine; ++i) {
-            int minersChannel = nMineCh + 2 + 2*i;
-            if (uc.read(minersChannel) < 2) {
-                uc.write(minersChannel, uc.read(minersChannel) + 1);
-                int mineLocChannel = nMineCh + 1 + 2*i;
-                myMine =  uc.read(mineLocChannel) ;
-                miner = true;
-                return;
-            }
-        }
-    }
-
-    void assignTown(){
-
-        townsfolk = true;
-
     }
 
 }

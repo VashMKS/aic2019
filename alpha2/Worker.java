@@ -18,8 +18,8 @@ public class Worker extends MovingUnit {
 
         while (true){
 
-            data.Update();
-            data.UpdateWorker();
+            data.update();
+            data.updateWorker();
 
             report();
 
@@ -48,8 +48,9 @@ public class Worker extends MovingUnit {
         if(tools.alliesAround(2, UnitType.BASE) > 0){
             Direction d = uc.getLocation().directionTo(data.allyBase);
             if(uc.canDeposit(d)) {
+                uc.println("resources delivered successfully");
                 uc.deposit(d);
-                data.delivering = false;
+                data.onDelivery = false;
             }
         }
     }
@@ -64,27 +65,27 @@ public class Worker extends MovingUnit {
         Direction dir = tools.randomDir();
         Location target = uc.getLocation().add(dir);
 
-        if (data.miner) {
+        if (data.isMiner) {
 
-            if (uc.getWood() + 3*uc.getIron() + 10*uc.getCrystal() > 10) {
+            if (data.onDelivery || tools.currency(uc.getInfo().getWood(), uc.getInfo().getIron(), uc.getInfo().getCrystal()) > 10) {
                 target = data.allyBase;
-                data.delivering = true;
+                data.onDelivery = true;
+                uc.println("Worker ID" + data.ID + " on delivery");
+
             } else {
-                target = tools.decrypt(data.myMine);
+                target = data.myMine;
+                uc.println("Worker ID" + data.ID + " headed to mine at (" + data.myMine.x + ", " + data.myMine.y + ")");
             }
 
-            if (data.currentRound%100 == 6) {
-                uc.println("My assigned mine is " + data.myMine);
-                uc.println("currently heading towards (" + target.x + ", " + target.y + ")");
-            }
+            // report every 100 rounds
+            // if (data.currentRound%100 == 16) { }
 
             /*
-            Location myMine = tools.decrypt(data.myMine);
-            target = myMine;
+            target = data.myMine;
 
             // if done gathering go back to base
             // TODO: deliver to the base or the nearest safe town
-            if (data.delivering) target = data.allyBase;
+            if (data.onDelivery) target = data.allyBase;
 
             uc.println(uc.getLocation().x + ' ' + uc.getLocation().y + " - " + myMine.x + ' ' + myMine.y);
 
@@ -97,10 +98,11 @@ public class Worker extends MovingUnit {
             if(uc.getLocation().isEqual(myMine) && tools.alliesAround(2, UnitType.WORKER) > 0) {
                 //TODO: mirar que el worker adjacent esta assignat a la teva mina
                 target = data.allyBase;
-                data.delivering = true;
+                data.onDelivery = true;
             }*/
         }
 
+        uc.println("target: (" + target.x + ", " + target.y + ")");
         movement.moveTo(target);
 
     }

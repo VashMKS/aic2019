@@ -4,7 +4,7 @@ import aic2019.Direction;
 import aic2019.UnitInfo;
 import aic2019.UnitType;
 
-public class RecruitmentUnit extends Structure {
+class RecruitmentUnit extends Structure {
 
     void spawnUnits() {
         if (data.nExplorer < 2) {

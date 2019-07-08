@@ -16,7 +16,7 @@ public class Mage extends CombatUnit {
 
         while (true) {
 
-            data.Update();
+            data.update();
 
             report();
 

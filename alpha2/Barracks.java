@@ -14,7 +14,7 @@ public class Barracks extends RecruitmentUnit {
 
         while (true) {
 
-            data.Update();
+            data.update();
 
             report();
 

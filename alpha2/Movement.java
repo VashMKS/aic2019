@@ -33,7 +33,7 @@ public class Movement {
         int d = myLoc.distanceSquared(target);
         if (d <= minDistToTarget) resetMovement();
 
-        // Update data
+        // update data
         prevTarget = target;
         minDistToTarget = Math.min(d, minDistToTarget);
 

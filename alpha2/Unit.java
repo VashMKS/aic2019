@@ -34,38 +34,51 @@ public class Unit {
 
     // scans for mines and reports new findings to the comm channels
     void reportMines() {
-        ResourceInfo[] minesAround = uc.senseResources();
-        //uc.println("sense mines successful, mines found: " + minesAround.length);
-        if(minesAround.length > 0) {
-            for (ResourceInfo mineInfo : minesAround) {
+        ResourceInfo[] minesOnSight = uc.senseResources();
+        if(minesOnSight.length > 0) {
+            //uc.println("mine scan successful, potential new mines: " + minesOnSight.length);
+            boolean newMineFound = false;
+            int mineLocChannel = data.nMineCh + 2*data.nMine - 1;
+            for (ResourceInfo mineInfo : minesOnSight) {
                 Location mineLoc = mineInfo.getLocation();
-                //uc.println("*notes mine location*: " + mineLoc.x + " " + mineLoc.y);
-                //uc.println("encrypted: " + tools.encrypt(mineLoc.x, mineLoc.y));
+                //uc.println("  checking location (" + mineLoc.x + " " + mineLoc.y + ")");
                 if (!tools.reportedMine(mineLoc)) {
-                    //uc.println("it hasn't. I'll take note of it");
-                    int mineLocChannel = data.nMineCh + 1 + 2*data.nMine;
+                    //uc.println("   new mine found, storing location");
+                    mineLocChannel += 2;
                     uc.write(mineLocChannel, tools.encrypt(mineLoc.x,mineLoc.y));
-                    data.nMine = data.nMine + 1;
-                    uc.write(data.nMineCh, data.nMine);
-                    //uc.println("now we've seen " + uc.read(data.nMineCh) + " mines so far");
+                    uc.write(data.nMineCh, data.nMine+1);
+                    newMineFound = true;
+                } else {
+                    //uc.println("   mine already scanned");
                 }
             }
+            if (newMineFound) data.updateMines();
+            //uc.println("so far " + uc.read(data.nMineCh) + " mines discovered");
         }
     }
 
-    // scans for towns and reports findings to the comm channels
+    // scans for towns and reports new findings to the comm channels
     void reportTowns() {
-        TownInfo[] townsAround = uc.senseTowns();
-        //uc.println("sense towns completed, towns found: " + townsAround.length);
-        if(townsAround.length > 0) {
-            for (TownInfo townInfo : townsAround){
+        TownInfo[] townsOnSight = uc.senseTowns();
+        if(townsOnSight.length > 0) {
+            //uc.println("town scan successful, potential new towns: " + townsOnSight.length);
+            boolean newTownFound = false;
+            int townLocChannel = data.nTownCh + 2*data.nTown - 1;
+            for (TownInfo townInfo : townsOnSight) {
                 Location townLoc = townInfo.getLocation();
-                if (! tools.reportedTown( townLoc )){
-                    uc.write(data.nTownCh + 1 + 2*data.nTown, tools.encrypt(townLoc.x,townLoc.y));
-                    data.nTown = data.nTown + 1;
+                //uc.println("  checking location (" + townLoc.x + " " + townLoc.y + ")");
+                if (!tools.reportedTown( townLoc )) {
+                    //uc.println("   new town found, storing location");
+                    townLocChannel += 2;
+                    uc.write(townLocChannel, tools.encrypt(townLoc.x,townLoc.y));
                     uc.write(data.nTownCh, data.nTown);
+                    newTownFound = true;
+                } else {
+                    //uc.println("   town already scanned");
                 }
             }
+            if (newTownFound) data.updateTowns();
+            //uc.println("so far " + uc.read(data.nTownCh) + " towns discovered");
         }
     }
 

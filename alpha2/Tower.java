@@ -14,7 +14,7 @@ public class Tower extends Structure implements StructureCombat {
 
         while (true) {
 
-            data.Update();
+            data.update();
 
             report();
 
@@ -31,7 +31,7 @@ public class Tower extends Structure implements StructureCombat {
         int priority = 0;
 
         for (UnitInfo unit : enemiesAround){
-            int unitPriority = tools.attackPriorityStructure(unit);
+            int unitPriority = targetPriority(unit);
             unitPriority = unitPriority / (unit.getHealth()/unit.getType().maxHealth);
 
             if (unitPriority > priority){
@@ -45,6 +45,16 @@ public class Tower extends Structure implements StructureCombat {
     }
 
     public int targetPriority(UnitInfo unit) {
+        if(unit.getType() == UnitType.BASE)     return 10;
+        if(unit.getType() == UnitType.BARRACKS) return 9;
+        if(unit.getType() == UnitType.TOWER)    return 8;
+        if(unit.getType() == UnitType.CATAPULT) return 7;
+        if(unit.getType() == UnitType.MAGE)     return 6;
+        if(unit.getType() == UnitType.SOLDIER)  return 5;
+        if(unit.getType() == UnitType.ARCHER)   return 4;
+        if(unit.getType() == UnitType.KNIGHT)   return 3;
+        if(unit.getType() == UnitType.EXPLORER) return 2;
+        if(unit.getType() == UnitType.WORKER)   return 1;
         return 0;
     }
 

@@ -3,8 +3,6 @@ package alpha2;
 import aic2019.Direction;
 import aic2019.UnitController;
 
-import java.awt.*;
-
 public class Explorer extends CombatUnit {
 
     public Explorer (UnitController _uc) {
@@ -19,7 +17,7 @@ public class Explorer extends CombatUnit {
 
         while (true) {
 
-            data.Update();
+            data.update();
 
             report();
 

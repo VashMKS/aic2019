@@ -16,7 +16,7 @@ public class Soldier extends CombatUnit {
 
         while (true) {
 
-            data.Update();
+            data.update();
 
             report();
 

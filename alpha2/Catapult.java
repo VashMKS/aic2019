@@ -16,7 +16,7 @@ public class Catapult extends CombatUnit {
 
         while (true) {
 
-            data.Update();
+            data.update();
 
             report();
 

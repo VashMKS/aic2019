@@ -16,7 +16,7 @@ public class Knight extends CombatUnit {
 
         while (true) {
 
-            data.Update();
+            data.update();
 
             report();
 
