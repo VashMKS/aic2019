@@ -79,7 +79,7 @@ public class Worker extends MovingUnit {
                 //uc.println("Worker ID" + data.ID + " headed to mine at (" + data.myMine.x + ", " + data.myMine.y + ")");
             }
 
-        }
+        }else target = data.enemyBase;
 
         //uc.println("target: (" + target.x + ", " + target.y + ")");
         movement.moveTo(target);
@@ -107,7 +107,7 @@ public class Worker extends MovingUnit {
 
         if(uc.senseUnits(data.allyTeam, true).length > 0 ){
             for(Direction d : data.dirs){
-                if (uc.canSpawn(d, UnitType.TOWER)) {
+                if (!d.isEqual(uc.getLocation().directionTo(data.allyBase)) && uc.canSpawn(d, UnitType.TOWER)) {
                     uc.spawn(d, UnitType.TOWER);
                 }
 

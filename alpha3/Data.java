@@ -118,7 +118,7 @@ public class Data {
         nMine           = uc.read(nMineCh);
         mineLocations   = new Location[nMine];
         miners          = new int[nMine];
-        for (int i = 0; i < nMine; i++) {
+        for (int i = 0; i < nMine ; i++) {
             int mineLocChannel = nMineCh + 2*i + 1;
             Location mineLoc = tools.decrypt(uc.read(mineLocChannel));
             mineLocations[i] = mineLoc;

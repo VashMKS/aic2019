@@ -53,14 +53,14 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
         UnitInfo[] unitsAround = uc.senseUnits();
         Location target = uc.getLocation();
-        int priority = 0;
+        float priority = 0;
 
         for (UnitInfo unit : unitsAround) {
 
             if (!unit.getTeam().equals(data.allyTeam)) {
 
                 //TODO: falta mirar les caselles al voltant de les unitats enemigues
-                int unitPriority = areaAttackPriority( unit.getLocation() );
+                float unitPriority = areaAttackPriority( unit.getLocation() );
                 //uc.println("My target is at " + unit.getLocation().x + " " + unit.getLocation().y + " with priority " + unitPriority );
 
                 if (unitPriority > priority) {
@@ -68,11 +68,6 @@ public class Base extends RecruitmentUnit implements StructureCombat {
                     target = unit.getLocation();
                 }
             }
-        }
-
-        if (!target.isEqual(uc.getLocation()) && uc.canAttack(target) ){
-            //uc.println("I'm about to attack " + target.x + " " + target.y );
-            uc.attack(target);
         }
 
     }
@@ -91,12 +86,12 @@ public class Base extends RecruitmentUnit implements StructureCombat {
         return 0;
     }
 
-    int areaAttackPriority(Location loc){
+    float areaAttackPriority(Location loc){
 
         if( loc.distanceSquared(uc.getLocation() ) <= 2 ) return -data.INF;
 
         UnitInfo[] unitsNearLoc = uc.senseUnits(loc, 2);
-        int priority = 0;
+        float priority = 0;
         for (UnitInfo unit : unitsNearLoc) {
             if (unit.getTeam().equals(data.allyTeam)) priority -= 100;
             else {

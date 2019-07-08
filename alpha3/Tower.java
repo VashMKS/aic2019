@@ -20,6 +20,8 @@ public class Tower extends Structure implements StructureCombat {
 
             attack();
 
+            attackTowns();
+
             uc.yield();
         }
     }
@@ -28,7 +30,7 @@ public class Tower extends Structure implements StructureCombat {
 
         UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
         Location target = uc.getLocation();
-        int priority = 0;
+        float priority = 0;
 
         for (UnitInfo unit : enemiesAround){
             int unitPriority = targetPriority(unit);
@@ -56,6 +58,24 @@ public class Tower extends Structure implements StructureCombat {
         if(unit.getType() == UnitType.EXPLORER) return 2;
         if(unit.getType() == UnitType.WORKER)   return 1;
         return 0;
+    }
+
+    void attackTowns(){
+        TownInfo[] nearbyTowns = uc.senseTowns(data.allyTeam, true);
+
+        Location target = uc.getLocation();
+        float priority = 0;
+
+        for (TownInfo town : nearbyTowns){
+            int townPriority = 1/town.getLoyalty();
+            if(townPriority > priority){
+                priority = townPriority;
+                target = town.getLocation();
+            }
+        }
+
+        if (!target.isEqual(uc.getLocation()) && uc.canAttack(target) ) uc.attack(target);
+
     }
 
 }
