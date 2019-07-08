@@ -19,7 +19,6 @@ public class Worker extends MovingUnit {
         while (true){
 
             data.update();
-            data.updateWorker();
 
             report();
 
@@ -79,7 +78,7 @@ public class Worker extends MovingUnit {
                 //uc.println("Worker ID" + data.ID + " headed to mine at (" + data.myMine.x + ", " + data.myMine.y + ")");
             }
 
-        }else target = data.enemyBase;
+        }
 
         //uc.println("target: (" + target.x + ", " + target.y + ")");
         movement.moveTo(target);
@@ -92,9 +91,9 @@ public class Worker extends MovingUnit {
 
         if (myLoc.isEqual(data.myMine) ) {
 
+            Direction target = myLoc.directionTo(data.allyBase).opposite();
             for (int i = 0; i < 3; ++i) {
 
-                Direction target = myLoc.directionTo(data.allyBase).opposite();
                 if (i == 1) target = target.rotateLeft();
                 if (i == 2) target = target.rotateRight();
 
@@ -104,7 +103,9 @@ public class Worker extends MovingUnit {
 
             }
         }
+    }
 
+    void panic() {
         if(uc.senseUnits(data.allyTeam, true).length > 0 ){
             for(Direction d : data.dirs){
                 if (!d.isEqual(uc.getLocation().directionTo(data.allyBase)) && uc.canSpawn(d, UnitType.TOWER)) {
@@ -115,6 +116,5 @@ public class Worker extends MovingUnit {
 
         }
     }
-
 
 }

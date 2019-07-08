@@ -7,6 +7,8 @@ public class Data {
     UnitController uc;
     Tools tools;
 
+    /* ------------------------------------------------- ATTRIBUTES ------------------------------------------------ */
+
     // Comm Channels (dynamic)
     int UnitsCh,            unitReportCh,           unitResetCh;            // Ch 0, 1, 2
     int workerCh,           workerReportCh,         workerResetCh;          // Ch 3, 4, 5
@@ -35,6 +37,7 @@ public class Data {
     final float ironMultiplier = GameConstants.INITIAL_IRON_VALUE;
     final float crystalMultiplier = GameConstants.INITIAL_CRYSTAL_VALUE;
     int ID;
+    UnitType type;
     Team allyTeam;
     Team enemyTeam;
     Direction[] dirs;
@@ -88,6 +91,7 @@ public class Data {
         uc = _uc;
         tools = new Tools(uc, this);
         ID = uc.getInfo().getID();
+        type = uc.getType();
         allyTeam = uc.getTeam();
         enemyTeam = uc.getOpponent();
         dirs = Direction.values();
@@ -106,14 +110,22 @@ public class Data {
         }
     }
 
+    /* -------------------------------------------------- METHODS -------------------------------------------------- */
+
     // This function is called once per turn
     public void update() {
+
+        // General updates
         updateRound();
         updateChannels();
         updateUnitInfo();
         updateMines();
         updateTowns();
         updateEnemyIntel();
+
+        // Class specific updates
+        updateBase();
+        updateWorker();
     }
 
     void updateMines() {
@@ -144,9 +156,24 @@ public class Data {
         }
     }
 
+    // Base specific updates
+    void updateBase() {
+        if (type == UnitType.BASE) {
+
+            // reset resource request channels
+            uc.write(requestWoodResetCh, 0);
+            uc.write(requestIronResetCh, 0);
+            uc.write(requestCrystalResetCh, 0);
+
+        }
+    }
+
+    // Worker specific update
     void updateWorker() {
-        if (!isMiner) assignMine();
-        if (!isMiner && !isTownsfolk) assignTown();
+        if (type.equals(UnitType.WORKER)) {
+            if (!isMiner) assignMine();
+            if (!isMiner && !isTownsfolk) assignTown();
+        }
     }
 
     void assignMine() {
