@@ -60,7 +60,10 @@ public class Soldier extends CombatUnit {
             target.y = (data.allyBase.y + data.enemyBase.y)/2;
         }
 
-        if(! movement.doMicro() ) movement.moveTo(target);
+        if(! movement.doMicro() ){
+            uc.drawLine(uc.getLocation(), target, "#0000ff" );
+            movement.moveTo(target);
+        }
 
     }
 
@@ -74,10 +77,10 @@ public class Soldier extends CombatUnit {
 
             if(!uc.canAttack(unit.getLocation()) ) continue;
 
-            int unitPriority = targetPriority(unit);
+            float unitPriority = targetPriority(unit);
             //prioriza atacar a matar
             if(unit.getHealth() <= uc.getType().attack) unitPriority += 50;
-            else unitPriority = unitPriority * (unit.getType().maxHealth/unit.getHealth());
+            else unitPriority = unitPriority * (float)(unit.getType().maxHealth/unit.getHealth());
 
             if (unitPriority > priority){
                 priority = unitPriority;

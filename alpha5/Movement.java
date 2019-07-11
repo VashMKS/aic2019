@@ -83,11 +83,12 @@ public class Movement {
             //Siempre nos podemos quedar quietos
             int bestIndex = 8;
 
-            for (int i = 0; i < 8; ++i) {
-                if (!uc.canMove(data.dirs[i])) continue;
+            for (int i = 7; i >= 0; --i) {
+                if (!uc.canMove( data.dirs[i]) ) continue;
                 if (micro[i].isBetter(micro[bestIndex])) bestIndex = i;
             }
 
+            uc.drawLine(uc.getLocation(), uc.getLocation().add(data.dirs[bestIndex]), "FF69B4");
             uc.move(data.dirs[bestIndex]);
             return true;
         }
@@ -97,38 +98,39 @@ public class Movement {
     }
 
     class MicroInfo{
-        int maxDamage;
-        int minDistToEnemy;
-        int minEnemyHealth;
+        int maxDamage = 0;
+        int minDistToEnemy = data.INF;
+        int minEnemyHealth = data.INF;
+        boolean canAttack = false;
 
         Location loc;
 
         public MicroInfo (Location _loc){
             this.loc = _loc;
-            int maxDamage = 0;
-            int minDistToEnemy = data.INF;
-            int minEnemyHealth = data.INF;
         }
 
 
 
         void update(UnitInfo enemy) {
 
-            if (uc.canAttack(enemy.getLocation())) {
-
-                if( minEnemyHealth > enemy.getHealth() ){
+            if (uc.canAttack(enemy.getLocation()) ) {
+                canAttack = true;
+                if (minEnemyHealth > enemy.getHealth()) {
                     minEnemyHealth = enemy.getHealth();
                 }
 
-                int d = loc.distanceSquared(enemy.getLocation());
-                if (d < minDistToEnemy) {
-                    minDistToEnemy = d;
-                }
-                if (enemy.getType().attackRangeSquared < d &&
-                    enemy.getType().minAttackRangeSquared > d) {
+            }
 
-                    maxDamage += enemy.getType().attack;
-                }
+            int d = loc.distanceSquared(enemy.getLocation());
+            if (d < minDistToEnemy) {
+                minDistToEnemy = d;
+            }
+            //TODO: mirar montañas
+            if (enemy.getType().attackRangeSquared < d &&
+                enemy.getType().minAttackRangeSquared > d) {
+
+                maxDamage += enemy.getType().attack;
+
             }
         }
 
@@ -137,14 +139,16 @@ public class Movement {
             if (uc.senseImpact(loc) == 1 ) maxDamage += 20;
         }
 
+        /*
         boolean canAttack(){
 
-            //TODO: mirar montañas
             return (uc.getType().attackRangeSquared >= minDistToEnemy &&
                     uc.getType().minAttackRangeSquared <= minDistToEnemy);
         }
+        */
 
         boolean isBetter(MicroInfo mic){
+
 
             int dmg = uc.getType().attack;
             int hp = uc.getInfo().getHealth();
@@ -154,8 +158,8 @@ public class Movement {
             if(maxDamage >= hp && mic.maxDamage < hp) return false;
 
             //Prioriza poder atacar
-            if(canAttack() && !mic.canAttack()) return true;
-            if(!canAttack() && mic.canAttack()) return false;
+            if(canAttack && !mic.canAttack) return true;
+            if(!canAttack && mic.canAttack) return false;
 
             //Prioriza las casillas en las que puede hacer killingBlow
             if(minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) return true;
@@ -163,13 +167,10 @@ public class Movement {
 
             //Prioriza las casillas en las que menos daño le pueden hacer
             if(maxDamage < mic.maxDamage) return true;
-            if(maxDamage > mic.maxDamage) return true;
+            if(maxDamage > mic.maxDamage) return false;
 
             //prioriza acercarse al enemigo
             return minDistToEnemy <= mic.minDistToEnemy;
-
-
-
 
         }
 

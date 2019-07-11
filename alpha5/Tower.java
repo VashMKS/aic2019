@@ -36,11 +36,11 @@ public class Tower extends Structure implements StructureCombat {
 
             if(!uc.canAttack(unit.getLocation()) ) continue;
 
-            int unitPriority = targetPriority(unit);
+            float unitPriority = targetPriority(unit);
 
             //Prioriza atacar a matar
             if(unit.getHealth() <= uc.getType().attack) unitPriority += 50;
-            else unitPriority = unitPriority * (unit.getType().maxHealth/unit.getHealth());
+            else unitPriority = unitPriority * (float)(unit.getType().maxHealth/unit.getHealth());
 
             if (unitPriority > priority){
                 priority = unitPriority;

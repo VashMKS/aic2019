@@ -51,25 +51,25 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
     public void attack() {
 
-        UnitInfo[] unitsAround = uc.senseUnits();
+        UnitInfo[] unitsAround = uc.senseUnits(data.allyTeam, true);
         Location target = uc.getLocation();
         float priority = 0;
 
         for (UnitInfo unit : unitsAround) {
 
-            if (!unit.getTeam().equals(data.allyTeam)) {
+            if(! uc.canAttack(unit.getLocation()) ) continue;
 
-                //TODO: falta mirar les caselles al voltant de les unitats enemigues
-                float unitPriority = areaAttackPriority( unit.getLocation() );
-                //uc.println("My target is at " + unit.getLocation().x + " " + unit.getLocation().y + " with priority " + unitPriority );
+            //TODO: falta mirar les caselles al voltant de les unitats enemigues
+            float unitPriority = areaAttackPriority( unit.getLocation() );
+            //uc.println("My target is at " + unit.getLocation().x + " " + unit.getLocation().y + " with priority " + unitPriority );
 
-                if (unitPriority > priority) {
-                    priority = unitPriority;
-                    target = unit.getLocation();
-                }
+            if (unitPriority > priority) {
+                priority = unitPriority;
+                target = unit.getLocation();
             }
-        }
 
+        }
+        if(!target.isEqual(uc.getLocation()) )uc.attack(target);
     }
 
     public int targetPriority(UnitInfo unit) {
@@ -88,15 +88,15 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
     float areaAttackPriority(Location loc){
 
-        if( loc.distanceSquared(uc.getLocation() ) <= 2 ) return -data.INF;
+        if( loc.distanceSquared(uc.getLocation() ) <= 2 ) return -1000;
 
         UnitInfo[] unitsNearLoc = uc.senseUnits(loc, 2);
         float priority = 0;
         for (UnitInfo unit : unitsNearLoc) {
             if (unit.getTeam().equals(data.allyTeam)) priority -= 100;
             else {
-                int p = targetPriority(unit);
-                p = p * (unit.getType().maxHealth / unit.getHealth());
+                float p = targetPriority(unit);
+                p = p * (float)(unit.getType().maxHealth / unit.getHealth());
                 priority += p;
             }
         }
