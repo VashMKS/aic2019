@@ -9,7 +9,6 @@ public class Soldier extends CombatUnit {
         this.data = new Data(uc);
         this.tools = new Tools(uc, data);
         this.movement = new Movement(uc, data);
-        this.combat = new Combat(uc, data, tools, movement);
     }
 
     void run() {
@@ -26,7 +25,7 @@ public class Soldier extends CombatUnit {
 
             attack();
 
-            combat.attackTown();
+            attackTown();
 
             uc.yield();
         }
@@ -64,6 +63,7 @@ public class Soldier extends CombatUnit {
 
     }
 
+    @Override
     public void attack(){
 
         UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
@@ -87,21 +87,6 @@ public class Soldier extends CombatUnit {
 
         if (!target.isEqual(uc.getLocation()) ) uc.attack(target);
 
-    }
-
-    public int targetPriority(UnitInfo unit) {
-
-        if(unit.getType() == UnitType.MAGE)     return 10;
-        if(unit.getType() == UnitType.SOLDIER)  return 9;
-        if(unit.getType() == UnitType.ARCHER)   return 8;
-        if(unit.getType() == UnitType.KNIGHT)   return 7;
-        if(unit.getType() == UnitType.TOWER)    return 6;
-        if(unit.getType() == UnitType.BASE)     return 5;
-        if(unit.getType() == UnitType.CATAPULT) return 4;
-        if(unit.getType() == UnitType.BARRACKS) return 3;
-        if(unit.getType() == UnitType.EXPLORER) return 2;
-        if(unit.getType() == UnitType.WORKER)   return 1;
-        return 0;
     }
 
 }

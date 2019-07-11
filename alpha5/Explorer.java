@@ -10,7 +10,6 @@ public class Explorer extends CombatUnit {
         this.data = new Data(uc);
         this.tools = new Tools(uc, data);
         this.movement = new Movement(uc, data);
-        this.combat = new Combat(uc, data,tools, movement);
     }
 
     /* IDEA: [distributed mapping] always assign 1 explorer as Cartographer and some as Map Keepers
