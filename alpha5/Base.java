@@ -1,9 +1,6 @@
 package alpha5;
 
-import aic2019.Location;
-import aic2019.UnitController;
-import aic2019.UnitInfo;
-import aic2019.UnitType;
+import aic2019.*;
 
 public class Base extends RecruitmentUnit implements StructureCombat {
 
@@ -26,13 +23,17 @@ public class Base extends RecruitmentUnit implements StructureCombat {
             // logs every 100 rounds
             if (data.currentRound % 100 == 15) {
                 uc.println("Round " + data.currentRound + " report:");
+                uc.println("  - currently there are " + data.nWanderer + " workers wandering around. " +
+                           "Threshold is at " + data.workerHealthThreshold + " HP");
+                uc.println("  - currently " + data.nMiner + " miners out of " + data.nWorker + " workers are active in " + data.nMine + " mines. " +
+                           "Cap is at " + data.nMinerThreshold + " miners");
                 for (int i = 0; i < data.nMine; i++) {
-                    uc.println(data.nMine);
                     Location mineLoc = data.mineLocations[i];
-                    uc.println(mineLoc);
                     int nMiners = data.miners[i];
                     uc.println("  - mine " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " miners");
                 }
+                uc.println("  - currently " + data.nTownsfolk + " townsfolk out of " + data.nWorker + " workers are active in " + data.nTown + " towns. " +
+                           "Cap is at " + data.nTownsfolkThreshold + " townsfolk");
                 for (int i = 0; i < data.nTown; i++) {
                     Location mineLoc = data.townLocations[i];
                     int nMiners = data.townsfolk[i];
@@ -57,7 +58,7 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
         for (UnitInfo unit : unitsAround) {
 
-            if(! uc.canAttack(unit.getLocation()) ) continue;
+            if(!uc.canAttack(unit.getLocation())) continue;
 
             //TODO: falta mirar les caselles al voltant de les unitats enemigues
             float unitPriority = areaAttackPriority( unit.getLocation() );
@@ -88,7 +89,7 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
     float areaAttackPriority(Location loc){
 
-        if( loc.distanceSquared(uc.getLocation() ) <= 2 ) return -1000;
+        if(loc.distanceSquared(uc.getLocation() ) <= 2) return -1000;
 
         UnitInfo[] unitsNearLoc = uc.senseUnits(loc, 2);
         float priority = 0;

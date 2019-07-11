@@ -20,7 +20,7 @@ public class Tower extends Structure implements StructureCombat {
 
             attack();
 
-            attackTowns();
+            attackTown();
 
             uc.yield();
         }
@@ -66,7 +66,7 @@ public class Tower extends Structure implements StructureCombat {
         return 0;
     }
 
-    public void attackTowns(){
+    void attackTown() {
         TownInfo[] nearbyTowns = uc.senseTowns(data.allyTeam, true);
 
         Location target = uc.getLocation();
@@ -80,7 +80,7 @@ public class Tower extends Structure implements StructureCombat {
             }
         }
 
-        if (!target.isEqual(uc.getLocation()) && uc.canAttack(target) ) uc.attack(target);
+        if (!target.isEqual(uc.getLocation()) && uc.canAttack(target)) uc.attack(target);
 
     }
 

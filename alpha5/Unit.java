@@ -1,9 +1,6 @@
 package alpha5;
 
-import aic2019.Location;
-import aic2019.ResourceInfo;
-import aic2019.TownInfo;
-import aic2019.UnitController;
+import aic2019.*;
 
 public class Unit {
 
@@ -17,23 +14,57 @@ public class Unit {
         reportEnvironment();
     }
 
-    // overrided for each different unit
+    // placeholder, this is overridden for each different unit
     void reportMyself() {
+        // Report to the Comm Channel
+        uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
+        // Reset Next Slot
+        uc.write(data.unitResetCh, 0);
     }
 
-    // report enemies on sight
+    // report hostile (enemy + neutral) units on sight and adjacent
     void reportEnemies () {
+        UnitInfo[] nonAllyUnitsOnSight = uc.senseUnits(data.allyTeam, true);
+
+        //
+        if (nonAllyUnitsOnSight.length > 0) uc.write(data.hostileFoundCh, 1);
+
+        for (UnitInfo unit : nonAllyUnitsOnSight) {
+            // checks if the hostile unit is reachable
+            if (!data.hostileContact && unit.getLocation().distanceSquared(uc.getLocation()) <= 2) {
+                data.hostileContact = true;
+                uc.write(data.hostileContactCh, 1);
+            }
+
+            if (!data.neutralFound && unit.getTeam() == Team.NEUTRAL) {
+                uc.write(data.neutralFoundCh, 1);
+                // checks if the neutral unit is reachable
+                if (!data.neutralContact && unit.getLocation().distanceSquared(uc.getLocation()) <= 2) {
+                    data.neutralContact = true;
+                    uc.write(data.neutralContactCh, 1);
+                }
+            }
+
+            if (!data.enemyFound && unit.getTeam() == data.enemyTeam) {
+                uc.write(data.enemyFoundCh, 1);
+                // checks if the enemy unit is reachable
+                if (!data.enemyContact && unit.getLocation().distanceSquared(uc.getLocation()) <= 2) {
+                    data.enemyContact = true;
+                    uc.write(data.enemyContactCh, 1);
+                }
+            }
+        }
     }
 
     // report mines, towns, terrain, etc
     void reportEnvironment() {
-        reportMines();
+        reportResources();
         reportTowns();
-        reportMap();
+        reportTerrain();
     }
 
     // scans for mines and reports new findings to the comm channels
-    void reportMines() {
+    void reportResources() {
         ResourceInfo[] minesOnSight = uc.senseResources();
         if(minesOnSight.length > 0) {
             //uc.println("mine scan successful, potential new mines: " + minesOnSight.length);
@@ -82,7 +113,8 @@ public class Unit {
         }
     }
 
-    void reportMap() {
+    // scans for terrain and updates the internal map
+    void reportTerrain() {
 
     }
 

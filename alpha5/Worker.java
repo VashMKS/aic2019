@@ -26,9 +26,15 @@ public class Worker extends MovingUnit {
 
             deliver();
 
+            repair();
+
             buildTower();
 
             move();
+
+            deliver();
+
+            repair();
 
             uc.yield();
         }
@@ -43,17 +49,33 @@ public class Worker extends MovingUnit {
         // Reset Next Slot
         uc.write(data.unitResetCh, 0);
         uc.write(data.workerResetCh, 0);
+        if (data.isMiner) {
+            uc.write(data.minerReportCh, uc.read(data.minerReportCh)+1);
+            uc.write(data.minerResetCh, 0);
+        }
+        if (data.isTownsfolk) {
+            uc.write(data.townsfolkReportCh, uc.read(data.townsfolkReportCh)+1);
+            uc.write(data.townsfolkResetCh, 0);
+        }
+        if (data.isWanderer) {
+            uc.write(data.wandererReportCh, uc.read(data.wandererReportCh) + 1);
+            uc.write(data.wandererResetCh, 0);
+        }
     }
 
     void deliver(){
         if(tools.alliesAround(2, UnitType.BASE) > 0){
             Direction d = uc.getLocation().directionTo(data.allyBase);
             if(uc.canDeposit(d)) {
-                uc.println("resources delivered successfully");
+                //uc.println("resources delivered successfully");
                 uc.deposit(d);
                 data.onDelivery = false;
             }
         }
+    }
+
+    void repair() {
+        // TODO: if adjacent to an allied town repair it
     }
 
     void gather(){
@@ -91,6 +113,7 @@ public class Worker extends MovingUnit {
 
         if (myLoc.isEqual(data.myMine) ) {
 
+            // TODO: mark mine as "fortified" when all 3 towers have been built (or tried)
             Direction target = myLoc.directionTo(data.allyBase).opposite();
             for (int i = 0; i < 3; ++i) {
 

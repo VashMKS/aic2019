@@ -1,9 +1,6 @@
 package alpha5;
 
-import aic2019.Location;
-import aic2019.UnitController;
-import aic2019.UnitInfo;
-import aic2019.UnitType;
+import aic2019.*;
 
 public class Soldier extends CombatUnit {
 
@@ -29,7 +26,7 @@ public class Soldier extends CombatUnit {
 
             attack();
 
-            combat.attackTowns();
+            combat.attackTown();
 
             uc.yield();
         }
@@ -106,6 +103,5 @@ public class Soldier extends CombatUnit {
         if(unit.getType() == UnitType.WORKER)   return 1;
         return 0;
     }
-
 
 }

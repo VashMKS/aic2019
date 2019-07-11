@@ -7,14 +7,32 @@ import aic2019.UnitType;
 class RecruitmentUnit extends Structure {
 
     void spawnUnits() {
+
+        // Base
+        if (uc.getType() == UnitType.BASE) {
+            // TODO: do it with allied mines/towns instead
+            if (data.nWorker < data.nMinerThreshold + data.nTownsfolkThreshold) {
+                if (data.nMiner < data.nMinerPerMine*data.nMine && data.nMiner < data.nMinerThreshold) {
+                    trySpawnWorker();
+                }
+                if (data.nTownsfolk < data.nTownsfolkPerTown*data.nTown && data.nTownsfolk < data.nTownsfolkThreshold) {
+                    trySpawnWorker();
+                }
+            }
+        }
+
+        // Barracks
+        if (uc.getType() == UnitType.BARRACKS) {
+            if (data.nCombatUnit < 2 || data.hostileContact) {
+                trySpawnArmy();
+            }
+        }
+
+        // Both
         if (data.nExplorer < 2) {
             trySpawnExplorer();
         }
-        if (data.nWorker < 2*data.nMine) {
-            trySpawnWorker();
-        } else {
-            trySpawnArmy();
-        }
+
     }
 
     // spawn a worker
@@ -23,7 +41,15 @@ class RecruitmentUnit extends Structure {
         for (Direction dir : data.dirs) {
             if (!done && uc.canSpawn(dir, UnitType.WORKER)) {
                 uc.spawn(dir, UnitType.WORKER);
-                uc.write(data.workerReportCh, uc.read(data.workerReportCh+1));
+                // Report to the Comm Channel
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
+                uc.write(data.workerReportCh, uc.read(data.workerReportCh + 1));
+                // Reset Next Slot
+                uc.write(data.unitResetCh, 0);
+                uc.write(data.workerResetCh, 0);
+                // Update current data
+                data.nUnit = data.nUnit + 1;
+                data.nWorker = data.nWorker + 1;
                 done = true;
             }
         }
@@ -35,6 +61,15 @@ class RecruitmentUnit extends Structure {
         for (Direction dir : data.dirs) {
             if (!done && uc.canSpawn(dir, UnitType.EXPLORER)) {
                 uc.spawn(dir, UnitType.EXPLORER);
+                // Report to the Comm Channel
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
+                uc.write(data.explorerReportCh, uc.read(data.explorerReportCh + 1));
+                // Reset Next Slot
+                uc.write(data.unitResetCh, 0);
+                uc.write(data.explorerResetCh, 0);
+                // Update current data
+                data.nUnit = data.nUnit + 1;
+                data.nExplorer = data.nExplorer + 1;
                 done = true;
             }
         }
@@ -47,6 +82,18 @@ class RecruitmentUnit extends Structure {
         for (Direction dir : data.dirs) {
             if (!done && uc.canSpawn(dir, UnitType.SOLDIER)) {
                 uc.spawn(dir, UnitType.SOLDIER);
+                // Report to the Comm Channel
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
+                uc.write(data.soldierReportCh, uc.read(data.soldierReportCh + 1));
+                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
+                // Reset Next Slot
+                uc.write(data.unitResetCh, 0);
+                uc.write(data.soldierResetCh, 0);
+                uc.write(data.combatUnitResetCh, 0);
+                // Update current data
+                data.nUnit = data.nUnit + 1;
+                data.nSoldier = data.nSoldier + 1;
+                data.nCombatUnit = data.nCombatUnit + 1;
                 done = true;
             }
         }

@@ -1,9 +1,6 @@
 package alpha5;
 
 import aic2019.*;
-import javafx.print.Collation;
-
-import java.util.Collections;
 
 public class Combat {
 
@@ -11,6 +8,7 @@ public class Combat {
     Data data;
     Tools tools;
     Movement movement;
+
     Direction[] randomDirs;
 
     public Combat(UnitController _uc, Data _data, Tools _tools, Movement _movement) {
@@ -18,17 +16,17 @@ public class Combat {
         this.data = _data;
         this.tools = _tools;
         this.movement = _movement;
-
     }
-
-
-
 
     int targetPriority(UnitInfo unit) {
         return 0;
     }
 
-    public void attackTowns(){
+    void attack() {
+        return;
+    }
+
+    public void attackTown(){
 
         TownInfo[] nearbyTowns = uc.senseTowns(data.allyTeam, true);
         Location target = uc.getLocation();
@@ -36,7 +34,7 @@ public class Combat {
 
         for (TownInfo town : nearbyTowns){
             float townPriority = (float) 1/town.getLoyalty();
-            if(townPriority > priority){
+            if (townPriority > priority) {
                 priority = townPriority;
                 target = town.getLocation();
             }
@@ -44,12 +42,6 @@ public class Combat {
 
         if (!target.isEqual(uc.getLocation()) && uc.canAttack(target) ) uc.attack(target);
 
-    }
-
-
-
-    void attack() {
-        return;
     }
 
 }

@@ -7,7 +7,7 @@ public class Movement {
     UnitController uc;
     Data data;
 
-    public Movement (UnitController _uc, Data _data) {
+    public Movement(UnitController _uc, Data _data) {
         this.uc = _uc;
         this.data = _data;
     }
@@ -19,7 +19,7 @@ public class Movement {
     private int minDistToTarget = INF;          // minimum distance I've been to the target while going around an obstacle
     private Location prevTarget = null;         // previous target
 
-    void moveTo(Location target){
+    void moveTo(Location target) {
         // No target? ==> bye!
         if (target == null) return;
 
@@ -51,7 +51,7 @@ public class Movement {
             }
             Location newLoc = myLoc.add(dir);
             if (uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
-            // If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
+                // If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
             else lastObstacleFound = myLoc.add(dir);
 
             if (rotateRight) dir = dir.rotateRight();
@@ -62,12 +62,12 @@ public class Movement {
     }
 
     // clear some of the previous data
-    void resetMovement(){
+    void resetMovement() {
         lastObstacleFound = null;
         minDistToTarget = INF;
     }
 
-    boolean doMicro(){
+    boolean doMicro() {
 
         UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
         if (enemiesAround.length > 0) {
@@ -84,7 +84,7 @@ public class Movement {
             int bestIndex = 8;
 
             for (int i = 7; i >= 0; --i) {
-                if (!uc.canMove( data.dirs[i]) ) continue;
+                if (!uc.canMove(data.dirs[i])) continue;
                 if (micro[i].isBetter(micro[bestIndex])) bestIndex = i;
             }
 
@@ -92,12 +92,10 @@ public class Movement {
             uc.move(data.dirs[bestIndex]);
             return true;
         }
-
         return false;
-
     }
 
-    class MicroInfo{
+    class MicroInfo {
         int maxDamage = 0;
         int minDistToEnemy = data.INF;
         int minEnemyHealth = data.INF;
@@ -105,20 +103,18 @@ public class Movement {
 
         Location loc;
 
-        public MicroInfo (Location _loc){
+        public MicroInfo (Location _loc) {
             this.loc = _loc;
         }
 
-
-
+        //
         void update(UnitInfo enemy) {
 
-            if (uc.canAttack(enemy.getLocation()) ) {
+            if (uc.canAttack(enemy.getLocation())) {
                 canAttack = true;
                 if (minEnemyHealth > enemy.getHealth()) {
                     minEnemyHealth = enemy.getHealth();
                 }
-
             }
 
             int d = loc.distanceSquared(enemy.getLocation());
@@ -134,49 +130,44 @@ public class Movement {
             }
         }
 
-        void senseImpact(){
-            //mira si el siguiente turno impactara una catapulta en el sitio
-            if (uc.senseImpact(loc) == 1 ) maxDamage += 20;
+        // mira si el siguiente turno impactara una catapulta en el sitio
+        void senseImpact() {
+            if (uc.senseImpact(loc) == 1) maxDamage += 20;
         }
 
         /*
         boolean canAttack(){
-
             return (uc.getType().attackRangeSquared >= minDistToEnemy &&
                     uc.getType().minAttackRangeSquared <= minDistToEnemy);
         }
         */
 
-        boolean isBetter(MicroInfo mic){
-
+        //
+        boolean isBetter(MicroInfo mic) {
 
             int dmg = uc.getType().attack;
             int hp = uc.getInfo().getHealth();
 
-            //Prioriza lo primero no morir este turno
-            if(maxDamage < hp && mic.maxDamage >= hp) return true;
-            if(maxDamage >= hp && mic.maxDamage < hp) return false;
+            // Prioriza lo primero no morir este turno
+            if (maxDamage < hp && mic.maxDamage >= hp) return true;
+            if (maxDamage >= hp && mic.maxDamage < hp) return false;
 
-            //Prioriza poder atacar
-            if(canAttack && !mic.canAttack) return true;
-            if(!canAttack && mic.canAttack) return false;
+            // Prioriza poder atacar
+            if (canAttack && !mic.canAttack) return true;
+            if (!canAttack && mic.canAttack) return false;
 
-            //Prioriza las casillas en las que puede hacer killingBlow
-            if(minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) return true;
-            if(minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) return false;
+            // Prioriza las casillas en las que puede hacer killingBlow
+            if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) return true;
+            if (minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) return false;
 
-            //Prioriza las casillas en las que menos daño le pueden hacer
-            if(maxDamage < mic.maxDamage) return true;
-            if(maxDamage > mic.maxDamage) return false;
+            // Prioriza las casillas en las que menos daño le pueden hacer
+            if (maxDamage < mic.maxDamage) return true;
+            if (maxDamage > mic.maxDamage) return false;
 
-            //prioriza acercarse al enemigo
+            // Prioriza acercarse al enemigo
             return minDistToEnemy <= mic.minDistToEnemy;
 
         }
 
     }
-
-
-
-
 }

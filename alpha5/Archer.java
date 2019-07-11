@@ -15,6 +15,11 @@ public class Archer extends CombatUnit {
     void run() {
 
         while (true) {
+
+            data.update();
+
+            report();
+
             uc.yield();
         }
 
