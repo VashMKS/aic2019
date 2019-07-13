@@ -1,6 +1,7 @@
-package eggplant2;
+package eggplant3;
 
-import aic2019.*;
+import aic2019.Resource;
+import aic2019.UnitController;
 
 public class Market {
 

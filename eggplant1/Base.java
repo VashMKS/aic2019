@@ -39,9 +39,9 @@ public class Base extends RecruitmentUnit implements StructureCombat {
                 uc.println("  - currently " + data.nTownsfolk + " townsfolk out of " + data.nWorker + " workers are active in " + data.nTown + " towns. " +
                            "Cap is at " + data.nTownsfolkThreshold + " townsfolk");
                 for (int i = 0; i < data.nTown; i++) {
-                    Location mineLoc = data.townLocations[i];
-                    int nMiners = data.townsfolk[i];
-                    uc.println("  - town " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " isTownsfolk");
+                    Location townLoc = data.townLocations[i];
+                    int nTownsfolk = data.townsfolk[i];
+                    uc.println("  - town " + i + " is at (" + townLoc.x + ", " + townLoc.y + ") with " + nTownsfolk + " isTownsfolk");
                 }
             }
 

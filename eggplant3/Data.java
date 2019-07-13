@@ -1,4 +1,4 @@
-package eggplant1;
+package eggplant3;
 
 import aic2019.*;
 
@@ -30,11 +30,11 @@ public class Data {
 
     // Comm Channels (static)
     int workerHealthThresholdCh = 100;    // Ch 100
-    int hostileFoundCh          = 101;    // Ch 101
+    int hostileOnSightCh        = 101;    // Ch 101
     int hostileContactCh        = 102;    // Ch 102
-    int enemyFoundCh            = 103;    // Ch 103
+    int enemyOnSightCh          = 103;    // Ch 103
     int enemyContactCh          = 104;    // Ch 104
-    int neutralFoundCh          = 105;    // Ch 105
+    int neutralOnSightCh        = 105;    // Ch 105
     int neutralContactCh        = 106;    // Ch 106
     int enemyLocCh              = 107;    // Ch 107
     int requestedSoldiersCh     = 108;    // Ch 108
@@ -77,10 +77,10 @@ public class Data {
     int yOffset;
 
     // Enemy Intel
-    // true when unit enters field of vision    // true when unit is adjacent
-    boolean hostileFound;                       boolean hostileContact;
-    boolean enemyFound;                         boolean enemyContact;
-    boolean neutralFound;                       boolean neutralContact;
+    // true when in field of vision             // true when adjacent
+    boolean hostileOnSight;                     boolean hostileContact;
+    boolean enemyOnSight;                       boolean enemyContact;
+    boolean neutralOnSight;                     boolean neutralContact;
     Location enemyLoc; // currently unused
 
     // Worker variables
@@ -93,14 +93,13 @@ public class Data {
     boolean onDelivery;
 
     // Base variables
-    float woodSurplus;          float ironSurplus;              float crystalSurplus;
+    float woodSurplus;            float ironSurplus;              float crystalSurplus;
     float requestedWood;        float requestedIron;            float requestedCrystal;
     int tradingWood;            int tradingIron;                int tradingCrystal;
     int economyThreshold = 300;
 
     // Army variables TODO: demanar unitats de forma dinamica
-    int nRequestedSoldier = 99; int nRequestedArcher = 99;
-
+    int nRequestedSoldier = 15; int nRequestedArcher = 10;      int nRequestedMage = 5;
 
     /* ------------------------------------------------ CONSTRUCTOR ------------------------------------------------ */
 
@@ -127,6 +126,7 @@ public class Data {
             uc.write(workerHealthThresholdCh, workerHealthThreshold);
 
             tradingWood = 0;    tradingIron = 0;    tradingCrystal = 0;
+
         }
 
         // Worker Initializer
@@ -197,7 +197,6 @@ public class Data {
             woodSurplus = uc.getWood() - requestedWood;
             ironSurplus = uc.getWood() - requestedIron;
             crystalSurplus = uc.getWood() - requestedCrystal;
-
         }
     }
 
@@ -238,11 +237,11 @@ public class Data {
 
     void updateEnemyIntel() {
 
-        hostileFound   = (uc.read(hostileFoundCh) == 1);
+        hostileOnSight = (uc.read(hostileOnSightCh) == 1);
         hostileContact = (uc.read(hostileContactCh) == 1);
-        neutralFound   = (uc.read(neutralFoundCh) == 1);
+        neutralOnSight = (uc.read(neutralOnSightCh) == 1);
         neutralContact = (uc.read(neutralContactCh) == 1);
-        enemyFound     = (uc.read(enemyFoundCh) == 1);
+        enemyOnSight = (uc.read(enemyOnSightCh) == 1);
         enemyContact   = (uc.read(enemyContactCh) == 1);
 
         enemyLoc = tools.decrypt(uc.read(enemyLocCh));

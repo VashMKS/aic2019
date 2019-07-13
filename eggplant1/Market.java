@@ -64,7 +64,7 @@ public class Market {
 
         uc.println("Requested: WOOD " + data.requestedWood + ", IRON " + data.requestedIron + ", CRYSTAL " + data.requestedCrystal);
 
-        if(data.requestedWood == 0 && data.requestedWood == 0 && data.requestedWood == 0) return;
+        if(data.requestedWood == 0 && data.requestedIron == 0 && data.requestedCrystal == 0) return;
 
         if(data.woodSurplus                           > data.economyThreshold && data.tradingWood    == 0){
             data.tradingWood    = 20;

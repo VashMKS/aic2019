@@ -30,11 +30,11 @@ public class Data {
 
     // Comm Channels (static)
     int workerHealthThresholdCh = 100;    // Ch 100
-    int hostileFoundCh          = 101;    // Ch 101
+    int hostileOnSightCh        = 101;    // Ch 101
     int hostileContactCh        = 102;    // Ch 102
-    int enemyFoundCh            = 103;    // Ch 103
+    int enemyOnSightCh          = 103;    // Ch 103
     int enemyContactCh          = 104;    // Ch 104
-    int neutralFoundCh          = 105;    // Ch 105
+    int neutralOnSightCh        = 105;    // Ch 105
     int neutralContactCh        = 106;    // Ch 106
     int enemyLocCh              = 107;    // Ch 107
     int requestedSoldiersCh     = 108;    // Ch 108
@@ -77,10 +77,10 @@ public class Data {
     int yOffset;
 
     // Enemy Intel
-    // true when unit enters field of vision    // true when unit is adjacent
-    boolean hostileFound;                       boolean hostileContact;
-    boolean enemyFound;                         boolean enemyContact;
-    boolean neutralFound;                       boolean neutralContact;
+    // true when in field of vision             // true when adjacent
+    boolean hostileOnSight;                     boolean hostileContact;
+    boolean enemyOnSight;                       boolean enemyContact;
+    boolean neutralOnSight;                     boolean neutralContact;
     Location enemyLoc; // currently unused
 
     // Worker variables
@@ -237,11 +237,11 @@ public class Data {
 
     void updateEnemyIntel() {
 
-        hostileFound   = (uc.read(hostileFoundCh) == 1);
+        hostileOnSight = (uc.read(hostileOnSightCh) == 1);
         hostileContact = (uc.read(hostileContactCh) == 1);
-        neutralFound   = (uc.read(neutralFoundCh) == 1);
+        neutralOnSight = (uc.read(neutralOnSightCh) == 1);
         neutralContact = (uc.read(neutralContactCh) == 1);
-        enemyFound     = (uc.read(enemyFoundCh) == 1);
+        enemyOnSight = (uc.read(enemyOnSightCh) == 1);
         enemyContact   = (uc.read(enemyContactCh) == 1);
 
         enemyLoc = tools.decrypt(uc.read(enemyLocCh));
