@@ -23,27 +23,7 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
             report();
 
-            // logs every 100 rounds
-            if (data.currentRound % 100 == 15) {
-                uc.println("Round " + data.currentRound + " Report");
-                uc.println(" - Worker Report");
-                uc.println("  - currently there are " + data.nWanderer + " jobless workers. " +
-                           "Threshold is at " + data.workerHealthThreshold + " HP");
-                uc.println("  - currently " + data.nMiner + " miners out of " + data.nWorker + " workers are active in " + data.nMine + " mines. " +
-                           "Cap is at " + data.nMinerThreshold + " miners");
-                for (int i = 0; i < data.nMine; i++) {
-                    Location mineLoc = data.mineLocations[i];
-                    int nMiners = data.miners[i];
-                    uc.println("  - mine " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " miners");
-                }
-                uc.println("  - currently " + data.nTownsfolk + " townsfolk out of " + data.nWorker + " workers are active in " + data.nTown + " towns. " +
-                           "Cap is at " + data.nTownsfolkThreshold + " townsfolk");
-                for (int i = 0; i < data.nTown; i++) {
-                    Location townLoc = data.townLocations[i];
-                    int nTownsfolk = data.townsfolk[i];
-                    uc.println("  - town " + i + " is at (" + townLoc.x + ", " + townLoc.y + ") with " + nTownsfolk + " isTownsfolk");
-                }
-            }
+            logs();
 
             spawnUnits();
 
@@ -54,6 +34,30 @@ public class Base extends RecruitmentUnit implements StructureCombat {
             uc.yield();
         }
 
+    }
+
+    void logs() {
+        // logs every 100 rounds
+        if (data.currentRound % 100 == 15) {
+            uc.println("Round " + data.currentRound + " Report");
+            uc.println(" - Worker Report");
+            uc.println("  - currently there are " + data.nWanderer + " jobless workers. " +
+                    "Threshold is at " + data.workerHealthThreshold + " HP");
+            uc.println("  - currently " + data.nMiner + " miners out of " + data.nWorker + " workers are active in " + data.nMine + " mines. " +
+                    "Cap is at " + data.nMinerThreshold + " miners");
+            for (int i = 0; i < data.nMine; i++) {
+                Location mineLoc = data.mineLocations[i];
+                int nMiners = data.miners[i];
+                uc.println("  - mine " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " miners");
+            }
+            uc.println("  - currently " + data.nTownsfolk + " townsfolk out of " + data.nWorker + " workers are active in " + data.nTown + " towns. " +
+                    "Cap is at " + data.nTownsfolkThreshold + " townsfolk");
+            for (int i = 0; i < data.nTown; i++) {
+                Location townLoc = data.townLocations[i];
+                int nTownsfolk = data.townsfolk[i];
+                uc.println("  - town " + i + " is at (" + townLoc.x + ", " + townLoc.y + ") with " + nTownsfolk + " isTownsfolk");
+            }
+        }
     }
 
     public void attack() {

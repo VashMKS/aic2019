@@ -6,11 +6,12 @@ public class Data {
 
     UnitController uc;
     Tools tools;
+    Map map;
 
     /* ----------------------------------------------- COMM CHANNELS ----------------------------------------------- */
 
     // Comm Channels (dynamic)
-    int unitCh,            unitReportCh,           unitResetCh;             // Ch 0, 1, 2
+    int unitCh,             unitReportCh,           unitResetCh;             // Ch 0, 1, 2
     int workerCh,           workerReportCh,         workerResetCh;          // Ch 3, 4, 5
     int explorerCh,         explorerReportCh,       explorerResetCh;        // Ch 6, 7, 8
     int soldierCh,          soldierReportCh,        soldierResetCh;         // Ch 9, 10, 11
@@ -29,6 +30,7 @@ public class Data {
     int wandererCh,         wandererReportCh,       wandererResetCh;        // Ch 48, 49, 50
 
     // Comm Channels (static)
+    int macroCh                 = 99;     // Ch 99
     int workerHealthThresholdCh = 100;    // Ch 100
     int hostileOnSightCh        = 101;    // Ch 101
     int hostileContactCh        = 102;    // Ch 102
@@ -43,7 +45,7 @@ public class Data {
 
     int nMineCh                 = 1000;   // Ch 1000
     int nTownCh                 = 10000;  // Ch 10000
-    int mapCh                   = 290000; // Ch 290000
+    int mapCh                   = 100000; // Ch 290000
 
     /* ------------------------------------------------- VARIABLES ------------------------------------------------- */
 
@@ -51,11 +53,12 @@ public class Data {
     final int INF = Integer.MAX_VALUE;
     final float ironMultiplier    = GameConstants.INITIAL_IRON_VALUE;
     final float crystalMultiplier = GameConstants.INITIAL_CRYSTAL_VALUE;
-    int ID;                     Location allyBase;              Direction[] dirs;
-    UnitType type;              Location enemyBase;             UnitType[] types;
+    int ID;                     Location allyBase;              Direction[] dirs = Direction.values();
+    UnitType type;              Location enemyBase;             UnitType[] types = UnitType.values();
     Team allyTeam;              int VP;                         int spawnRound;
     Team enemyTeam;             int enemyVP;                    int turnsAlive;
-    int currentRound;
+    int currentRound;           int sightRangeSquared;          int sightRange;
+    Location myLoc;             int macroID;                    String macroState;
 
     // Unit Count Info
     int nUnit;                  int nCombatUnit;                int nWorker;
@@ -93,7 +96,7 @@ public class Data {
     boolean onDelivery;
 
     // Base variables
-    float woodSurplus;            float ironSurplus;              float crystalSurplus;
+    float woodSurplus;          float ironSurplus;              float crystalSurplus;
     float requestedWood;        float requestedIron;            float requestedCrystal;
     int tradingWood;            int tradingIron;                int tradingCrystal;
     int economyThreshold = 300;
@@ -106,8 +109,6 @@ public class Data {
     public Data (UnitController _uc) {
         uc           = _uc;
         tools        = new Tools(uc, this);
-        ID           = uc.getInfo().getID();
-        type         = uc.getType();
         allyTeam     = uc.getTeam();
         enemyTeam    = uc.getOpponent();
         dirs         = Direction.values();
@@ -116,12 +117,28 @@ public class Data {
         spawnRound   = currentRound;
         enemyBase    = enemyTeam.getInitialLocation();
         allyBase     = allyTeam.getInitialLocation();
-        xOffset      = 49 - allyBase.x;
-        yOffset      = 49 - allyBase.y;
-        turnsAlive   = 0;
+        xOffset      = 50 - allyBase.x;
+        yOffset      = 50 - allyBase.y;
+
+        // Unit Specific Constants
+        ID                = uc.getInfo().getID();
+        type              = uc.getType();
+        sightRangeSquared = type.getSightRangeSquared();
+        sightRange        = (int)Math.round(Math.sqrt(sightRangeSquared));
+        turnsAlive        = 0;
+
+        // Local Map Initializer
+        // uc.println("hi");
+        // map = new Map(allyBase, uc);
+        // uc.println("bye");
 
         // Base Initializer
         if (uc.getType() == UnitType.BASE) {
+
+            macroState = "DEFAULT";
+            macroID    = getMacroID(macroState);
+            uc.write(macroCh, macroID);
+
             workerHealthThreshold = 11;
             uc.write(workerHealthThresholdCh, workerHealthThreshold);
 
@@ -241,7 +258,7 @@ public class Data {
         hostileContact = (uc.read(hostileContactCh) == 1);
         neutralOnSight = (uc.read(neutralOnSightCh) == 1);
         neutralContact = (uc.read(neutralContactCh) == 1);
-        enemyOnSight = (uc.read(enemyOnSightCh) == 1);
+        enemyOnSight   = (uc.read(enemyOnSightCh) == 1);
         enemyContact   = (uc.read(enemyContactCh) == 1);
 
         enemyLoc = tools.decrypt(uc.read(enemyLocCh));
@@ -259,10 +276,13 @@ public class Data {
     }
 
     void updateGeneral() {
-        currentRound = uc.getRound();
-        turnsAlive = currentRound - spawnRound;
-        VP = allyTeam.getVictoryPoints();
-        enemyVP = enemyTeam.getVictoryPoints();
+        currentRound    = uc.getRound();
+        myLoc           = uc.getLocation();
+        turnsAlive      = currentRound - spawnRound;
+        VP              = allyTeam.getVictoryPoints();
+        enemyVP         = enemyTeam.getVictoryPoints();
+        macroID         = uc.read(macroCh);
+        macroState      = getMacroState(macroID);
     }
 
     void updateChannels() {
@@ -365,6 +385,22 @@ public class Data {
         int x = loc.x + xOffset;
         int y = loc.y + yOffset;
         return mapCh + 100*x + y;
+    }
+
+    String getMacroState (int _macroID) {
+        if (_macroID == 0) return "DEFENSE";
+        if (_macroID == 1) return "EXPLORATION";
+        if (_macroID == 2) return "CONQUEST";
+        if (_macroID == 3) return "DESTRUCTION";
+        return "DEFAULT";
+    }
+
+    int getMacroID (String _macroState) {
+        if (_macroState.equals("DEFENSE"))     return 0;
+        if (_macroState.equals("EXPLORATION")) return 1;
+        if (_macroState.equals("CONQUEST"))    return 2;
+        if (_macroState.equals("DESTRUCTION")) return 3;
+        return -1;
     }
 
 }
