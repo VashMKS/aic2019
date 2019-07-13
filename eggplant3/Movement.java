@@ -94,8 +94,9 @@ public class Movement {
                             " MinDistance to enemy: " + micro[i].minDistToEnemy + ", maxDamage: " + micro[i].maxDamage +
                             ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack() );
                  */
-
-                if (uc.getType() == UnitType.ARCHER || uc.getType() == UnitType.MAGE) {
+                if (uc.getType() == UnitType.WORKER || uc.getType() == UnitType.EXPLORER){
+                    if (micro[i].isBetterExplorer(micro[bestIndex])) bestIndex = i;
+                }else if (uc.getType() == UnitType.ARCHER || uc.getType() == UnitType.MAGE) {
                     if (micro[i].isBetterRanged(micro[bestIndex])) bestIndex = i;
                 }else{
                     if (micro[i].isBetterMelee(micro[bestIndex])) bestIndex = i;
@@ -153,7 +154,7 @@ public class Movement {
 
         void senseImpact(){
             //mira si el siguiente turno impactara una catapulta en el sitio
-            if (uc.senseImpact(loc) == 1 ) maxDamage += 20;
+            if (uc.senseImpact(loc) <= uc.getType().movementDelay ) maxDamage += 20;
         }
 
         boolean canAttack(){
@@ -225,6 +226,33 @@ public class Movement {
             //prioriza alejarse del enemigo
             if(minDistToEnemy > mic.minDistToEnemy) return true;
             if(minDistToEnemy < mic.minDistToEnemy) return false;
+
+            //Si las posiciones son equivalentes mejor no cambiar
+            return true;
+
+        }
+
+        boolean isBetterExplorer (Movement.MicroInfo mic){
+
+
+            int dmg = uc.getType().attack;
+            int hp = uc.getInfo().getHealth();
+
+            //Prioriza las casillas en las que menos daño le pueden hacer
+            if(maxDamage < mic.maxDamage) return true;
+            if(maxDamage > mic.maxDamage) return false;
+
+            //prioriza alejarse del enemigo
+            if(minDistToEnemy > mic.minDistToEnemy) return true;
+            if(minDistToEnemy < mic.minDistToEnemy) return false;
+
+            if(uc.canAttack() ) {
+                //Prioriza las casillas en las que puede hacer killingBlow
+                if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) return true;
+                if (minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) return false;
+
+            }
+
 
             //Si las posiciones son equivalentes mejor no cambiar
             return true;

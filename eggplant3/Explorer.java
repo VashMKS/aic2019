@@ -1,7 +1,9 @@
 package eggplant3;
 
 import aic2019.Direction;
+import aic2019.Location;
 import aic2019.UnitController;
+import aic2019.UnitInfo;
 
 public class Explorer extends CombatUnit {
 
@@ -26,7 +28,13 @@ public class Explorer extends CombatUnit {
 
             report();
 
+            attack();
+
             move();
+
+            attack();
+
+            attackTowns();
 
             uc.yield();
         }
@@ -46,7 +54,37 @@ public class Explorer extends CombatUnit {
 
     @Override
     void move() {
-        Direction dir = tools.randomDir();
-        if (uc.canMove(dir)) uc.move(dir);
+
+        if(! movement.doMicro() ){
+            Direction dir = tools.randomDir();
+            if (uc.canMove(dir)) uc.move(dir);
+        }
+
     }
+
+    public void attack(){
+
+        UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
+        Location target = uc.getLocation();
+        float priority = 0;
+
+        for (UnitInfo unit : enemiesAround){
+
+            if(!uc.canAttack(unit.getLocation()) ) continue;
+
+            float unitPriority = targetPriority(unit);
+            //prioriza atacar a matar
+            if(unit.getHealth() <= uc.getType().attack) unitPriority += 50;
+            else unitPriority = unitPriority * (float)(unit.getType().maxHealth/unit.getHealth());
+
+            if (unitPriority > priority){
+                priority = unitPriority;
+                target = unit.getLocation();
+            }
+        }
+
+        if (!target.isEqual(uc.getLocation()) ) uc.attack(target);
+
+    }
+
 }
