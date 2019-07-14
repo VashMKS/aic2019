@@ -62,7 +62,7 @@ public class Unit {
     void reportEnvironment() {
         reportResources();
         reportTowns();
-        reportTerrain();
+        //reportMap();
     }
 
     // scans for mines and reports new findings to the comm channels
@@ -116,8 +116,65 @@ public class Unit {
     }
 
     // scans for terrain and updates the internal map
-    void reportTerrain() {
+    void reportMap() {
+        for (int i = -data.sightRange; i < data.sightRange; i++) {
+            for (int j = -data.sightRange; j < data.sightRange; j++) {
+                if (i*i + j*j < data.sightRangeSquared) {
+                    int x = data.myLoc.x + i;
+                    int y = data.myLoc.y + j;
+                    uc.println("1");
+                    Location loc = new Location(x,y);
+                    uc.println("2");
+                    if (uc.canSenseLocation(loc)) {
+                        // get the Coord object in that position
+                        int mapCh = data.localMapCoordCh(loc);
+                        int encodedCoord = uc.read(mapCh);
+                        uc.println("3");
+                        Coord coord;
+                        if (encodedCoord == 0) {
+                            coord = new Coord();
+                        } else {
+                            coord = data.map.decodeCoord(encodedCoord);
+                        }
 
+                        uc.println("4");
+                        // update the Coord object
+                        if (coord.content == null) {
+                            if (loc.equals(data.enemyBase)) {
+                                coord.content = "ENEMY_BASE";
+                            } else if (uc.senseTown(loc) != null) {
+                                coord.content = "TOWN";
+                            } else if (uc.senseResource(loc) != Resource.NONE){
+                                coord.content = uc.senseResource(loc).toString();
+                            } else {
+                                coord.content = uc.senseTerrain(loc).toString();
+                            }
+                        }
+                        uc.println("5");
+                        UnitInfo unit = uc.senseUnit(loc);
+                        if (unit == null) {
+                            coord.unitType    = null;
+                            coord.team        = null;
+                            coord.healthLevel = 0;
+                        } else {
+                            coord.unitType    = unit.getType();
+                            coord.team        = unit.getTeam();
+                            coord.healthLevel = Math.round(((float)unit.getHealth() / (float)unit.getType().maxHealth * 10));
+                        }
+                        coord.lastExplored = data.currentRound;
+
+                        uc.println("6");
+                        // write the updated object to the local map and the comm channel
+                        data.map.updateMap(x,y,coord.content,data.currentRound,unit);
+                        uc.println(encodedCoord);
+                        encodedCoord = data.map.encodeCoord(coord);
+                        uc.println(encodedCoord);
+                        //uc.write(mapCh, encodedCoord);
+                    }
+                    uc.println("7");
+                }
+            }
+        }
     }
 
 }

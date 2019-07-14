@@ -189,13 +189,18 @@ class RecruitmentUnit extends Structure {
         for (UnitInfo unit : unitsAround) {
             UnitType type = unit.getType();
             if (type != UnitType.BARRACKS && type != UnitType.BASE && unit.getConstructionTurns() > 0) {
+
+                // TODO: training channel for each type of unit, right now trainingCh is for workers
+
                 if (type == UnitType.WORKER) {
                     // Report to the Comm Channel
                     uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
                     uc.write(data.workerReportCh, uc.read(data.workerReportCh)+1);
+                    uc.write(data.trainingReportCh, uc.read(data.trainingReportCh)+1);
                     // Reset Next Slot
                     uc.write(data.unitResetCh, 0);
                     uc.write(data.workerResetCh, 0);
+                    uc.write(data.trainingResetCh, 0);
                 } else if (type == UnitType.EXPLORER) {
                     // Report to the Comm Channel
                     uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);

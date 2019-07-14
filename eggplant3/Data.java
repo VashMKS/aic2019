@@ -11,7 +11,7 @@ public class Data {
     /* ----------------------------------------------- COMM CHANNELS ----------------------------------------------- */
 
     // Comm Channels (dynamic)
-    int unitCh,             unitReportCh,           unitResetCh;             // Ch 0, 1, 2
+    int unitCh,             unitReportCh,           unitResetCh;            // Ch 0, 1, 2
     int workerCh,           workerReportCh,         workerResetCh;          // Ch 3, 4, 5
     int explorerCh,         explorerReportCh,       explorerResetCh;        // Ch 6, 7, 8
     int soldierCh,          soldierReportCh,        soldierResetCh;         // Ch 9, 10, 11
@@ -27,7 +27,8 @@ public class Data {
     int requestWoodCh,      requestWoodReportCh,    requestWoodResetCh;     // Ch 39, 40, 41
     int requestIronCh,      requestIronReportCh,    requestIronResetCh;     // Ch 42, 43, 44
     int requestCrystalCh,   requestCrystalReportCh, requestCrystalResetCh;  // Ch 45, 46, 47
-    int wandererCh,         wandererReportCh,       wandererResetCh;        // Ch 48, 49, 50
+    int joblessCh,          joblessReportCh,        joblessResetCh;         // Ch 48, 49, 50
+    int trainingCh,         trainingReportCh,       trainingResetCh;        // Ch 51, 52, 53
 
     // Comm Channels (static)
     int macroCh                 = 99;     // Ch 99
@@ -65,7 +66,7 @@ public class Data {
     int nMiner;                 int nTownsfolk;                 int nExplorer;
     int nSoldier;               int nArcher;                    int nKnight;
     int nMage;                  int nCatapult;                  int nBarracks;
-    int nTower;                 int nWanderer;
+    int nTower;                 int nJobless;                   int nTraining;
 
     // Mine Info
     int nMine;                  Location[] mineLocations;       int[] miners;
@@ -89,16 +90,16 @@ public class Data {
     // Worker variables
     int nMinerThreshold = 16;   int nTownsfolkThreshold = 4;    int workerHealthThreshold;
     int nMinerPerMine = 2;      int nTownsfolkPerTown = 1;
-    boolean isMiner;            boolean isTownsfolk;            boolean isWanderer;
+    boolean isMiner;            boolean isTownsfolk;            boolean isJobless;
     int myMineCh;               int myTownCh;
     int myMineMinerCh;          int myTownTownsfolkCh;
     Location myMine;            Location myTown;
     boolean onDelivery;
 
     // Base variables
-    float woodSurplus;          float ironSurplus;              float crystalSurplus;
-    float requestedWood;        float requestedIron;            float requestedCrystal;
-    int tradingWood;            int tradingIron;                int tradingCrystal;
+    float woodSurplus;          float requestedWood;            int tradingWood;
+    float ironSurplus;          float requestedIron;            int tradingIron;
+    float crystalSurplus;       float requestedCrystal;         int tradingCrystal;
     int economyThreshold = 300;
 
     // Army variables TODO: demanar unitats de forma dinamica
@@ -111,8 +112,6 @@ public class Data {
         tools        = new Tools(uc, this);
         allyTeam     = uc.getTeam();
         enemyTeam    = uc.getOpponent();
-        dirs         = Direction.values();
-        types        = UnitType.values();
         currentRound = uc.getRound();
         spawnRound   = currentRound;
         enemyBase    = enemyTeam.getInitialLocation();
@@ -128,21 +127,32 @@ public class Data {
         turnsAlive        = 0;
 
         // Local Map Initializer
-        // uc.println("hi");
-        // map = new Map(allyBase, uc);
-        // uc.println("bye");
+        map = new Map(allyBase);
 
         // Base Initializer
         if (uc.getType() == UnitType.BASE) {
 
+            // macro
             macroState = "DEFAULT";
             macroID    = getMacroID(macroState);
             uc.write(macroCh, macroID);
 
+            // map
+            Coord coord = new Coord();
+            coord.content      = "ALLY_BASE";
+            coord.unitType     = UnitType.BASE;
+            coord.team         = allyTeam;
+            coord.lastExplored = currentRound;
+            int encodedCoord = map.encodeCoord(coord);
+            uc.println("Encoded ally base: " + encodedCoord);
+            uc.write(localMapCoordCh(allyBase), encodedCoord);
+
+            // market
+            tradingWood = 0;    tradingIron = 0;    tradingCrystal = 0;
+
+            // workers
             workerHealthThreshold = 11;
             uc.write(workerHealthThresholdCh, workerHealthThreshold);
-
-            tradingWood = 0;    tradingIron = 0;    tradingCrystal = 0;
 
         }
 
@@ -151,7 +161,7 @@ public class Data {
             isMiner     = false;
             onDelivery  = false;
             isTownsfolk = false;
-            isWanderer  = false;
+            isJobless   = true;
         }
     }
 
@@ -220,8 +230,8 @@ public class Data {
     // Worker specific update
     void updateWorker() {
         if (type.equals(UnitType.WORKER)) {
-            // adaptive threshold for workers leaving jobs due to low health
-            if (nWanderer > nWorker/10) {
+            // adaptive threshold for workers to leave jobs due to low health
+            if (nJobless > nWorker/10) {
                 workerHealthThreshold = Math.max(4, workerHealthThreshold - 1);
                 uc.write(workerHealthThresholdCh, workerHealthThreshold);
             } else {
@@ -241,10 +251,10 @@ public class Data {
                     myTown      = null;
                     uc.write(myTownTownsfolkCh, uc.read(myTownTownsfolkCh) - 1);
                 }
-                uc.write(wandererReportCh, uc.read(wandererReportCh) + 1);
-                uc.write(wandererResetCh, 0);
-                nWanderer = nWanderer + 1;
-                isWanderer = true;
+                uc.write(joblessReportCh, uc.read(joblessReportCh) + 1);
+                uc.write(joblessResetCh, 0);
+                nJobless = nJobless + 1;
+                isJobless = true;
             } else {
                 assignJob();
             }
@@ -310,9 +320,9 @@ public class Data {
         townsfolkResetCh        = 36 + y;    requestWoodResetCh     = 39 + y;    requestIronResetCh     = 42 + y;
         townsfolkCh             = 36 + z;    requestWoodCh          = 39 + z;    requestIronCh          = 42 + z;
 
-        requestCrystalReportCh  = 45 + x;    wandererReportCh       = 48 + x;
-        requestCrystalResetCh   = 45 + y;    wandererResetCh        = 48 + y;
-        requestCrystalCh        = 45 + z;    wandererCh             = 48 + z;
+        requestCrystalReportCh  = 45 + x;    joblessReportCh        = 48 + x;    trainingReportCh       = 51 + x;
+        requestCrystalResetCh   = 45 + y;    joblessResetCh         = 48 + y;    trainingResetCh        = 51 + y;
+        requestCrystalCh        = 45 + z;    joblessCh              = 48 + z;    trainingCh             = 51 + z;
     }
 
     void updateUnitInfo() {
@@ -329,7 +339,8 @@ public class Data {
         nTower                = uc.read(towerCh);
         nMiner                = uc.read(minerCh);
         nTownsfolk            = uc.read(townsfolkCh);
-        nWanderer             = uc.read(wandererCh);
+        nJobless              = uc.read(joblessCh);
+        nTraining             = uc.read(trainingCh);
         workerHealthThreshold = uc.read(workerHealthThresholdCh);
     }
 
@@ -339,12 +350,13 @@ public class Data {
     void assignJob() {
         assignMine();
         assignTown();
+        assignJobless();
     }
 
     // try to assign a worker to a free mine
     void assignMine() {
         if (!isMiner && !isTownsfolk) {
-            isWanderer = false;
+            isJobless = false;
             for(int i = 0; i < nMine; ++i) {
                 if (miners[i] < 2) {
                     myMineCh      = nMineCh + 2*i + 1;
@@ -352,7 +364,7 @@ public class Data {
                     uc.write(myMineMinerCh, uc.read(myMineMinerCh) + 1);
                     myMine     = mineLocations[i];
                     miners[i]  = miners[i] + 1;
-                    isWanderer = false;
+                    isJobless = false;
                     isMiner    = true;
                     //uc.println("Worker ID" + ID + " assigned as miner at (" + myMine.x + ", " + myMine.y + ")");
                     return;
@@ -371,7 +383,7 @@ public class Data {
                     uc.write(myTownTownsfolkCh, uc.read(myTownTownsfolkCh) + 1);
                     myTown       = townLocations[i];
                     townsfolk[i] = townsfolk[i] + 1;
-                    isWanderer   = false;
+                    isJobless = false;
                     isTownsfolk  = true;
                     //uc.println("Worker ID" + ID + " assigned as townsfolk at (" + myTown.x + ", " + myTown.y + ")");
                     return;
@@ -380,11 +392,17 @@ public class Data {
         }
     }
 
+    void assignJobless() {
+        if (!isMiner && !isTownsfolk) {
+            isJobless = true;
+        }
+    }
+
     // returns the comm channel allocated to a position in the world
     int localMapCoordCh (Location loc) {
         int x = loc.x + xOffset;
         int y = loc.y + yOffset;
-        return mapCh + 100*x + y;
+        return mapCh + 1000*x + y;
     }
 
     String getMacroState (int _macroID) {

@@ -15,7 +15,7 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
     void run() {
 
-        uc.println("Base is at (" + uc.getLocation().x + ", " + uc.getLocation().y + ")");
+        uc.println("Team " + data.allyTeam + "'s base is at (" + data.allyBase.x + ", " + data.allyBase.y + ")");
 
         while (true) {
 
@@ -37,20 +37,68 @@ public class Base extends RecruitmentUnit implements StructureCombat {
     }
 
     void logs() {
-        // logs every 100 rounds
+        // logs every 500k + 2 for macro info and internal map status
+        // WARNING: this greatly surpasses bytecode limits and will freeze the unit for ~13 turns, use only in testing
+        /*if (data.currentRound % 500 == 2) {
+            uc.println("Round " + data.currentRound + "  Macro Report");
+            uc.println("  - Virtual Map State (no units)");
+            // String render = "";
+            for (int i = 0; i < 100; i++) {
+                String raster = "";
+                for (int j = 0; j < 100; j++) {
+                    if (data.map.visitedCoords[i][j] == 1) {
+                        Coord coord = data.map.coords[i][j];
+                        raster = raster.concat(coord.legendNoUnits());
+                    } else {
+                        raster = raster.concat("X");
+                    }
+                }
+                uc.println(raster);
+                // raster.concat("\n");
+                // render.concat(raster);
+            }
+            // uc.println(render);
+        }*/
+
+        // logs every 500k + 50 for macro info and internal map status
+        // WARNING: this greatly surpasses bytecode limits and will freeze the unit for ~13 turns, use only in testing
+        /*if (data.currentRound % 500 == 50) {
+            uc.println("Round " + data.currentRound + "  Map Report");
+            uc.println("  - Virtual Map State (with units)");
+            // String render = "";
+            for (int i = 0; i < 100; i++) {
+                String raster = "";
+                for (int j = 0; j < 100; j++) {
+                    if (data.map.visitedCoords[i][j] == 1) {
+                        Coord coord = data.map.coords[i][j];
+                        raster = raster.concat(coord.legend());
+                    } else {
+                        raster = raster.concat("X");
+                    }
+                }
+                uc.println(raster);
+                // raster.concat("\n");
+                // render.concat(raster);
+            }
+            // uc.println(render);
+        }*/
+
+        // logs every round 100k + 15 for workers
         if (data.currentRound % 100 == 15) {
-            uc.println("Round " + data.currentRound + " Report");
-            uc.println(" - Worker Report");
-            uc.println("  - currently there are " + data.nWanderer + " jobless workers. " +
+            uc.println("Round " + data.currentRound + " Worker Report");
+            uc.println("  - " + data.nTraining + " workers being trained");
+            uc.println("  - " + data.nJobless + " jobless workers. " +
                     "Threshold is at " + data.workerHealthThreshold + " HP");
-            uc.println("  - currently " + data.nMiner + " miners out of " + data.nWorker + " workers are active in " + data.nMine + " mines. " +
+            uc.println("  - " + data.nMiner + " miners out of " + data.nWorker +
+                    " workers are active in " + data.nMine + " mines. " +
                     "Cap is at " + data.nMinerThreshold + " miners");
             for (int i = 0; i < data.nMine; i++) {
                 Location mineLoc = data.mineLocations[i];
                 int nMiners = data.miners[i];
                 uc.println("  - mine " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " miners");
             }
-            uc.println("  - currently " + data.nTownsfolk + " townsfolk out of " + data.nWorker + " workers are active in " + data.nTown + " towns. " +
+            uc.println("  - " + data.nTownsfolk + " townsfolk out of " + data.nWorker +
+                    " workers are active in " + data.nTown + " towns. " +
                     "Cap is at " + data.nTownsfolkThreshold + " townsfolk");
             for (int i = 0; i < data.nTown; i++) {
                 Location townLoc = data.townLocations[i];

@@ -57,9 +57,9 @@ public class Worker extends MovingUnit {
             uc.write(data.townsfolkReportCh, uc.read(data.townsfolkReportCh)+1);
             uc.write(data.townsfolkResetCh, 0);
         }
-        if (data.isWanderer) {
-            uc.write(data.wandererReportCh, uc.read(data.wandererReportCh) + 1);
-            uc.write(data.wandererResetCh, 0);
+        if (data.isJobless) {
+            uc.write(data.joblessReportCh, uc.read(data.joblessReportCh) + 1);
+            uc.write(data.joblessResetCh, 0);
         }
     }
 
