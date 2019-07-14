@@ -70,11 +70,11 @@ public class Data {
 
     // Mine Info
     int nMine;                  Location[] mineLocations;       int[] miners;
-    int nAllyMine;              Location[] allyMineLocations;
+    int nOwnedMine;             int[] mineDanger;               Team[] mineOwners;
 
     // Town Info
     int nTown;                  Location[] townLocations;       int[] townsfolk;
-    int nAllyTown;              Location[] allyTownLocations;
+    int nOwnedTown;             int[] townDanger;               Team[] townOwners;
 
     // Map Info
     int xOffset;

@@ -62,7 +62,7 @@ public class Unit {
     void reportEnvironment() {
         reportResources();
         reportTowns();
-        //reportMap();
+        reportMap();
     }
 
     // scans for mines and reports new findings to the comm channels
@@ -117,27 +117,23 @@ public class Unit {
 
     // scans for terrain and updates the internal map
     void reportMap() {
+        uc.println("Unit ID" + data.ID + " reporting for the map:");
         for (int i = -data.sightRange; i < data.sightRange; i++) {
             for (int j = -data.sightRange; j < data.sightRange; j++) {
                 if (i*i + j*j < data.sightRangeSquared) {
                     int x = data.myLoc.x + i;
                     int y = data.myLoc.y + j;
-                    uc.println("1");
                     Location loc = new Location(x,y);
-                    uc.println("2");
                     if (uc.canSenseLocation(loc)) {
+                        uc.println("  - can sense location");
                         // get the Coord object in that position
                         int mapCh = data.localMapCoordCh(loc);
                         int encodedCoord = uc.read(mapCh);
-                        uc.println("3");
-                        Coord coord;
-                        if (encodedCoord == 0) {
-                            coord = new Coord();
-                        } else {
-                            coord = data.map.decodeCoord(encodedCoord);
-                        }
+                        uc.println("  - current encoded map state " + encodedCoord);
 
-                        uc.println("4");
+                        Coord coord = data.map.decodeCoord(encodedCoord);
+                        uc.println("  - Coord object decoded, proceeding to update");
+
                         // update the Coord object
                         if (coord.content == null) {
                             if (loc.equals(data.enemyBase)) {
@@ -150,7 +146,7 @@ public class Unit {
                                 coord.content = uc.senseTerrain(loc).toString();
                             }
                         }
-                        uc.println("5");
+                        uc.println("  - terrain update complete");
                         UnitInfo unit = uc.senseUnit(loc);
                         if (unit == null) {
                             coord.unitType    = null;
@@ -162,14 +158,13 @@ public class Unit {
                             coord.healthLevel = Math.round(((float)unit.getHealth() / (float)unit.getType().maxHealth * 10));
                         }
                         coord.lastExplored = data.currentRound;
-
-                        uc.println("6");
+                        uc.println("  - unit update complete");
+                        uc.println("  - updating local map");
                         // write the updated object to the local map and the comm channel
                         data.map.updateMap(x,y,coord.content,data.currentRound,unit);
-                        uc.println(encodedCoord);
                         encodedCoord = data.map.encodeCoord(coord);
-                        uc.println(encodedCoord);
-                        //uc.write(mapCh, encodedCoord);
+                        uc.println("  - updating shared map with " + encodedCoord);
+                        uc.write(mapCh, encodedCoord);
                     }
                     uc.println("7");
                 }
