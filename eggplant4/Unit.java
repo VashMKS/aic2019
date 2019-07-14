@@ -103,7 +103,7 @@ public class Unit {
                     //uc.println("   new town found, storing location");
                     townLocChannel += 2;
                     uc.write(townLocChannel, tools.encrypt(townLoc.x,townLoc.y));
-                    uc.write(data.nTownCh, data.nTown);
+                    uc.write(data.nTownCh, data.nTown + 1);
                     newTownFound = true;
                 } else {
                     //uc.println("   town already scanned");

@@ -77,7 +77,7 @@ public class Unit {
                     //uc.println("   new mine found, storing location");
                     mineLocChannel += 2;
                     uc.write(mineLocChannel, tools.encrypt(mineLoc.x,mineLoc.y));
-                    uc.write(data.nMineCh, data.nMine+1);
+                    uc.write(data.nMineCh, data.nMine + 1);
                     newMineFound = true;
                 } else {
                     //uc.println("   mine already scanned");
@@ -102,7 +102,7 @@ public class Unit {
                     //uc.println("   new town found, storing location");
                     townLocChannel += 2;
                     uc.write(townLocChannel, tools.encrypt(townLoc.x,townLoc.y));
-                    uc.write(data.nTownCh, data.nTown);
+                    uc.write(data.nTownCh, data.nTown + 1);
                     newTownFound = true;
                 } else {
                     //uc.println("   town already scanned");
