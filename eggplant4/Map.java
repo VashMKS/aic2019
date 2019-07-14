@@ -1,6 +1,9 @@
-package eggplant3;
+package eggplant4;
 
-import aic2019.*;
+import aic2019.Location;
+import aic2019.Team;
+import aic2019.UnitInfo;
+import aic2019.UnitType;
 
 public class Map {
 
