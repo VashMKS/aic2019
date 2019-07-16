@@ -120,6 +120,7 @@ public class Data {
         if (uc.getType() == UnitType.BASE) {
             workerHealthThreshold = 11;
             uc.write(workerHealthThresholdCh, workerHealthThreshold);
+            tradingWood = 0; tradingIron = 0; tradingCrystal = 0;
         }
 
         // Worker Initializer
@@ -130,7 +131,7 @@ public class Data {
             isJobless   = true;
         }
 
-        //Explorer Initializer
+        // Explorer Initializer
         if (uc.getType() == UnitType.EXPLORER) prefDir = allyBase.directionTo(enemyBase);
 
     }
