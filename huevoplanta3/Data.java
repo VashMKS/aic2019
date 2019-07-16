@@ -80,7 +80,7 @@ public class Data {
 
     // Worker variables
     int nMinerMax = 16;         int nTownsfolkMax = 0;          int workerHealthThreshold;
-    int nMinerPerMine = 1;      int nTownsfolkPerTown = 0;
+    int nMinerPerMine = 2;      int nTownsfolkPerTown = 0;
     boolean isMiner;            boolean isTownsfolk;            boolean isJobless;
     int myMineCh;               int myTownCh;
     int myMineMinerCh;          int myTownTownsfolkCh;
@@ -94,7 +94,7 @@ public class Data {
     int economyThreshold = 200;
 
     // Army variables TODO: demanar unitats de forma dinamica
-    int nRequestedSoldier = 15; int nRequestedArcher = 10;      int nRequestedMage = 0;
+    int nRequestedSoldier = 25; int nRequestedArcher = 15;      int nRequestedMage = 5;
     int nTownToAttack;
 
     // Explorer variables

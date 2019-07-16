@@ -121,11 +121,16 @@ public class Movement {
         int minDistToEnemy = 1000;
         int minEnemyHealth = 1000;
         boolean canAttack = false;
+        boolean isDiagonal = false;
 
         Location loc;
 
         public MicroInfo (Location _loc){
             this.loc = _loc;
+            if(loc.directionTo(uc.getLocation()) == Direction.NORTHEAST  || loc.directionTo(uc.getLocation()) == Direction.NORTHWEST ||
+               loc.directionTo(uc.getLocation()) == Direction.SOUTHEAST  || loc.directionTo(uc.getLocation()) == Direction.SOUTHWEST ){
+                isDiagonal = true;
+            }
         }
 
 
@@ -172,95 +177,110 @@ public class Movement {
 
         boolean isBetterMelee(MicroInfo mic) {
 
+            float preference = 0;
 
             int dmg = uc.getType().attack;
             int hp = uc.getInfo().getHealth();
 
             //Prioriza lo primero no morir este turno
-            if (maxDamage < hp && mic.maxDamage >= hp) return true;
-            if (maxDamage >= hp && mic.maxDamage < hp) return false;
+            if (maxDamage < hp && mic.maxDamage >= hp) preference += 10;
+            if (maxDamage >= hp && mic.maxDamage < hp) preference -= 10;
 
             if (uc.canAttack() ) {
 
                 //Prioriza poder atacar
-                if (canAttack && !mic.canAttack) return true;
-                if (!canAttack && mic.canAttack) return false;
+                if (canAttack && !mic.canAttack) preference += 5;
+                if (!canAttack && mic.canAttack) preference -= 5;
 
                 //Prioriza las casillas en las que puede hacer killingBlow
-                if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) return true;
-                if (minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) return false;
+                if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) preference += 10;
+                if (minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) preference -= 10;
             }
 
             //Prioriza las casillas en las que menos daño le pueden hacer
-            if(maxDamage < mic.maxDamage) return true;
-            if(maxDamage > mic.maxDamage) return false;
+            if(maxDamage < mic.maxDamage) preference += (mic.maxDamage - maxDamage)/2;
+            if(maxDamage > mic.maxDamage) preference -= (maxDamage - mic.maxDamage)/2;
 
             //prioriza acercarse al enemigo
-            if(minDistToEnemy < mic.minDistToEnemy) return true;
-            if(minDistToEnemy > mic.minDistToEnemy) return false;
+            if(minDistToEnemy < mic.minDistToEnemy) preference += 1;
+            if(minDistToEnemy > mic.minDistToEnemy) preference -= 1;
+
+            if(!isDiagonal && mic.isDiagonal) preference += 0.5;
+            if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
 
             //Si las posiciones son equivalentes mejor no cambiar
-            return true;
+            if (preference >= 0) return true;
+            return false;
 
         }
 
         boolean isBetterRanged (Movement.MicroInfo mic){
 
+            float preference = 0;
 
             int dmg = uc.getType().attack;
             int hp = uc.getInfo().getHealth();
 
             //Prioriza lo primero no morir este turno
-            if(maxDamage < hp && mic.maxDamage >= hp) return true;
-            if(maxDamage >= hp && mic.maxDamage < hp) return false;
+            if (maxDamage < hp && mic.maxDamage >= hp) preference += 10;
+            if (maxDamage >= hp && mic.maxDamage < hp) preference -= 10;
 
             if(uc.canAttack() ) {
 
                 //Prioriza poder atacar
-                if (canAttack && !mic.canAttack) return true;
-                if (!canAttack && mic.canAttack) return false;
+                if (canAttack && !mic.canAttack) preference += 3;
+                if (!canAttack && mic.canAttack) preference -= 3;
 
                 //Prioriza las casillas en las que puede hacer killingBlow
-                if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) return true;
-                if (minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) return false;
+                if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) preference += 7;
+                if (minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) preference -= 7;
 
             }
 
             //Prioriza las casillas en las que menos daño le pueden hacer
-            if(maxDamage < mic.maxDamage) return true;
-            if(maxDamage > mic.maxDamage) return false;
+            if(maxDamage < mic.maxDamage) preference += (mic.maxDamage - maxDamage);
+            if(maxDamage > mic.maxDamage) preference -= (maxDamage - mic.maxDamage);
 
             //prioriza alejarse del enemigo
-            if(minDistToEnemy > mic.minDistToEnemy) return true;
-            if(minDistToEnemy < mic.minDistToEnemy) return false;
+            //if(minDistToEnemy > mic.minDistToEnemy) preference += 1;
+            //if(minDistToEnemy < mic.minDistToEnemy) preference -= 1;
+
+            if(!isDiagonal && mic.isDiagonal) preference += 0.5;
+            if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
 
             //Si las posiciones son equivalentes mejor no cambiar
-            return true;
+            if (preference >= 0) return true;
+            return false;
 
         }
 
         boolean isBetterExplorer (Movement.MicroInfo mic){
 
+            float preference = 0;
+
 
             int dmg = uc.getType().attack;
 
             //Prioriza las casillas en las que menos daño le pueden hacer
-            if(maxDamage < mic.maxDamage) return true;
-            if(maxDamage > mic.maxDamage) return false;
+            if(maxDamage < mic.maxDamage) preference += (mic.maxDamage - maxDamage);
+            if(maxDamage > mic.maxDamage) preference -= (maxDamage - mic.maxDamage);
 
             //prioriza alejarse del enemigo
-            if(minDistToEnemy > mic.minDistToEnemy) return true;
-            if(minDistToEnemy < mic.minDistToEnemy) return false;
+            if(minDistToEnemy > mic.minDistToEnemy) preference += 1;
+            if(minDistToEnemy < mic.minDistToEnemy) preference -= 1;
 
             if(uc.canAttack() ) {
                 //Prioriza las casillas en las que puede hacer killingBlow
-                if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) return true;
-                if (minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) return false;
-
+                if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) preference += 300;
+                if (minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) preference -= 300;
             }
 
+            if(!isDiagonal && mic.isDiagonal) preference += 0.5;
+            if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
+
             //Si las posiciones son equivalentes mejor no cambiar
-            return true;
+            if (preference >= 0) return true;
+            return false;
 
         }
 

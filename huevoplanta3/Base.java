@@ -1,9 +1,6 @@
 package huevoplanta3;
 
-import aic2019.Location;
-import aic2019.UnitController;
-import aic2019.UnitInfo;
-import aic2019.UnitType;
+import aic2019.*;
 
 public class Base extends RecruitmentUnit {
 
@@ -33,7 +30,7 @@ public class Base extends RecruitmentUnit {
 
             attack();
 
-            market.economy();
+            economy();
 
             uc.yield();
         }
@@ -69,6 +66,80 @@ public class Base extends RecruitmentUnit {
                     "\n  - Archers: " + data.nArcher  + " out of " + data.nRequestedArcher +
                     "\n  - Mages: " + data.nMage    + " out of " + data.nRequestedMage);
         }
+    }
+
+    public void trade(){
+
+        float rWood    = uc.read(data.requestWoodCh);       float woodStock    = (uc.getWood()    - rWood);
+        float rIron    = uc.read(data.requestIronCh);       float ironStock    = (uc.getIron()    - rIron);
+        float rCrystal = uc.read(data.requestCrystalCh);    float crystalStock = (uc.getCrystal() - rCrystal);
+        float woodStockValue    = woodStock;
+        float ironStockValue    = ironStock*data.ironMultiplier;
+        float crystalStockValue = crystalStock*data.crystalMultiplier;
+
+
+        if(data.tradingWood > 0){
+            if(data.tradingWood%2 ==0 && woodStock > 0){
+                if(ironStock    < 0 && ironStockValue <= crystalStockValue) uc.trade(Resource.WOOD, Resource.IRON   , 2*woodStock/data.tradingWood );
+                if(crystalStock < 0 && crystalStockValue <  ironStockValue) uc.trade(Resource.WOOD, Resource.CRYSTAL, 2*woodStock/data.tradingWood );
+            }
+            --data.tradingWood;
+        }
+
+        if(data.tradingIron > 0){
+            if(data.tradingIron%2 == 0 && rIron > 0){
+                if(woodStock    < 0 && woodStockValue <= crystalStockValue) uc.trade(Resource.IRON, Resource.WOOD   , 2*ironStock/data.tradingIron );
+                if(crystalStock < 0 && crystalStockValue <  woodStockValue) uc.trade(Resource.IRON, Resource.CRYSTAL, 2*ironStock/data.tradingIron );
+            }
+            --data.tradingIron;
+        }
+
+        if(data.tradingCrystal > 0){
+            //uc.println("Trading crystals for " + data.tradingCrystal + " turns more! Total Crystals for trade: " + crystalStock);
+            if(data.tradingCrystal%2 == 0 && crystalStock > 0){
+
+                //uc.println("This turn trading " + 2*crystalStock/data.tradingCrystal);
+
+                if(woodStock < 0 && woodStockValue <= ironStockValue) uc.trade(Resource.CRYSTAL, Resource.WOOD, 2*crystalStock/data.tradingCrystal );
+                if(ironStock < 0 && ironStockValue <  woodStockValue) uc.trade(Resource.CRYSTAL, Resource.IRON, 2*crystalStock/data.tradingCrystal );
+            }
+            --data.tradingCrystal;
+        }
+
+    }
+
+    public void economy() {
+
+        float rWood    = uc.read(data.requestWoodCh);
+        float rIron    = uc.read(data.requestIronCh);
+        float rCrystal = uc.read(data.requestCrystalCh);
+
+        trade();
+
+        //uc.println("Requested: WOOD " + rWood + ", IRON " + rIron + ", CRYSTAL " + rCrystal);
+        //uc.println("Stock: WOOD " + uc.getWood() + ", IRON " + uc.getIron() + ", CRYSTAL " + uc.getCrystal());
+
+        if(rWood == 0 && rIron == 0 && rCrystal == 0) return;
+
+        float woodStock    = uc.getWood()    - rWood;
+        float ironStock    = uc.getIron()    - rIron;
+        float crystalStock = uc.getCrystal() - rCrystal;
+
+        if(woodStock > 0 && ironStock > 0 && crystalStock > 0) return;
+
+        if(woodStock                           > data.economyThreshold && data.tradingWood    == 0){
+            data.tradingWood    = 20;
+            uc.println("Trading Wood now!");
+        }
+        if(ironStock   *data.ironMultiplier    > data.economyThreshold && data.tradingIron    == 0){
+            data.tradingIron    = 20;
+            uc.println("Trading Iron now!");
+        }
+        if(crystalStock*data.crystalMultiplier > data.economyThreshold && data.tradingCrystal == 0) {
+            data.tradingCrystal = 20;
+            uc.println("Trading crystals now!");
+        }
+
     }
 
     public void attack() {
