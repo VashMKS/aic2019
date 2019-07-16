@@ -41,8 +41,8 @@ public class Data {
     int requestedArchersCh      = 109;    // Ch 109
     int requestedKnightCh       = 110;    // Ch 110
 
-    int nMineCh                 = 1000;   // Ch 1000
-    int nTownCh                 = 10000;  // Ch 10000
+    int nMineCh                 = 10000;  // Ch 10000
+    int nTownCh                 = 20000;  // Ch 20000
 
     /* ------------------------------------------------- VARIABLES ------------------------------------------------- */
 

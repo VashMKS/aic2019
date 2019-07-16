@@ -2,7 +2,7 @@ package huevoplanta2;
 
 import aic2019.*;
 
-public class Base extends RecruitmentUnit implements StructureCombat {
+public class Base extends RecruitmentUnit {
 
     public Base (UnitController _uc) {
         this.uc = _uc;
