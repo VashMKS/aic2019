@@ -79,7 +79,8 @@ public class Movement {
                 micro[i] = new MicroInfo(uc.getLocation().add(data.dirs[i]));
                 micro[i].senseImpact();
             }
-            for (UnitInfo enemy : enemiesAround) {
+            for (int i = 0; i < Math.min(enemiesAround.length,10); ++i) {
+                UnitInfo enemy = enemiesAround[i];
                 for (MicroInfo m : micro) m.update(enemy);
             }
 
@@ -119,6 +120,7 @@ public class Movement {
         int maxDamage = 0;
         int minDistToEnemy = 1000;
         int minEnemyHealth = 1000;
+        boolean canAttack = false;
 
         Location loc;
 
@@ -132,8 +134,10 @@ public class Movement {
 
             int d = loc.distanceSquared(enemy.getLocation());
 
-            if (d <= uc.getType().attackRangeSquared &&
-                d >= uc.getType().minAttackRangeSquared) {
+            if (d <= uc.getType().attackRangeSquared && d >= uc.getType().minAttackRangeSquared
+                && !uc.isObstructed(loc, enemy.getLocation())) {
+
+                canAttack = true;
 
                 if (minEnemyHealth > enemy.getHealth()) {
                     minEnemyHealth = enemy.getHealth();
@@ -158,10 +162,12 @@ public class Movement {
             if (uc.senseImpact(loc) <= uc.getType().movementDelay ) maxDamage += 20;
         }
 
+        /*
         boolean canAttack(){
             return (uc.getType().attackRangeSquared >= minDistToEnemy &&
                     uc.getType().minAttackRangeSquared <= minDistToEnemy);
         }
+        */
 
 
         boolean isBetterMelee(MicroInfo mic) {
@@ -177,8 +183,8 @@ public class Movement {
             if (uc.canAttack() ) {
 
                 //Prioriza poder atacar
-                if (canAttack() && !mic.canAttack()) return true;
-                if (!canAttack() && mic.canAttack()) return false;
+                if (canAttack && !mic.canAttack) return true;
+                if (!canAttack && mic.canAttack) return false;
 
                 //Prioriza las casillas en las que puede hacer killingBlow
                 if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) return true;
@@ -211,8 +217,8 @@ public class Movement {
             if(uc.canAttack() ) {
 
                 //Prioriza poder atacar
-                if (canAttack() && !mic.canAttack()) return true;
-                if (!canAttack() && mic.canAttack()) return false;
+                if (canAttack && !mic.canAttack) return true;
+                if (!canAttack && mic.canAttack) return false;
 
                 //Prioriza las casillas en las que puede hacer killingBlow
                 if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) return true;
@@ -237,7 +243,6 @@ public class Movement {
 
 
             int dmg = uc.getType().attack;
-            int hp = uc.getInfo().getHealth();
 
             //Prioriza las casillas en las que menos daño le pueden hacer
             if(maxDamage < mic.maxDamage) return true;
@@ -253,7 +258,6 @@ public class Movement {
                 if (minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) return false;
 
             }
-
 
             //Si las posiciones son equivalentes mejor no cambiar
             return true;

@@ -127,9 +127,6 @@ public class Unit {
                 int townLocChannel = data.nTownCh + 2*data.nTownToAttack + 1;
                 Location loc = townInfo.getLocation();
 
-                uc.println("The current mine is " + tools.decrypt(uc.read(townLocChannel)).x + " " + tools.decrypt(uc.read(townLocChannel)).y +
-                ". I'm looking at " + loc.x + " " + loc.y + " and its owner is " + townInfo.getOwner() );
-
                 if(tools.decrypt(uc.read(townLocChannel)).isEqual(loc)){
                     if (townInfo.getOwner() == data.allyTeam ) ++data.nTownToAttack;
                 }

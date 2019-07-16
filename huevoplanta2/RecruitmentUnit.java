@@ -8,6 +8,11 @@ class RecruitmentUnit extends Structure {
 
     void spawnUnits() {
 
+        uc.println("Army report - Soldiers: " + data.nSoldier + " out of " + data.nRequestedSoldier +
+                   "/ Archers: " + data.nArcher + " out of " + data.nRequestedArcher +
+                   "/ Combat Units: " + data.nCombatUnit);
+
+
         // Base
         if (uc.getType() == UnitType.BASE) {
             // TODO: do it with allied mines/towns instead
@@ -21,7 +26,16 @@ class RecruitmentUnit extends Structure {
 
             }
             //TODO: poner una condicion mejor
-            if(uc.getRound() > 50) trySpawnArmy();
+            if(uc.getRound() > 50){
+
+                trySpawnArmy();
+
+                request(UnitType.SOLDIER, data.nRequestedSoldier - data.nSoldier);
+                request(UnitType.ARCHER , data.nRequestedArcher - data.nArcher );
+                request(UnitType.MAGE , data.nRequestedMage - data.nMage );
+
+
+            }
         }
 
         // Barracks
@@ -44,9 +58,9 @@ class RecruitmentUnit extends Structure {
         if (quantity < 1) return;
 
         // Report to the Comm Channel
-        uc.write(data.requestWoodCh   , uc.read(data.requestWoodCh)     + quantity*type.woodCost);
-        uc.write(data.requestIronCh   , uc.read(data.requestIronCh)     + quantity*type.ironCost);
-        uc.write(data.requestCrystalCh, uc.read(data.requestCrystalCh)  + quantity*type.crystalCost);
+        uc.write(data.requestWoodReportCh   , uc.read(data.requestWoodReportCh)     + quantity*type.woodCost);
+        uc.write(data.requestIronReportCh   , uc.read(data.requestIronReportCh)     + quantity*type.ironCost);
+        uc.write(data.requestCrystalReportCh, uc.read(data.requestCrystalReportCh)  + quantity*type.crystalCost);
         // Reset Next Slot
         uc.write(data.requestWoodResetCh   , 0);
         uc.write(data.requestIronResetCh   , 0);
@@ -105,73 +119,101 @@ class RecruitmentUnit extends Structure {
     void trySpawnArmy() {
 
         boolean SpawnMage     =( (data.nMage  <= data.nRequestedMage) && (data.nCombatUnit%4 == 0) );
-        boolean SpawnSoldier  =( (data.nSoldier <= data.nRequestedSoldier) && (data.nCombatUnit%2 == 0) );
         boolean SpawnArcher   =( (data.nArcher  <= data.nRequestedArcher) && (data.nCombatUnit%2 == 1) );
 
         boolean done = false;
+
+        if (data.nCombatUnit%2 == 0){
+            if(!done && data.nSoldier < data.nRequestedSoldier) done = trySpawnSoldier();
+            if(!done && data.nArcher  < data.nRequestedArcher ) done = trySpawnArcher();
+            if(!done && data.nMage    < data.nRequestedMage   ) done = trySpawnMage();
+        }
+        if (data.nCombatUnit%2 == 0){
+            if(!done && data.nArcher  < data.nRequestedArcher ) done = trySpawnArcher();
+            if(!done && data.nSoldier < data.nRequestedSoldier) done = trySpawnSoldier();
+            if(!done && data.nMage    < data.nRequestedMage   ) done = trySpawnMage();
+        }
+
+    }
+
+    boolean trySpawnSoldier(){
+
+        boolean done = false;
         for (Direction dir : data.dirs) {
-            if(!done) {
-
-                if (SpawnMage && uc.canSpawn(dir, UnitType.MAGE)) {
-                    uc.spawn(dir, UnitType.MAGE);
-                    // Report to the Comm Channel
-                    uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
-                    uc.write(data.mageCh, uc.read(data.mageCh + 1));
-                    uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
-                    // Reset Next Slot
-                    uc.write(data.unitResetCh, 0);
-                    uc.write(data.mageResetCh, 0);
-                    uc.write(data.combatUnitResetCh, 0);
-                    // Update current data
-                    data.nUnit = data.nUnit + 1;
-                    data.nMage = data.nMage + 1;
-                    data.nCombatUnit = data.nCombatUnit + 1;
-                    done = true;
-                }
-
-                if (SpawnSoldier && uc.canSpawn(dir, UnitType.SOLDIER)) {
-                    uc.spawn(dir, UnitType.SOLDIER);
-                    // Report to the Comm Channel
-                    uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
-                    uc.write(data.soldierReportCh, uc.read(data.soldierReportCh + 1));
-                    uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
-                    // Reset Next Slot
-                    uc.write(data.unitResetCh, 0);
-                    uc.write(data.soldierResetCh, 0);
-                    uc.write(data.combatUnitResetCh, 0);
-                    // Update current data
-                    data.nUnit = data.nUnit + 1;
-                    data.nSoldier = data.nSoldier + 1;
-                    data.nCombatUnit = data.nCombatUnit + 1;
-                    done = true;
-                }
-
-                if (SpawnArcher && uc.canSpawn(dir, UnitType.ARCHER)) {
-                    uc.spawn(dir, UnitType.ARCHER);
-                    // Report to the Comm Channel
-                    uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
-                    uc.write(data.archerReportCh, uc.read(data.archerReportCh + 1));
-                    uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
-                    // Reset Next Slot
-                    uc.write(data.unitResetCh, 0);
-                    uc.write(data.archerResetCh, 0);
-                    uc.write(data.combatUnitResetCh, 0);
-                    // Update current data
-                    data.nUnit = data.nUnit + 1;
-                    data.nArcher = data.nArcher + 1;
-                    data.nCombatUnit = data.nCombatUnit + 1;
-                    done = true;
-                }
-
+            if (!done && uc.canSpawn(dir, UnitType.SOLDIER)) {
+                uc.spawn(dir, UnitType.SOLDIER);
+                // Report to the Comm Channel
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
+                uc.write(data.soldierReportCh, uc.read(data.soldierReportCh + 1));
+                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
+                // Reset Next Slot
+                uc.write(data.unitResetCh, 0);
+                uc.write(data.soldierResetCh, 0);
+                uc.write(data.combatUnitResetCh, 0);
+                // Update current data
+                data.nUnit = data.nUnit + 1;
+                data.nSoldier = data.nSoldier + 1;
+                data.nCombatUnit = data.nCombatUnit + 1;
+                done = true;
             }
         }
-        if(!done){
-            //If we can't spawn a unit that turn we request the resources to Spawn our army
-            request(UnitType.SOLDIER, data.nRequestedSoldier - data.nSoldier);
-            request(UnitType.ARCHER , data.nRequestedArcher - data.nArcher );
-            request(UnitType.MAGE , data.nRequestedMage - data.nMage );
-        }
+
+        return done;
+
     }
+
+    boolean trySpawnArcher(){
+
+        boolean done = false;
+        for (Direction dir : data.dirs) {
+            if (!done && uc.canSpawn(dir, UnitType.ARCHER)) {
+                uc.spawn(dir, UnitType.ARCHER);
+                // Report to the Comm Channel
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
+                uc.write(data.archerReportCh, uc.read(data.archerReportCh + 1));
+                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
+                // Reset Next Slot
+                uc.write(data.unitResetCh, 0);
+                uc.write(data.archerResetCh, 0);
+                uc.write(data.combatUnitResetCh, 0);
+                // Update current data
+                data.nUnit = data.nUnit + 1;
+                data.nArcher = data.nArcher + 1;
+                data.nCombatUnit = data.nCombatUnit + 1;
+                done = true;
+            }
+        }
+        return done;
+
+    }
+
+    boolean trySpawnMage(){
+
+        boolean done = false;
+        for (Direction dir : data.dirs) {
+            if (!done && uc.canSpawn(dir, UnitType.MAGE)) {
+                uc.spawn(dir, UnitType.MAGE);
+                // Report to the Comm Channel
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
+                uc.write(data.mageCh, uc.read(data.mageCh + 1));
+                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
+                // Reset Next Slot
+                uc.write(data.unitResetCh, 0);
+                uc.write(data.mageResetCh, 0);
+                uc.write(data.combatUnitResetCh, 0);
+                // Update current data
+                data.nUnit = data.nUnit + 1;
+                data.nMage = data.nMage + 1;
+                data.nCombatUnit = data.nCombatUnit + 1;
+                done = true;
+            }
+
+        }
+
+        return done;
+    }
+
+
 
     @Override
     void report() {

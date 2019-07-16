@@ -61,38 +61,28 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
         if(data.tradingWood > 0){
             if(data.tradingWood%2 ==0 && woodStock > 0){
-                if(ironStock < 0 && crystalStock >= 0) uc.trade(Resource.WOOD, Resource.IRON   , 2*woodStock/data.tradingWood );
-                if(ironStock >= 0 && crystalStock < 0) uc.trade(Resource.WOOD, Resource.CRYSTAL, 2*woodStock/data.tradingWood );
-                if(ironStock < 0  && crystalStock < 0){
-                    uc.trade(Resource.WOOD, Resource.IRON   , woodStock/data.tradingWood );
-                    uc.trade(Resource.WOOD, Resource.CRYSTAL, woodStock/data.tradingWood );
-                }
+                if(ironStock    < 0 && ironStock <= crystalStock) uc.trade(Resource.WOOD, Resource.IRON   , 2*woodStock/data.tradingWood );
+                if(crystalStock < 0 && crystalStock <  ironStock) uc.trade(Resource.WOOD, Resource.CRYSTAL, 2*woodStock/data.tradingWood );
             }
             --data.tradingWood;
         }
 
         if(data.tradingIron > 0){
             if(data.tradingIron%2 == 0 && rIron > 0){
-                if(woodStock < 0 && crystalStock >= 0) uc.trade(Resource.IRON, Resource.WOOD   , 2*ironStock/data.tradingIron );
-                if(woodStock >= 0 && crystalStock < 0) uc.trade(Resource.IRON, Resource.CRYSTAL, 2*ironStock/data.tradingIron );
-                if(woodStock < 0  && crystalStock < 0){
-                    uc.trade(Resource.IRON, Resource.WOOD   , ironStock/data.tradingIron );
-                    uc.trade(Resource.IRON, Resource.CRYSTAL, ironStock/data.tradingIron );
-                }
+                if(woodStock    < 0 && woodStock <= crystalStock) uc.trade(Resource.IRON, Resource.WOOD   , 2*ironStock/data.tradingIron );
+                if(crystalStock < 0 && crystalStock <  woodStock) uc.trade(Resource.IRON, Resource.CRYSTAL, 2*ironStock/data.tradingIron );
             }
             --data.tradingIron;
         }
 
         if(data.tradingCrystal > 0){
             //uc.println("Trading crystals for " + data.tradingCrystal + " turns more! Total Crystals for trade: " + crystalStock);
-            //uc.println("This turn trading " + 2*crystalStock/data.tradingCrystal);
             if(data.tradingCrystal%2 == 0 && crystalStock > 0){
-                if(woodStock < 0 && ironStock >= 0) uc.trade(Resource.CRYSTAL, Resource.WOOD, 2*crystalStock/data.tradingCrystal );
-                if(woodStock >= 0 && ironStock < 0) uc.trade(Resource.CRYSTAL, Resource.IRON, 2*crystalStock/data.tradingCrystal );
-                if(woodStock < 0  && ironStock < 0){
-                    uc.trade(Resource.CRYSTAL, Resource.WOOD, crystalStock/data.tradingCrystal );
-                    uc.trade(Resource.CRYSTAL, Resource.IRON, crystalStock/data.tradingCrystal );
-                }
+
+                //uc.println("This turn trading " + 2*crystalStock/data.tradingCrystal);
+
+                if(woodStock < 0 && woodStock <= ironStock) uc.trade(Resource.CRYSTAL, Resource.WOOD, 2*crystalStock/data.tradingCrystal );
+                if(ironStock < 0 && ironStock <  woodStock) uc.trade(Resource.CRYSTAL, Resource.IRON, 2*crystalStock/data.tradingCrystal );
             }
             --data.tradingCrystal;
         }
@@ -108,12 +98,15 @@ public class Base extends RecruitmentUnit implements StructureCombat {
         trade();
 
         //uc.println("Requested: WOOD " + rWood + ", IRON " + rIron + ", CRYSTAL " + rCrystal);
+        //uc.println("Stock: WOOD " + uc.getWood() + ", IRON " + uc.getIron() + ", CRYSTAL " + uc.getCrystal());
 
         if(rWood == 0 && rIron == 0 && rCrystal == 0) return;
 
         float woodStock    = uc.getWood()    - rWood;
         float ironStock    = uc.getIron()    - rIron;
         float crystalStock = uc.getCrystal() - rCrystal;
+
+        if(woodStock > 0 && ironStock > 0 && crystalStock > 0) return;
 
         if(woodStock                           > data.economyThreshold && data.tradingWood    == 0){
             data.tradingWood    = 20;
