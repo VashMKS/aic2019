@@ -11,12 +11,6 @@ public class Explorer extends CombatUnit {
         this.movement = new Movement(uc, data);
     }
 
-    /* IDEA: [distributed mapping] always assign 1 explorer as Cartographer and some as Map Keepers
-     * add to the Data class a Map object to be read every turn by each unit, the cartographer and keepers
-     * are in charge of updating it (hopefully in a safe and cheap way)
-     * The Cartographer keeps a list of positions that have never been visited ans tries to reach them
-     * The MapKeepers keep a queue with previously explored positions ordered by last updated and refresh the map */
-
     void run() {
 
         while (true) {

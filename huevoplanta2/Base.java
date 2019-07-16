@@ -20,26 +20,7 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
             report();
 
-            // logs every 100 rounds
-            if (data.currentRound % 100 == 15) {
-                uc.println("Round " + data.currentRound + " report:");
-                uc.println("  - currently there are " + data.nWanderer + " workers wandering around. " +
-                           "Threshold is at " + data.workerHealthThreshold + " HP");
-                uc.println("  - currently " + data.nMiner + " miners out of " + data.nWorker + " workers are active in " + data.nMine + " mines. " +
-                           "Cap is at " + data.nMinerThreshold + " miners");
-                for (int i = 0; i < data.nMine; i++) {
-                    Location mineLoc = data.mineLocations[i];
-                    int nMiners = data.miners[i];
-                    uc.println("  - mine " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " miners");
-                }
-                uc.println("  - currently " + data.nTownsfolk + " townsfolk out of " + data.nWorker + " workers are active in " + data.nTown + " towns. " +
-                           "Cap is at " + data.nTownsfolkThreshold + " townsfolk");
-                for (int i = 0; i < data.nTown; i++) {
-                    Location mineLoc = data.townLocations[i];
-                    int nMiners = data.townsfolk[i];
-                    uc.println("  - town " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " isTownsfolk");
-                }
-            }
+            logs();
 
             spawnUnits();
 
@@ -52,37 +33,63 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
     }
 
+    void logs() {
+        // worker logs
+        if (data.currentRound % 100 == 15) {
+            uc.println("Round " + data.currentRound + " Worker Report:\n " +
+                       "  - " + data.nJobless + " jobless workers out of " + data.nWorker + " workers. " +
+                       "Threshold is at " + data.workerHealthThreshold + " HP");
+            uc.println("  - " + data.nMiner + " miners are active in " + data.nMine + " mines. " +
+                       "Cap is at " + data.nMinerMax + " miners");
+            for (int i = 0; i < data.nMine; i++) {
+                Location mineLoc = data.mineLocations[i];
+                int nMiners = data.miners[i];
+                uc.println("  - mine " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " miners");
+            }
+            uc.println("  - " + data.nTownsfolk + " townsfolk are active in " + data.nTown + " towns. " +
+                       "Cap is at " + data.nTownsfolkMax + " townsfolk");
+            for (int i = 0; i < data.nTown; i++) {
+                Location mineLoc = data.townLocations[i];
+                int nMiners = data.townsfolk[i];
+                uc.println("  - town " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " isTownsfolk");
+            }
+        }
+
+        // army logs
+        if (data.currentRound % 100 == 25) {
+            uc.println("Round " + data.currentRound + " Army Report:\n  - Combat Units: " + data.nCombatUnit +
+                    "\n  - Soldiers: " + data.nSoldier + " out of " + data.nRequestedSoldier +
+                    "\n  - Archers: " + data.nArcher  + " out of " + data.nRequestedArcher +
+                    "\n  - Mages: " + data.nMage    + " out of " + data.nRequestedMage);
+        }
+    }
+
     public void trade(){
 
-        float rWood    = uc.read(data.requestWoodCh);       float woodStock    = uc.getWood()    - rWood;
-        float rIron    = uc.read(data.requestIronCh);       float ironStock    = uc.getIron()    - rIron;
-        float rCrystal = uc.read(data.requestCrystalCh);    float crystalStock = uc.getCrystal() - rCrystal;
-
-
         if(data.tradingWood > 0){
-            if(data.tradingWood%2 ==0 && woodStock > 0){
-                if(ironStock    < 0 && ironStock <= crystalStock) uc.trade(Resource.WOOD, Resource.IRON   , 2*woodStock/data.tradingWood );
-                if(crystalStock < 0 && crystalStock <  ironStock) uc.trade(Resource.WOOD, Resource.CRYSTAL, 2*woodStock/data.tradingWood );
+            if(data.tradingWood%2 ==0 && data.woodSurplus > 0){
+                if(data.ironSurplus    < 0 && data.ironSurplus <= data.crystalSurplus) uc.trade(Resource.WOOD, Resource.IRON   , 2*data.woodSurplus/data.tradingWood );
+                if(data.crystalSurplus < 0 && data.crystalSurplus <  data.ironSurplus) uc.trade(Resource.WOOD, Resource.CRYSTAL, 2*data.woodSurplus/data.tradingWood );
             }
             --data.tradingWood;
         }
 
         if(data.tradingIron > 0){
-            if(data.tradingIron%2 == 0 && rIron > 0){
-                if(woodStock    < 0 && woodStock <= crystalStock) uc.trade(Resource.IRON, Resource.WOOD   , 2*ironStock/data.tradingIron );
-                if(crystalStock < 0 && crystalStock <  woodStock) uc.trade(Resource.IRON, Resource.CRYSTAL, 2*ironStock/data.tradingIron );
+            if(data.tradingIron%2 == 0 && data.requestedIron > 0){
+                if(data.woodSurplus    < 0 && data.woodSurplus <= data.crystalSurplus) uc.trade(Resource.IRON, Resource.WOOD   , 2*data.ironSurplus/data.tradingIron );
+                if(data.crystalSurplus < 0 && data.crystalSurplus <  data.woodSurplus) uc.trade(Resource.IRON, Resource.CRYSTAL, 2*data.ironSurplus/data.tradingIron );
             }
             --data.tradingIron;
         }
 
         if(data.tradingCrystal > 0){
             //uc.println("Trading crystals for " + data.tradingCrystal + " turns more! Total Crystals for trade: " + crystalStock);
-            if(data.tradingCrystal%2 == 0 && crystalStock > 0){
+            if(data.tradingCrystal%2 == 0 && data.crystalSurplus > 0){
 
                 //uc.println("This turn trading " + 2*crystalStock/data.tradingCrystal);
 
-                if(woodStock < 0 && woodStock <= ironStock) uc.trade(Resource.CRYSTAL, Resource.WOOD, 2*crystalStock/data.tradingCrystal );
-                if(ironStock < 0 && ironStock <  woodStock) uc.trade(Resource.CRYSTAL, Resource.IRON, 2*crystalStock/data.tradingCrystal );
+                if(data.woodSurplus < 0 && data.woodSurplus <= data.ironSurplus) uc.trade(Resource.CRYSTAL, Resource.WOOD, 2*data.crystalSurplus/data.tradingCrystal );
+                if(data.ironSurplus < 0 && data.ironSurplus <  data.woodSurplus) uc.trade(Resource.CRYSTAL, Resource.IRON, 2*data.crystalSurplus/data.tradingCrystal );
             }
             --data.tradingCrystal;
         }
@@ -91,34 +98,26 @@ public class Base extends RecruitmentUnit implements StructureCombat {
 
     public void economy() {
 
-        float rWood    = uc.read(data.requestWoodCh);
-        float rIron    = uc.read(data.requestIronCh);
-        float rCrystal = uc.read(data.requestCrystalCh);
-
         trade();
 
         //uc.println("Requested: WOOD " + rWood + ", IRON " + rIron + ", CRYSTAL " + rCrystal);
         //uc.println("Stock: WOOD " + uc.getWood() + ", IRON " + uc.getIron() + ", CRYSTAL " + uc.getCrystal());
 
-        if(rWood == 0 && rIron == 0 && rCrystal == 0) return;
+        if(data.requestedWood == 0 && data.requestedIron == 0 && data.requestedCrystal == 0) return;
 
-        float woodStock    = uc.getWood()    - rWood;
-        float ironStock    = uc.getIron()    - rIron;
-        float crystalStock = uc.getCrystal() - rCrystal;
+        if(data.woodSurplus > 0 && data.ironSurplus > 0 && data.crystalSurplus > 0) return;
 
-        if(woodStock > 0 && ironStock > 0 && crystalStock > 0) return;
-
-        if(woodStock                           > data.economyThreshold && data.tradingWood    == 0){
+        if(data.woodSurplus                           > data.economyThreshold && data.tradingWood    == 0){
             data.tradingWood    = 20;
-            uc.println("Trading Wood now!");
+            //uc.println("Trading Wood now!");
         }
-        if(ironStock   *data.ironMultiplier    > data.economyThreshold && data.tradingIron    == 0){
+        if(data.ironSurplus   *data.ironMultiplier    > data.economyThreshold && data.tradingIron    == 0){
             data.tradingIron    = 20;
-            uc.println("Trading Iron now!");
+            //uc.println("Trading Iron now!");
         }
-        if(crystalStock*data.crystalMultiplier > data.economyThreshold && data.tradingCrystal == 0) {
+        if(data.crystalSurplus*data.crystalMultiplier > data.economyThreshold && data.tradingCrystal == 0) {
             data.tradingCrystal = 20;
-            uc.println("Trading crystals now!");
+            //uc.println("Trading crystals now!");
         }
 
     }

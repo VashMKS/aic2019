@@ -72,12 +72,12 @@ public class Tools {
     }
 
     //Turn a pair of coordinates into an integer
-    int encrypt(int x, int y) {
+    int encodeLocation(int x, int y) {
         return x*1000 + y;
     }
 
     //Decrypt a location from an integer
-    Location decrypt(int n) {
+    Location decodeLocation(int n) {
         return new Location(n/1000, n%1000);
     }
 
@@ -148,7 +148,7 @@ public class Tools {
         for(int i = 0; i < data.nMine; i++) {
             //uc.println("*checks list*");
             int mineLocChannel = data.nMineCh + 1 + 2*i;
-            Location mineLoc = decrypt(uc.read(mineLocChannel));
+            Location mineLoc = decodeLocation(uc.read(mineLocChannel));
             if (loc.isEqual(mineLoc)) {
                 //uc.println("found it!");
                 return true;
@@ -162,7 +162,7 @@ public class Tools {
         //uc.println("let's check if this town has been reported");
         for(int i = 0; i < data.nTown; i++) {
             //uc.println("*checks list*");
-            Location townLoc = decrypt(uc.read(data.nTownCh + 1 +2*i));
+            Location townLoc = decodeLocation(uc.read(data.nTownCh + 1 +2*i));
             if (loc.isEqual(townLoc)) {
                 //uc.println("found it!");
                 return true;

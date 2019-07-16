@@ -17,7 +17,7 @@ public class CombatUnit extends MovingUnit {
         }else{
             if(data.nTownToAttack < data.nTown){
                 int townLocChannel = data.nTownCh + 2*data.nTownToAttack + 1;
-                target = tools.decrypt(uc.read(townLocChannel) );
+                target = tools.decodeLocation(uc.read(townLocChannel) );
             }
             else{
                 target.x = (data.allyBase.x + data.enemyBase.x)/2;
@@ -28,7 +28,7 @@ public class CombatUnit extends MovingUnit {
 
         //uc.println("We are currently on Town " + data.nTownToAttack + " of " + data.nTown + ". My target is at " + target.x + " " + target.y);
 
-        if(! movement.doMicro() ){
+        if(!movement.doMicro()){
             uc.drawLine(uc.getLocation(), target, "#0000ff" );
             movement.moveTo(target);
         }

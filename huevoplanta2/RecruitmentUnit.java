@@ -8,19 +8,14 @@ class RecruitmentUnit extends Structure {
 
     void spawnUnits() {
 
-        uc.println("Army report - Soldiers: " + data.nSoldier + " out of " + data.nRequestedSoldier +
-                   "/ Archers: " + data.nArcher + " out of " + data.nRequestedArcher +
-                   "/ Combat Units: " + data.nCombatUnit);
-
-
         // Base
         if (uc.getType() == UnitType.BASE) {
             // TODO: do it with allied mines/towns instead
-            if (data.nWorker < data.nMinerThreshold + data.nTownsfolkThreshold) {
-                if (data.nMiner < data.nMinerPerMine*data.nMine && data.nMiner < data.nMinerThreshold) {
+            if (data.nWorker < data.nMinerMax + data.nTownsfolkMax) {
+                if (data.nMiner < data.nMinerPerMine*data.nMine && data.nMiner < data.nMinerMax) {
                     trySpawnWorker();
                 }
-                if (data.nTownsfolk < data.nTownsfolkPerTown*data.nTown && data.nTownsfolk < data.nTownsfolkThreshold) {
+                if (data.nTownsfolk < data.nTownsfolkPerTown*data.nTown && data.nTownsfolk < data.nTownsfolkMax) {
                     trySpawnWorker();
                 }
 
@@ -33,8 +28,6 @@ class RecruitmentUnit extends Structure {
                 request(UnitType.SOLDIER, data.nRequestedSoldier - data.nSoldier);
                 request(UnitType.ARCHER , data.nRequestedArcher - data.nArcher );
                 request(UnitType.MAGE , data.nRequestedMage - data.nMage );
-
-
             }
         }
 
@@ -88,7 +81,7 @@ class RecruitmentUnit extends Structure {
 
         if (!done){
             request(UnitType.WORKER, Math.min(data.nTownsfolkPerTown*data.nTown, data.nTownsfolk) - data.nTownsfolk);
-            request(UnitType.WORKER, Math.min(data.nMinerPerMine*data.nMine, data.nMinerThreshold) - data.nWorker);
+            request(UnitType.WORKER, Math.min(data.nMinerPerMine*data.nMine, data.nMinerMax) - data.nWorker);
 
         }
 
@@ -128,7 +121,7 @@ class RecruitmentUnit extends Structure {
             if(!done && data.nArcher  < data.nRequestedArcher ) done = trySpawnArcher();
             if(!done && data.nMage    < data.nRequestedMage   ) done = trySpawnMage();
         }
-        if (data.nCombatUnit%2 == 0){
+        if (data.nCombatUnit%2 == 1){
             if(!done && data.nArcher  < data.nRequestedArcher ) done = trySpawnArcher();
             if(!done && data.nSoldier < data.nRequestedSoldier) done = trySpawnSoldier();
             if(!done && data.nMage    < data.nRequestedMage   ) done = trySpawnMage();

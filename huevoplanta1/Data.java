@@ -43,7 +43,6 @@ public class Data {
 
     int nMineCh                 = 1000;   // Ch 1000
     int nTownCh                 = 10000;  // Ch 10000
-    int mapCh                   = 290000; // Ch 290000
 
     /* ------------------------------------------------- VARIABLES ------------------------------------------------- */
 
@@ -71,10 +70,6 @@ public class Data {
     // Town Info
     int nTown;                  Location[] townLocations;       int[] townsfolk;
     int nAllyTown;              Location[] allyTownLocations;
-
-    // Map Info
-    int xOffset;
-    int yOffset;
 
     // Enemy Intel
     // true when in field of vision             // true when adjacent
@@ -120,8 +115,6 @@ public class Data {
         spawnRound   = currentRound;
         enemyBase    = enemyTeam.getInitialLocation();
         allyBase     = allyTeam.getInitialLocation();
-        xOffset      = 49 - allyBase.x;
-        yOffset      = 49 - allyBase.y;
         turnsAlive   = 0;
         nTownToAttack= 0;
 
@@ -131,7 +124,6 @@ public class Data {
             uc.write(workerHealthThresholdCh, workerHealthThreshold);
 
             tradingWood = 0;    tradingIron = 0;    tradingCrystal = 0;
-
         }
 
         // Worker Initializer
@@ -373,13 +365,6 @@ public class Data {
                 }
             }
         }
-    }
-
-    // returns the comm channel allocated to a position in the world
-    int localMapCoordCh (Location loc) {
-        int x = loc.x + xOffset;
-        int y = loc.y + yOffset;
-        return mapCh + 100*x + y;
     }
 
 }

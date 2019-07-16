@@ -83,7 +83,7 @@ public class Unit {
                 if (!tools.reportedMine(mineLoc)) {
                     //uc.println("   new mine found, storing location");
                     mineLocChannel += 2;
-                    uc.write(mineLocChannel, tools.encrypt(mineLoc.x,mineLoc.y));
+                    uc.write(mineLocChannel, tools.encodeLocation(mineLoc.x,mineLoc.y));
                     uc.write(data.nMineCh, data.nMine+1);
                     newMineFound = true;
                 } else {
@@ -108,7 +108,7 @@ public class Unit {
                 if (!tools.reportedTown( townLoc )) {
                     //uc.println(" new town found, storing location");
                     townLocChannel += 2;
-                    uc.write(townLocChannel, tools.encrypt(townLoc.x,townLoc.y));
+                    uc.write(townLocChannel, tools.encodeLocation(townLoc.x,townLoc.y));
                     uc.write(data.nTownCh, data.nTown+1);
                     newTownFound = true;
                 }
@@ -127,7 +127,7 @@ public class Unit {
                 int townLocChannel = data.nTownCh + 2*data.nTownToAttack + 1;
                 Location loc = townInfo.getLocation();
 
-                if(tools.decrypt(uc.read(townLocChannel)).isEqual(loc)){
+                if(tools.decodeLocation(uc.read(townLocChannel)).isEqual(loc)){
                     if (townInfo.getOwner() == data.allyTeam ) ++data.nTownToAttack;
                 }
             }
