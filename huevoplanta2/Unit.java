@@ -105,7 +105,7 @@ public class Unit {
             for (TownInfo townInfo : townsOnSight) {
                 Location townLoc = townInfo.getLocation();
                 //uc.println("  checking location (" + townLoc.x + " " + townLoc.y + ")");
-                if (!tools.reportedTown( townLoc )) {
+                if (!tools.reportedTown(townLoc)) {
                     //uc.println(" new town found, storing location");
                     townLocChannel += 2;
                     uc.write(townLocChannel, tools.encodeLocation(townLoc.x,townLoc.y));

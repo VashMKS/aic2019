@@ -12,9 +12,14 @@ public class Tools {
         this.data = _data;
     }
 
+    // Returns a random integer between 0 and n
+    int randomInt(int n) {
+        return (int)(Math.random()*n);
+    }
+
     //Returns a random direction
     Direction randomDir() {
-        int randomNum = (int)(Math.random()*8);
+        int randomNum = randomInt(8);
         return data.dirs[randomNum];
     }
 

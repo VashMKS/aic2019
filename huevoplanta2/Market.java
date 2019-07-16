@@ -18,7 +18,7 @@ public class Market {
     public void economy() {
 
         // market logs
-        if (data.tradingWood + data.tradingIron + data.tradingCrystal > 0) {
+        if (data.currentRound%100 == 55 && data.tradingWood + data.tradingIron + data.tradingCrystal > 0) {
             uc.println("Market Report:" +
                     "\n  - Resource surpluses: " + data.woodSurplus + "W, " + data.ironSurplus + "I, " + data.crystalSurplus + "C" +
                     "\n  - Trading turns left: " + data.tradingWood + " (W), " + data.tradingIron + " (I), " + data.tradingCrystal + " (C)");
@@ -33,12 +33,12 @@ public class Market {
 
         if(data.woodSurplus > 0 && data.ironSurplus > 0 && data.crystalSurplus > 0) return;
 
-        if(data.woodSurplus                           > data.economyThreshold && data.tradingWood    == 0){
-            data.tradingWood    = 20;
+        if(data.woodSurplus > data.economyThreshold && data.tradingWood == 0){
+            data.tradingWood = 20;
             //uc.println("Trading Wood now!");
         }
-        if(data.ironSurplus   *data.ironMultiplier    > data.economyThreshold && data.tradingIron    == 0){
-            data.tradingIron    = 20;
+        if(data.ironSurplus*data.ironMultiplier > data.economyThreshold && data.tradingIron == 0){
+            data.tradingIron = 20;
             //uc.println("Trading Iron now!");
         }
         if(data.crystalSurplus*data.crystalMultiplier > data.economyThreshold && data.tradingCrystal == 0) {

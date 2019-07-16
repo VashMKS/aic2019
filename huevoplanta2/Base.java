@@ -16,6 +16,7 @@ public class Base extends RecruitmentUnit {
     void run() {
 
         uc.println("Base is at (" + uc.getLocation().x + ", " + uc.getLocation().y + ")");
+        //uc.println("max towns: " + GameConstants.MAX_TOWNS);
 
         while (true) {
 

@@ -21,7 +21,7 @@ class RecruitmentUnit extends Structure {
 
             }
             //TODO: poner una condicion mejor
-            if(uc.getRound() > 50){
+            if(uc.getRound() > 25){
 
                 trySpawnArmy();
 
