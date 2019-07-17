@@ -333,6 +333,7 @@ public class Data {
         nJobless                 = uc.read(joblessCh);
         workerHealthThreshold    = uc.read(workerHealthThresholdCh);
         mineMinDistSqToBase      = uc.read(mineMinDistSqToBaseCh);
+        mineMinDistSqToBaseIndex = uc.read(mineMinDistSqToBaseIndexCh);
         mineMaxDistSqToBase      = uc.read(mineMaxDistSqToBaseCh);
         mineMaxDistSqToBaseIndex = uc.read(mineMaxDistSqToBaseIndexCh);
     }
