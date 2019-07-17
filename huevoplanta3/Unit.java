@@ -73,22 +73,26 @@ public class Unit {
             int counter = 0;
             for (ResourceInfo mineInfo : minesOnSight) {
 
-                if (counter > 16) return;
+                // hard cap on the number of iterations of this function
+                if (counter > 10) return;
                 else counter++;
 
                 boolean newMineFound = false;
                 Location mineLoc = mineInfo.getLocation();
                 int distSqToBase = mineLoc.distanceSquared(data.allyBase);
 
-                if(distSqToBase > 100 && data.nMine > 4) continue;
-                if(mineLoc.distanceSquared(data.enemyBase) < 50) continue;
+                // don't assign too many mines adjacent to the base (workers will block the base)
+                if (distSqToBase <= 2 && data.nMine > 4) continue;
+                // don't gather on mines too far away if we got a few closer
+                if (distSqToBase > 100 && data.nMine > 4) continue;
+                // don't gather no mines too close to the enemy base
+                if (mineLoc.distanceSquared(data.enemyBase) < 81) continue;
 
-                // TODO: hard cap on number of iterations of this function
                 if (data.nMine < data.nMineMax) {
                     // add this mine to our list of mines if never seen before
                     if (tools.reportedMine(mineLoc) == -1) {
                         int mineLocChannel = data.nMineCh + data.channelsPerMine*data.nMine + 1;
-                        int mineDistSqToBaseChannel = mineLocChannel + 2;
+                        int mineDistSqToBaseChannel = mineLocChannel + 4;
                         uc.write(mineLocChannel, tools.encodeLocation(mineLoc.x,mineLoc.y));
                         uc.write(mineDistSqToBaseChannel, distSqToBase);
                         uc.write(data.nMineCh, data.nMine+1);
@@ -100,12 +104,13 @@ public class Unit {
                     uc.write(data.mineMinDistSqToBaseCh, distSqToBase);
                     int index = data.mineMaxDistSqToBaseIndexCh;
                     int mineLocChannel = data.nMineCh + data.channelsPerMine*index + 1;
-                    int mineDistSqToBaseChannel = mineLocChannel + 2;
+                    int mineDistSqToBaseChannel = mineLocChannel + 4;
                     uc.write(mineLocChannel, tools.encodeLocation(mineLoc.x, mineLoc.y));
                     uc.write(mineDistSqToBaseChannel, distSqToBase);
                     newMineFound = true;
                 }
 
+                // update if a new mine was added to the comm channels
                 if (newMineFound) data.updateMines();
             }
             //uc.println("so far " + uc.read(data.nMineCh) + " mines discovered");

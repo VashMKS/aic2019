@@ -22,6 +22,8 @@ public class Worker extends MovingUnit {
 
             report();
 
+            //logs();
+
             gather();
 
             deliver();
@@ -50,12 +52,22 @@ public class Worker extends MovingUnit {
         uc.write(data.unitResetCh, 0);
         uc.write(data.workerResetCh, 0);
         if (data.isMiner) {
+            // Report to the Comm Channel
             uc.write(data.minerReportCh, uc.read(data.minerReportCh)+1);
+            uc.write(data.myMineMinerReportCh, uc.read(data.myMineMinerReportCh)+1);
+            // Reset Next Slot
             uc.write(data.minerResetCh, 0);
+            uc.write(data.myMineMinerResetCh, 0);
         }
-        if (data.isJobless) {
-            uc.write(data.joblessReportCh, uc.read(data.joblessReportCh) + 1);
-            uc.write(data.joblessResetCh, 0);
+    }
+
+    void logs() {
+        if (data.currentRound % 100 == 1) {
+            uc.println("worker ID" + data.ID + "assigned to mine " + data.myMineIndex +
+                    " at (" + data.myMine.x + ", " + data.myMine.y);
+            uc.println("myMineMinerReportCh = " + data.myMineMinerReportCh + " reads " + uc.read(data.myMineMinerReportCh));
+            uc.println("myMineMinerResetCh = " + data.myMineMinerResetCh + " reads " + uc.read(data.myMineMinerResetCh));
+            uc.println("myMineMinerCh = " + data.myMineMinerCh + " reads " + uc.read(data.myMineMinerCh));
         }
     }
 
@@ -85,8 +97,8 @@ public class Worker extends MovingUnit {
         Location target = uc.getLocation().add(dir);
 
         if (data.isMiner) {
-            // TODO: make that 100 less arbitrary (maybe depend on distance to the base)
-            if (data.onDelivery || tools.currency(uc.getInfo().getWood(), uc.getInfo().getIron(), uc.getInfo().getCrystal()) > 100) {
+            // TODO: make that 50 less arbitrary (maybe depend on distance to the base)
+            if (data.onDelivery || tools.currency(uc.getInfo().getWood(), uc.getInfo().getIron(), uc.getInfo().getCrystal()) > 50) {
 
                 if (data.hasTown) target = data.myTown;
                 else target = data.allyBase;
@@ -101,7 +113,7 @@ public class Worker extends MovingUnit {
         }
 
         //uc.println("target: (" + target.x + ", " + target.y + ")");
-       if(!movement.doMicro(uc.getLocation().directionTo(target) )){
+       if(!movement.doMicro(uc.getLocation().directionTo(target))){
            //uc.drawLine(uc.getLocation(), target, "#0000ff" );
            movement.moveTo(target);
        }

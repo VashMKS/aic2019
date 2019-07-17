@@ -72,7 +72,7 @@ public class Movement {
         // if(!uc.canMove()) uc.println("I'm on cooldown");
 
         UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
-        if (uc.canMove() &&(enemiesAround.length > 0 || uc.getLocation().distanceSquared(data.enemyBase) <= 72)) {
+        if (uc.canMove() && (enemiesAround.length > 0 || uc.getLocation().distanceSquared(data.enemyBase) <= 72)) {
             //uc.println(uc.getType() + " report in Round: " + uc.getRound());
             MicroInfo[] micro = new MicroInfo[9];
             for (int i = 0; i < 9; ++i) {
@@ -142,9 +142,7 @@ public class Movement {
         }
 
         void checkTargetDirection(Direction targetDir){
-
             if(uc.getLocation().directionTo(loc) == targetDir) onRouteToTarget = true;
-
         }
 
 
@@ -176,6 +174,10 @@ public class Movement {
             }
         }
 
+        void senseImpact(){
+            //mira si el siguiente turno impactara una catapulta en el sitio
+            if (uc.senseImpact(loc) <= uc.getType().movementDelay ) maxDamage += 20;
+        }
 
         /*
         boolean canAttack(){

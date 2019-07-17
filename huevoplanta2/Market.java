@@ -18,11 +18,11 @@ public class Market {
     public void economy() {
 
         // market logs
-        if (data.currentRound%100 == 55 && data.tradingWood + data.tradingIron + data.tradingCrystal > 0) {
+        /*if (data.currentRound%100 == 55 && data.tradingWood + data.tradingIron + data.tradingCrystal > 0) {
             uc.println("Market Report:" +
                     "\n  - Resource surpluses: " + data.woodSurplus + "W, " + data.ironSurplus + "I, " + data.crystalSurplus + "C" +
                     "\n  - Trading turns left: " + data.tradingWood + " (W), " + data.tradingIron + " (I), " + data.tradingCrystal + " (C)");
-        }
+        }*/
 
         trade();
 

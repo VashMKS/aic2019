@@ -15,7 +15,7 @@ public class Base extends RecruitmentUnit {
 
     void run() {
 
-        uc.println("Base is at (" + uc.getLocation().x + ", " + uc.getLocation().y + ")");
+        //uc.println("Base is at (" + uc.getLocation().x + ", " + uc.getLocation().y + ")");
 
         while (true) {
 
@@ -23,7 +23,7 @@ public class Base extends RecruitmentUnit {
 
             report();
 
-            logs();
+            //logs();
 
             spawnUnits();
 
@@ -37,11 +37,18 @@ public class Base extends RecruitmentUnit {
     }
 
     void logs() {
+
+        // recruitment logs
+        /*if (data.currentRound < 25) {
+            uc.println("current round: " + data.currentRound + ", x: " + data.x + ", y: " + data.y + ", z: " + data.z);
+            uc.println("explorer report channel " + data.explorerReportCh + " reads " + uc.read(data.explorerReportCh));
+            uc.println("explorer reset channel " + data.explorerResetCh + " reads " + uc.read(data.explorerResetCh));
+            uc.println("explorer channel " + data.explorerCh + " reads " + uc.read(data.explorerCh));
+        }*/
+
         // miner logs
         if (data.currentRound % 100 == 15) {
-            uc.println("Round " + data.currentRound + " Worker Report:\n " +
-                       "  - " + data.nJobless + " jobless workers out of " + data.nWorker + " workers. " +
-                       "Threshold is at " + data.workerHealthThreshold + " HP");
+            uc.println("Round " + data.currentRound + " Worker Report:");
             uc.println("  - " + data.nMiner + " miners are active in " + data.nMine + " mines. " +
                        "Cap is at " + data.nMinerMax + " miners and " + data.nMineMax + " mines");
             for (int i = 0; i < data.nMine; i++) {
@@ -55,9 +62,9 @@ public class Base extends RecruitmentUnit {
         if (data.currentRound % 100 == 35) {
             uc.println("Round " + data.currentRound + " Town Report:");
             for (int i = 0; i < data.nTown; i++) {
-                Location mineLoc = data.townLocations[i];
-                if (data.townOwned[i]) uc.println("  - town " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") and we own it");
-                else uc.println("  - town " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") and we don't own it");
+                Location townLoc = data.townLocations[i];
+                if (data.townOwned[i]) uc.println("  - town " + i + " at (" + townLoc.x + ", " + townLoc.y + ") is owned by us");
+                else uc.println("  - town " + i + " at (" + townLoc.x + ", " + townLoc.y + ") is not owned by us");
             }
         }
 

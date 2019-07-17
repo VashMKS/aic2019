@@ -10,8 +10,7 @@ class RecruitmentUnit extends Structure {
 
         // Base
         if (uc.getType() == UnitType.BASE) {
-            // TODO: do it with "safe" mines instead
-            if (data.nMiner < data.nMinerPerMine*data.nMine && data.nMiner < data.nMinerMax) {
+            if (data.nMiner < data.nMinerPerMine*data.nMine && data.nMiner < data.nMinerMax && data.nWorker < data.nWorkerMax) {
                 trySpawnWorker();
             }
             //TODO: poner una condicion mejor
@@ -83,7 +82,7 @@ class RecruitmentUnit extends Structure {
                 uc.spawn(dir, UnitType.EXPLORER);
                 // Report to the Comm Channel
                 uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
-                uc.write(data.explorerReportCh, uc.read(data.explorerReportCh + 1));
+                uc.write(data.explorerReportCh, uc.read(data.explorerReportCh)+1);
                 // Reset Next Slot
                 uc.write(data.unitResetCh, 0);
                 uc.write(data.explorerResetCh, 0);
