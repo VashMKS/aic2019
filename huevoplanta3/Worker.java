@@ -101,7 +101,7 @@ public class Worker extends MovingUnit {
         }
 
         //uc.println("target: (" + target.x + ", " + target.y + ")");
-       if(!movement.doMicro()){
+       if(!movement.doMicro(uc.getLocation().directionTo(target) )){
            //uc.drawLine(uc.getLocation(), target, "#0000ff" );
            movement.moveTo(target);
        }

@@ -116,14 +116,14 @@ public class Unit {
     void reportTowns() {
         TownInfo[] townsOnSight = uc.senseTowns();
         if(townsOnSight.length > 0 && data.nTown < 10) {
-            uc.println("town scan successful, potential new towns: " + townsOnSight.length);
+            //uc.println("town scan successful, potential new towns: " + townsOnSight.length);
             for (TownInfo town : townsOnSight) {
                 boolean newTownFound = false;
                 Location townLoc = town.getLocation();
-                uc.println("  checking location (" + townLoc.x + " " + townLoc.y + ")");
+                //uc.println("  checking location (" + townLoc.x + " " + townLoc.y + ")");
                 int index = tools.reportedTown(townLoc);
                 if (index == -1) {
-                    uc.println(" new town found, storing location");
+                    //uc.println(" new town found, storing location");
                     int townLocChannel = data.nTownCh + data.channelsPerTown*data.nTown + 1;
                     int townOwnerChannel = townLocChannel + 1;
                     int townsDistSqToBaseChannel = townLocChannel + 2;

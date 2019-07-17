@@ -26,7 +26,7 @@ public class CombatUnit extends MovingUnit {
 
         //uc.println("We are currently on Town " + data.townToAttack + " of " + data.nTown + ". My target is at " + target.x + " " + target.y);
 
-        if(!movement.doMicro()){
+        if(!movement.doMicro(uc.getLocation().directionTo(target) ) ){
             uc.drawLine(uc.getLocation(), target, "#0000ff" );
             movement.moveTo(target);
         }

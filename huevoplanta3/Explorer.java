@@ -39,7 +39,7 @@ public class Explorer extends CombatUnit {
 
     @Override
     void move() {
-        if(!movement.doMicro()) {
+        if(!movement.doMicro(data.prefDir)) {
             if (uc.canMove(data.prefDir)) uc.move(data.prefDir);
             else{
                 double r = Math.random();

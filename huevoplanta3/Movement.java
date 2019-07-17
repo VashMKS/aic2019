@@ -67,17 +67,17 @@ public class Movement {
         minDistToTarget = INF;
     }
 
-    boolean doMicro(){
+    boolean doMicro(Direction targetDir){
 
         // if(!uc.canMove()) uc.println("I'm on cooldown");
 
         UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
-        if (enemiesAround.length > 0 && uc.canMove()) {
+        if (uc.canMove() &&(enemiesAround.length > 0 || uc.getLocation().distanceSquared(data.enemyBase) <= 72)) {
             //uc.println(uc.getType() + " report in Round: " + uc.getRound());
             MicroInfo[] micro = new MicroInfo[9];
             for (int i = 0; i < 9; ++i) {
                 micro[i] = new MicroInfo(uc.getLocation().add(data.dirs[i]));
-                micro[i].senseImpact();
+                micro[i].checkTargetDirection(targetDir);
             }
             for (int i = 0; i < Math.min(enemiesAround.length,10); ++i) {
                 UnitInfo enemy = enemiesAround[i];
@@ -122,15 +122,29 @@ public class Movement {
         int minEnemyHealth = 1000;
         boolean canAttack = false;
         boolean isDiagonal = false;
+        boolean tooCloseToEnemyBase = false;
+        boolean onRouteToTarget = false;
 
         Location loc;
 
         public MicroInfo (Location _loc){
             this.loc = _loc;
+
             if(loc.directionTo(uc.getLocation()) == Direction.NORTHEAST  || loc.directionTo(uc.getLocation()) == Direction.NORTHWEST ||
                     loc.directionTo(uc.getLocation()) == Direction.SOUTHEAST  || loc.directionTo(uc.getLocation()) == Direction.SOUTHWEST ){
                 isDiagonal = true;
             }
+
+            if(loc.distanceSquared(data.enemyBase) <= 50 ) tooCloseToEnemyBase = true;
+
+            if (uc.senseImpact(loc) <= uc.getType().movementDelay ) maxDamage += 20;
+
+        }
+
+        void checkTargetDirection(Direction targetDir){
+
+            if(uc.getLocation().directionTo(loc) == targetDir) onRouteToTarget = true;
+
         }
 
 
@@ -162,10 +176,6 @@ public class Movement {
             }
         }
 
-        void senseImpact(){
-            //mira si el siguiente turno impactara una catapulta en el sitio
-            if (uc.senseImpact(loc) <= uc.getType().movementDelay ) maxDamage += 20;
-        }
 
         /*
         boolean canAttack(){
@@ -181,6 +191,10 @@ public class Movement {
 
             int dmg = uc.getType().attack;
             int hp = uc.getInfo().getHealth();
+
+            //Prioriza no entrar en el rango de vision de la Base enemiga
+            if(!tooCloseToEnemyBase && mic.tooCloseToEnemyBase) preference += 10;
+            if(tooCloseToEnemyBase && !mic.tooCloseToEnemyBase) preference -= 10;
 
             //Prioriza lo primero no morir este turno
             if (maxDamage < hp && mic.maxDamage >= hp) preference += 10;
@@ -208,6 +222,10 @@ public class Movement {
             if(!isDiagonal && mic.isDiagonal) preference += 0.5;
             if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
 
+            //prioriza acercarse al objectivo
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
+
             //Si las posiciones son equivalentes mejor no cambiar
             if (preference >= 0) return true;
             return false;
@@ -220,6 +238,10 @@ public class Movement {
 
             int dmg = uc.getType().attack;
             int hp = uc.getInfo().getHealth();
+
+            //Prioriza no entrar en el rango de vision de la Base enemiga
+            if(!tooCloseToEnemyBase && mic.tooCloseToEnemyBase) preference += 20;
+            if(tooCloseToEnemyBase && !mic.tooCloseToEnemyBase) preference -= 20;
 
             //Prioriza lo primero no morir este turno
             if (maxDamage < hp && mic.maxDamage >= hp) preference += 10;
@@ -248,6 +270,10 @@ public class Movement {
             if(!isDiagonal && mic.isDiagonal) preference += 0.5;
             if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
 
+            //prioriza acercarse al objectivo
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
+
             //Si las posiciones son equivalentes mejor no cambiar
             if (preference >= 0) return true;
             return false;
@@ -259,6 +285,10 @@ public class Movement {
             float preference = 0;
 
             int dmg = uc.getType().attack;
+
+            //Prioriza no entrar en el rango de vision de la Base enemiga
+            if(!tooCloseToEnemyBase && mic.tooCloseToEnemyBase) preference += 100;
+            if(tooCloseToEnemyBase && !mic.tooCloseToEnemyBase) preference -= 100;
 
             //Prioriza las casillas en las que menos daño le pueden hacer
             if(maxDamage < mic.maxDamage) preference += (mic.maxDamage - maxDamage);
@@ -275,8 +305,13 @@ public class Movement {
 
             }
 
+            //prioriza no moverse en diagonal (genera mas cooldown)
             if(!isDiagonal && mic.isDiagonal) preference += 0.5;
             if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
+
+            //prioriza acercarse al objectivo
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
 
             //Si las posiciones son equivalentes mejor no cambiar
             if (preference >= 0) return true;

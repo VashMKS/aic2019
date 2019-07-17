@@ -34,11 +34,13 @@ public class Mage extends CombatUnit {
 
     public void attack() {
 
-        UnitInfo[] unitsAround = uc.senseUnits(data.allyTeam, true);
+        UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
         Location target = uc.getLocation();
         float priority = 0;
 
-        for (UnitInfo unit : unitsAround) {
+        for (int i = 0; i < Math.min(enemiesAround.length, 6); ++i) {
+
+            UnitInfo unit = enemiesAround[i];
 
             for (Direction d : data.dirs) {
 
