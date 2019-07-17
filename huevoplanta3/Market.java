@@ -15,6 +15,7 @@ public class Market {
         this.tools = new Tools(uc, data);
     }
 
+    /*
     public void economy() {
 
         // market logs
@@ -26,8 +27,8 @@ public class Market {
 
         trade();
 
-        //uc.println("Requested: WOOD " + rWood + ", IRON " + rIron + ", CRYSTAL " + rCrystal);
-        //uc.println("Stock: WOOD " + uc.getWood() + ", IRON " + uc.getIron() + ", CRYSTAL " + uc.getCrystal());
+        uc.println("Requested: WOOD " + data.requestedWood + ", IRON " + data.requestedIron + ", CRYSTAL " + data.requestedCrystal);
+        uc.println("Stock: WOOD " + uc.getWood() + ", IRON " + uc.getIron() + ", CRYSTAL " + uc.getCrystal());
 
         if(data.requestedWood == 0 && data.requestedIron == 0 && data.requestedCrystal == 0) return;
 
@@ -67,10 +68,10 @@ public class Market {
         }
 
         if(data.tradingCrystal > 0){
-            //uc.println("Trading crystals for " + data.tradingCrystal + " turns more! Total Crystals for trade: " + crystalStock);
+            uc.println("Trading crystals for " + data.tradingCrystal + " turns more! Total Crystals for trade: " + data.crystalSurplus);
             if(data.tradingCrystal%2 == 0 && data.crystalSurplus > 0){
 
-                //uc.println("This turn trading " + 2*crystalStock/data.tradingCrystal);
+                uc.println("This turn trading " + 2*data.crystalSurplus/data.tradingCrystal);
 
                 if(data.woodSurplus < 0 && data.woodSurplus <= data.ironSurplus) uc.trade(Resource.CRYSTAL, Resource.WOOD, 2*data.crystalSurplus/data.tradingCrystal );
                 if(data.ironSurplus < 0 && data.ironSurplus <  data.woodSurplus) uc.trade(Resource.CRYSTAL, Resource.IRON, 2*data.crystalSurplus/data.tradingCrystal );
@@ -79,117 +80,79 @@ public class Market {
         }
 
     }
+    */
 
-    // exchange resources to fit our needs
-    /*void trade(){
+    public void trade(){
 
-        if(data.tradingWood > 0) {
-            if(data.tradingWood%2 ==0 && data.woodSurplus > 0) {
-                float tradeAmount = data.woodSurplus/data.tradingWood;
-                if(data.ironSurplus < 0 && data.crystalSurplus >= 0) {
-                    float tradeOutput = uc.tradeOutput(Resource.WOOD, Resource.IRON, 2*tradeAmount);
-                    uc.println("  - trade -" + 2*tradeAmount + "W --> +" + tradeOutput + "I");
+        float rWood    = uc.read(data.requestWoodCh);
+        float rIron    = uc.read(data.requestIronCh);
+        float rCrystal = uc.read(data.requestCrystalCh);
+        float woodSurplus    = uc.getWood()    - rWood;        float woodSurplusValue    = woodSurplus;
+        float ironSurplus    = uc.getIron()    - rIron;        float ironSurplusValue    = ironSurplus    *data.ironMultiplier;
+        float crystalSurplus = uc.getCrystal() - rCrystal;     float crystalSurplusValue = crystalSurplus *data.crystalMultiplier;
 
-                    uc.trade(Resource.WOOD, Resource.IRON, 2*tradeAmount);
-                }
-                if(data.ironSurplus >= 0 && data.crystalSurplus < 0) {
-                    float tradeOutput = uc.tradeOutput(Resource.WOOD, Resource.CRYSTAL, 2*tradeAmount);
-                    uc.println("  - trade -" + 2*tradeAmount + "w --> +" + tradeOutput + "C");
+        if(data.tradingCrystal > 0 && uc.canTrade()){
+            //uc.println("Trading crystals for " + data.tradingCrystal + " turns more! Total Crystals for trade: " + crystalSurplus);
+            if(data.tradingCrystal%2 == 0 && crystalSurplus > 0){
 
-                    uc.trade(Resource.WOOD, Resource.CRYSTAL, 2*tradeAmount);
-                }
-                if(data.ironSurplus < 0  && data.crystalSurplus < 0) {
-                    float tradeOutput1 = uc.tradeOutput(Resource.WOOD, Resource.IRON, tradeAmount);
-                    float tradeOutput2 = uc.tradeOutput(Resource.WOOD, Resource.CRYSTAL, tradeAmount);
-                    uc.println("  - trade -" + tradeAmount + "W --> +" + tradeOutput1 + "I");
-                    uc.println("  - trade -" + tradeAmount + "W --> +" + tradeOutput2 + "C");
+                //uc.println("This turn trading " + 2*crystalSurplus/data.tradingCrystal);
 
-                    uc.trade(Resource.WOOD, Resource.IRON   , tradeAmount);
-                    uc.trade(Resource.WOOD, Resource.CRYSTAL, tradeAmount);
-                }
-            }
-            --data.tradingWood;
-        }
-
-        if(data.tradingIron > 0) {
-            if(data.tradingIron%2 == 0 && data.requestedIron > 0) {
-                float tradeAmount = data.ironSurplus/data.tradingIron;
-                if(data.woodSurplus < 0 && data.crystalSurplus >= 0) {
-                    float tradeOutput = uc.tradeOutput(Resource.IRON, Resource.WOOD, 2*tradeAmount);
-                    uc.println("  - trade -" + 2*tradeAmount + "I --> +" + tradeOutput + "W");
-
-                    uc.trade(Resource.IRON, Resource.WOOD   , 2*tradeAmount);
-                }
-                if(data.woodSurplus >= 0 && data.crystalSurplus < 0) {
-                    float tradeOutput = uc.tradeOutput(Resource.IRON, Resource.CRYSTAL, 2*tradeAmount);
-                    uc.println("  - trade -" + 2*tradeAmount + "I --> +" + tradeOutput + "C");
-
-                    uc.trade(Resource.IRON, Resource.CRYSTAL, 2*tradeAmount);
-                }
-                if(data.woodSurplus < 0  && data.crystalSurplus < 0) {
-                    float tradeOutput1 = uc.tradeOutput(Resource.IRON, Resource.WOOD, tradeAmount);
-                    float tradeOutput2 = uc.tradeOutput(Resource.IRON, Resource.CRYSTAL, tradeAmount);
-                    uc.println("  - trade -" + tradeAmount + "I --> +" + tradeOutput1 + "W");
-                    uc.println("  - trade -" + tradeAmount + "I --> +" + tradeOutput2 + "C");
-
-                    uc.trade(Resource.IRON, Resource.WOOD   , tradeAmount);
-                    uc.trade(Resource.IRON, Resource.CRYSTAL, tradeAmount);
-                }
-            }
-            --data.tradingIron;
-        }
-
-        if(data.tradingCrystal > 0) {
-            if(data.tradingCrystal%2 == 0 && data.crystalSurplus > 0) {
-                float tradeAmount = data.crystalSurplus/data.tradingCrystal;
-                if(data.woodSurplus < 0 && data.ironSurplus >= 0) {
-                    float tradeOutput = uc.tradeOutput(Resource.CRYSTAL, Resource.WOOD, 2*tradeAmount);
-                    uc.println("  - trade -" + 2*tradeAmount + "C --> +" + tradeOutput + "W");
-
-                    uc.trade(Resource.CRYSTAL, Resource.WOOD, 2*tradeAmount);
-                }
-                if(data.woodSurplus >= 0 && data.ironSurplus < 0) {
-                    float tradeOutput = uc.tradeOutput(Resource.CRYSTAL, Resource.WOOD, 2*tradeAmount);
-                    uc.println("  - trade -" + 2*tradeAmount + "C --> +" + tradeOutput + "I");
-
-                    uc.trade(Resource.CRYSTAL, Resource.IRON, 2*tradeAmount);
-                }
-                if(data.woodSurplus < 0  && data.ironSurplus < 0) {
-                    float tradeOutput1 = uc.tradeOutput(Resource.CRYSTAL, Resource.WOOD, tradeAmount);
-                    float tradeOutput2 = uc.tradeOutput(Resource.CRYSTAL, Resource.IRON, tradeAmount);
-                    uc.println("  - trade -" + tradeAmount + "C --> +" + tradeOutput1 + "W");
-                    uc.println("  - trade -" + tradeAmount + "C --> +" + tradeOutput2 + "I");
-
-                    uc.trade(Resource.CRYSTAL, Resource.WOOD, tradeAmount);
-                    uc.trade(Resource.CRYSTAL, Resource.IRON, tradeAmount);
-                }
+                if(woodSurplus < 0 && woodSurplusValue <= ironSurplusValue) uc.trade(Resource.CRYSTAL, Resource.WOOD, 2* crystalSurplus /data.tradingCrystal );
+                if(ironSurplus < 0 && ironSurplusValue < woodSurplusValue) uc.trade(Resource.CRYSTAL, Resource.IRON, 2* crystalSurplus /data.tradingCrystal );
             }
             --data.tradingCrystal;
         }
 
+        if(data.tradingIron > 0 && uc.canTrade()){
+            if(data.tradingIron%2 == 0 && ironSurplus > 0){
+                if(woodSurplus < 0 && woodSurplusValue <= crystalSurplusValue) uc.trade(Resource.IRON, Resource.WOOD   , 2* ironSurplus /data.tradingIron );
+                if(crystalSurplus < 0 && crystalSurplusValue < woodSurplusValue) uc.trade(Resource.IRON, Resource.CRYSTAL, 2* ironSurplus /data.tradingIron );
+            }
+            --data.tradingIron;
+        }
+
+        if(data.tradingWood > 0 && uc.canTrade()){
+            if(data.tradingWood%2 == 0 && woodSurplus > 0){
+                if(ironSurplus < 0 && ironSurplusValue <= crystalSurplusValue) uc.trade(Resource.WOOD, Resource.IRON   , 2* woodSurplus /data.tradingWood );
+                if(crystalSurplus < 0 && crystalSurplusValue < ironSurplusValue) uc.trade(Resource.WOOD, Resource.CRYSTAL, 2* woodSurplus /data.tradingWood );
+            }
+            --data.tradingWood;
+        }
+
     }
 
-    void economy() {
+    public void economy() {
+
+        float rWood    = uc.read(data.requestWoodCh);
+        float rIron    = uc.read(data.requestIronCh);
+        float rCrystal = uc.read(data.requestCrystalCh);
 
         trade();
 
-        //uc.println("Requested: WOOD " + data.requestedWood + ", IRON " + data.requestedIron + ", CRYSTAL " + data.requestedCrystal);
+        //uc.println("Requested: WOOD " + rWood + ", IRON " + rIron + ", CRYSTAL " + rCrystal);
+        //uc.println("Stock: WOOD " + uc.getWood() + ", IRON " + uc.getIron() + ", CRYSTAL " + uc.getCrystal());
 
-        if(data.requestedWood == 0 && data.requestedIron == 0 && data.requestedCrystal == 0) return;
+        if(rWood == 0 && rIron == 0 && rCrystal == 0) return;
 
-        if(data.woodSurplus                           > data.economyThreshold && data.tradingWood    == 0){
+        float woodStock    = uc.getWood()    - rWood;     float woodStockValue    = woodStock;
+        float ironStock    = uc.getIron()    - rIron;     float ironStockValue    = ironStock*data.ironMultiplier;
+        float crystalStock = uc.getCrystal() - rCrystal;  float crystalStockValue = crystalStock*data.crystalMultiplier;
+
+        if(woodStock > 0 && ironStock > 0 && crystalStock > 0) return;
+
+        if(woodStockValue    > data.economyThreshold && data.tradingWood    == 0){
             data.tradingWood    = 20;
             //uc.println("Trading Wood now!");
         }
-        if(data.ironSurplus   *data.ironMultiplier    > data.economyThreshold && data.tradingIron    == 0){
+        if(ironStockValue    > data.economyThreshold && data.tradingIron    == 0){
             data.tradingIron    = 20;
             //uc.println("Trading Iron now!");
         }
-        if(data.crystalSurplus*data.crystalMultiplier > data.economyThreshold && data.tradingCrystal == 0) {
+        if(crystalStockValue > data.economyThreshold && data.tradingCrystal == 0) {
             data.tradingCrystal = 20;
             //uc.println("Trading crystals now!");
         }
 
-    }*/
+    }
 
 }
