@@ -85,7 +85,7 @@ public class Data {
     Location enemyLoc; // currently unused
 
     // Worker variables
-    int nMinerMax = 16;         int nMinerPerMine = 1;          int workerHealthThreshold;
+    int nMinerMax = 16;         int nMinerPerMine = 2;          int workerHealthThreshold;
     boolean isMiner;            boolean isJobless;              boolean onDelivery;
     Location myMine;            int myMineIndex;                int myMineLocCh;
     int myMineMinerCh;          int myMineDistSqToBaseCh;       boolean hasTown;

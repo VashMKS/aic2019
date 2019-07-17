@@ -164,13 +164,13 @@ public class Tools {
 
     // checks if a certain town has been reported before
     int reportedTown(Location loc) {
-        //uc.println("let's check if this town has been reported");
+        uc.println("let's check if this town has been reported");
         for(int i = 0; i < data.nTown; i++) {
-            //uc.println("*checks list*");
+            uc.println("*checks list*");
             int townLocChannel = data.nTownCh + data.channelsPerTown*i + 1;
             Location townLoc = decodeLocation(uc.read(townLocChannel));
             if (loc.isEqual(townLoc)) {
-                //uc.println("found it!");
+                uc.println("found it!");
                 return i;
             }
         }
