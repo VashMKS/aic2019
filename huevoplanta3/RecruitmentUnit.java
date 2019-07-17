@@ -10,15 +10,9 @@ class RecruitmentUnit extends Structure {
 
         // Base
         if (uc.getType() == UnitType.BASE) {
-            // TODO: do it with allied mines/towns instead
-            if (data.nWorker < data.nMinerMax + data.nTownsfolkMax) {
-                if (data.nMiner < data.nMinerPerMine*data.nMine && data.nMiner < data.nMinerMax) {
-                    trySpawnWorker();
-                }
-                if (data.nTownsfolk < data.nTownsfolkPerTown*data.nTown && data.nTownsfolk < data.nTownsfolkMax) {
-                    trySpawnWorker();
-                }
-
+            // TODO: do it with "safe" mines instead
+            if (data.nMiner < data.nMinerPerMine*data.nMine && data.nMiner < data.nMinerMax) {
+                trySpawnWorker();
             }
             //TODO: poner una condicion mejor
             if(uc.getRound() > 25){
@@ -75,7 +69,6 @@ class RecruitmentUnit extends Structure {
         }
 
         if (!done){
-            request(UnitType.WORKER, Math.min(data.nTownsfolkPerTown*data.nTown, data.nTownsfolk) - data.nTownsfolk);
             request(UnitType.WORKER, Math.min(data.nMinerPerMine*data.nMine, data.nMinerMax) - data.nWorker);
 
         }
@@ -132,7 +125,6 @@ class RecruitmentUnit extends Structure {
         if(spawnSoldier) request(UnitType.SOLDIER, data.nRequestedSoldier - data.nSoldier);
         if(spawnArcher)  request(UnitType.ARCHER , data.nRequestedArcher - data.nArcher );
         if(spawnMage)    request(UnitType.MAGE , data.nRequestedMage - data.nMage );
-
 
     }
 

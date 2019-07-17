@@ -63,7 +63,6 @@ public class Unit {
         reportResources();
         reportTowns();
         reportTownControl();
-        reportTerrain();
     }
 
     // scans for mines and reports new findings to the comm channels
@@ -71,26 +70,44 @@ public class Unit {
         ResourceInfo[] minesOnSight = uc.senseResources();
         if(minesOnSight.length > 0) {
             //uc.println("mine scan successful, potential new mines: " + minesOnSight.length);
-            boolean newMineFound = false;
-            int mineLocChannel = data.nMineCh + 2*data.nMine - 1;
+            int counter = 0;
             for (ResourceInfo mineInfo : minesOnSight) {
+
+                if (counter > 16) return;
+                else counter++;
+
+                boolean newMineFound = false;
                 Location mineLoc = mineInfo.getLocation();
+                int distSqToBase = mineLoc.distanceSquared(data.allyBase);
 
-                if(mineLoc.distanceSquared(data.enemyBase) < 49 ) continue;
-                if(mineLoc.distanceSquared(data.allyBase) > 36 && data.nMine > 4) continue;
+                if(distSqToBase > 100 && data.nMine > 4) continue;
+                if(mineLoc.distanceSquared(data.enemyBase) < 50) continue;
 
-                //uc.println("  checking location (" + mineLoc.x + " " + mineLoc.y + ")");
-                if (!tools.reportedMine(mineLoc)) {
-                    //uc.println("   new mine found, storing location");
-                    mineLocChannel += 2;
-                    uc.write(mineLocChannel, tools.encodeLocation(mineLoc.x,mineLoc.y));
-                    uc.write(data.nMineCh, data.nMine+1);
+                // TODO: hard cap on number of iterations of this function
+                if (data.nMine < data.nMineMax) {
+                    // add this mine to our list of mines if never seen before
+                    if (tools.reportedMine(mineLoc) == -1) {
+                        int mineLocChannel = data.nMineCh + data.channelsPerMine*data.nMine + 1;
+                        int mineDistSqToBaseChannel = mineLocChannel + 2;
+                        uc.write(mineLocChannel, tools.encodeLocation(mineLoc.x,mineLoc.y));
+                        uc.write(mineDistSqToBaseChannel, distSqToBase);
+                        uc.write(data.nMineCh, data.nMine+1);
+                        newMineFound = true;
+                    }
+                } else if (distSqToBase < data.mineMinDistSqToBase) {
+                    // swap the mine with the longest distance to base for this one
+                    data.mineMinDistSqToBase = distSqToBase;
+                    uc.write(data.mineMinDistSqToBaseCh, distSqToBase);
+                    int index = data.mineMaxDistSqToBaseIndexCh;
+                    int mineLocChannel = data.nMineCh + data.channelsPerMine*index + 1;
+                    int mineDistSqToBaseChannel = mineLocChannel + 2;
+                    uc.write(mineLocChannel, tools.encodeLocation(mineLoc.x, mineLoc.y));
+                    uc.write(mineDistSqToBaseChannel, distSqToBase);
                     newMineFound = true;
-                } else {
-                    //uc.println("   mine already scanned");
                 }
+
+                if (newMineFound) data.updateMines();
             }
-            if (newMineFound) data.updateMines();
             //uc.println("so far " + uc.read(data.nMineCh) + " mines discovered");
         }
     }
@@ -100,20 +117,35 @@ public class Unit {
         TownInfo[] townsOnSight = uc.senseTowns();
         if(townsOnSight.length > 0) {
             //uc.println("town scan successful, potential new towns: " + townsOnSight.length);
-            boolean newTownFound = false;
-            int townLocChannel = data.nTownCh + 2*data.nTown - 1;
-            for (TownInfo townInfo : townsOnSight) {
-                Location townLoc = townInfo.getLocation();
+            for (TownInfo town : townsOnSight) {
+                boolean newTownFound = false;
+                Location townLoc = town.getLocation();
                 //uc.println("  checking location (" + townLoc.x + " " + townLoc.y + ")");
-                if (!tools.reportedTown(townLoc)) {
+                int index = tools.reportedTown(townLoc);
+                if (index == -1) {
                     //uc.println(" new town found, storing location");
-                    townLocChannel += 2;
+                    int townLocChannel = data.nTownCh + data.channelsPerTown*data.nTown;
+                    int townOwnerChannel = townLocChannel + 1;
+                    int townsDistSqToBaseChannel = townLocChannel + 2;
                     uc.write(townLocChannel, tools.encodeLocation(townLoc.x,townLoc.y));
+                    uc.write(townOwnerChannel, 0);
+                    uc.write(townsDistSqToBaseChannel, townLoc.distanceSquared(data.allyBase));
                     uc.write(data.nTownCh, data.nTown+1);
                     newTownFound = true;
+                } else {
+                    if (town.getOwner() == data.allyTeam) {
+                        data.townOwned[index] = true;
+                        int townOwnerChannel = data.nTownCh + data.channelsPerTown*data.nTown + 2;
+                        uc.write(townOwnerChannel, 1);
+                    } else {
+                        data.townOwned[index] = false;
+                        int townOwnerChannel = data.nTownCh + data.channelsPerTown*data.nTown + 2;
+                        uc.write(townOwnerChannel, 0);
+                    }
                 }
+
+                if (newTownFound) data.updateTowns();
             }
-            if (newTownFound) data.updateTowns();
             //uc.println("so far " + uc.read(data.nTownCh) + " towns discovered");
         }
     }
@@ -124,20 +156,17 @@ public class Unit {
         if (townsOnSight.length > 0) {
             for (TownInfo townInfo : townsOnSight) {
 
-                int townLocChannel = data.nTownCh + 2*data.nTownToAttack + 1;
+                int townLocChannel = data.nTownCh + data.channelsPerTown*data.townToAttack + 1;
                 Location loc = townInfo.getLocation();
 
                 if(tools.decodeLocation(uc.read(townLocChannel)).isEqual(loc)){
-                    if (townInfo.getOwner() == data.allyTeam ) ++data.nTownToAttack;
+                    if (townInfo.getOwner() == data.allyTeam) {
+                        data.townToAttack += 1;
+                        data.townToAttack = data.townToAttack % data.nTown;
+                    }
                 }
             }
         }
-    }
-
-
-    // scans for terrain and updates the internal map
-    void reportTerrain() {
-
     }
 
 }

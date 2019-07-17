@@ -53,12 +53,12 @@ public class Knight extends CombatUnit {
         if(uc.getRound() <= 200){
             target.x = (3*data.allyBase.x + data.enemyBase.x)/4;
             target.y = (3*data.allyBase.y + data.enemyBase.y)/4;
-        }else{
+        } else {
             target.x = (data.allyBase.x + data.enemyBase.x)/2;
             target.y = (data.allyBase.y + data.enemyBase.y)/2;
         }
 
-        if(! movement.doMicro() ){
+        if(!movement.doMicro() ){
             uc.drawLine(uc.getLocation(), target, "#0000ff" );
             movement.moveTo(target);
         }

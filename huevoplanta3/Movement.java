@@ -128,7 +128,7 @@ public class Movement {
         public MicroInfo (Location _loc){
             this.loc = _loc;
             if(loc.directionTo(uc.getLocation()) == Direction.NORTHEAST  || loc.directionTo(uc.getLocation()) == Direction.NORTHWEST ||
-               loc.directionTo(uc.getLocation()) == Direction.SOUTHEAST  || loc.directionTo(uc.getLocation()) == Direction.SOUTHWEST ){
+                    loc.directionTo(uc.getLocation()) == Direction.SOUTHEAST  || loc.directionTo(uc.getLocation()) == Direction.SOUTHWEST ){
                 isDiagonal = true;
             }
         }
@@ -258,7 +258,6 @@ public class Movement {
 
             float preference = 0;
 
-
             int dmg = uc.getType().attack;
 
             //Prioriza las casillas en las que menos daño le pueden hacer
@@ -273,6 +272,7 @@ public class Movement {
                 //Prioriza las casillas en las que puede hacer killingBlow
                 if (minEnemyHealth <= dmg && mic.minEnemyHealth > dmg) preference += 300;
                 if (minEnemyHealth > dmg && mic.minEnemyHealth <= dmg) preference -= 300;
+
             }
 
             if(!isDiagonal && mic.isDiagonal) preference += 0.5;

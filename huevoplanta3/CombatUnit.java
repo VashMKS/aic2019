@@ -11,22 +11,20 @@ public class CombatUnit extends MovingUnit {
     void move(){
         Location target = new Location();
 
-        if(uc.getRound() <= 100 || data.nCombatUnit < 10 ){
+        if(uc.getRound() <= 75 || data.nCombatUnit < 10 ){
             target.x = (3*data.allyBase.x + data.enemyBase.x)/4;
             target.y = (3*data.allyBase.y + data.enemyBase.y)/4;
-        }else{
-            if(data.nTownToAttack < data.nTown){
-                int townLocChannel = data.nTownCh + 2*data.nTownToAttack + 1;
-                target = tools.decodeLocation(uc.read(townLocChannel) );
-            }
-            else{
+        } else {
+            if (data.townToAttack == -1) {
                 target.x = (data.allyBase.x + data.enemyBase.x)/2;
                 target.y = (data.allyBase.y + data.enemyBase.y)/2;
+            } else {
+                int townLocChannel = data.nTownCh + data.channelsPerTown * data.townToAttack + 1;
+                target = tools.decodeLocation(uc.read(townLocChannel));
             }
-
         }
 
-        //uc.println("We are currently on Town " + data.nTownToAttack + " of " + data.nTown + ". My target is at " + target.x + " " + target.y);
+        //uc.println("We are currently on Town " + data.townToAttack + " of " + data.nTown + ". My target is at " + target.x + " " + target.y);
 
         if(!movement.doMicro()){
             uc.drawLine(uc.getLocation(), target, "#0000ff" );

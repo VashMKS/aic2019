@@ -53,10 +53,6 @@ public class Worker extends MovingUnit {
             uc.write(data.minerReportCh, uc.read(data.minerReportCh)+1);
             uc.write(data.minerResetCh, 0);
         }
-        if (data.isTownsfolk) {
-            uc.write(data.townsfolkReportCh, uc.read(data.townsfolkReportCh)+1);
-            uc.write(data.townsfolkResetCh, 0);
-        }
         if (data.isJobless) {
             uc.write(data.joblessReportCh, uc.read(data.joblessReportCh) + 1);
             uc.write(data.joblessResetCh, 0);
@@ -75,7 +71,7 @@ public class Worker extends MovingUnit {
     }
 
     void repair() {
-        // TODO: if adjacent to an allied town repair it
+        // TODO: if adjacent to an owned town repair it
     }
 
     void gather(){
@@ -89,22 +85,24 @@ public class Worker extends MovingUnit {
         Location target = uc.getLocation().add(dir);
 
         if (data.isMiner) {
+            // TODO: make that 100 less arbitrary (maybe depend on distance to the base)
+            if (data.onDelivery || tools.currency(uc.getInfo().getWood(), uc.getInfo().getIron(), uc.getInfo().getCrystal()) > 100) {
 
-            if (data.onDelivery || tools.currency(uc.getInfo().getWood(), uc.getInfo().getIron(), uc.getInfo().getCrystal()) > 10) {
-                target = data.allyBase;
+                if (data.hasTown) target = data.myTown;
+                else target = data.allyBase;
+
                 data.onDelivery = true;
-                //uc.println("Worker ID" + data.ID + " on delivery");
+                //uc.println("Worker ID" + data.ID + " on delivery towards (" + target.x + ", " + target.y + ")");
 
             } else {
                 target = data.myMine;
                 //uc.println("Worker ID" + data.ID + " headed to mine at (" + data.myMine.x + ", " + data.myMine.y + ")");
             }
-
         }
 
         //uc.println("target: (" + target.x + ", " + target.y + ")");
-       if(! movement.doMicro() ){
-           uc.drawLine(uc.getLocation(), target, "#0000ff" );
+       if(!movement.doMicro()){
+           //uc.drawLine(uc.getLocation(), target, "#0000ff" );
            movement.moveTo(target);
        }
 

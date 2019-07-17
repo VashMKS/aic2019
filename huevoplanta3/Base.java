@@ -16,7 +16,6 @@ public class Base extends RecruitmentUnit {
     void run() {
 
         uc.println("Base is at (" + uc.getLocation().x + ", " + uc.getLocation().y + ")");
-        //uc.println("max towns: " + GameConstants.MAX_TOWNS);
 
         while (true) {
 
@@ -30,6 +29,7 @@ public class Base extends RecruitmentUnit {
 
             attack();
 
+            //market.economy();
             economy();
 
             uc.yield();
@@ -38,24 +38,27 @@ public class Base extends RecruitmentUnit {
     }
 
     void logs() {
-        // worker logs
+        // miner logs
         if (data.currentRound % 100 == 15) {
             uc.println("Round " + data.currentRound + " Worker Report:\n " +
                        "  - " + data.nJobless + " jobless workers out of " + data.nWorker + " workers. " +
                        "Threshold is at " + data.workerHealthThreshold + " HP");
             uc.println("  - " + data.nMiner + " miners are active in " + data.nMine + " mines. " +
-                       "Cap is at " + data.nMinerMax + " miners");
+                       "Cap is at " + data.nMinerMax + " miners and " + data.nMineMax + " mines");
             for (int i = 0; i < data.nMine; i++) {
                 Location mineLoc = data.mineLocations[i];
-                int nMiners = data.miners[i];
-                uc.println("  - mine " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " miners");
+                uc.println("  - mine " + i + " (" + mineLoc.x + ", " + mineLoc.y + "), dist sq to base " +
+                           data.mineDistSqToBase[i] + " and " + data.miners[i] + " miners");
             }
-            uc.println("  - " + data.nTownsfolk + " townsfolk are active in " + data.nTown + " towns. " +
-                       "Cap is at " + data.nTownsfolkMax + " townsfolk");
+        }
+
+        // town logs
+        if (data.currentRound % 100 == 35) {
+            uc.println("Round " + data.currentRound + " Town Report:");
             for (int i = 0; i < data.nTown; i++) {
                 Location mineLoc = data.townLocations[i];
-                int nMiners = data.townsfolk[i];
-                uc.println("  - town " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") with " + nMiners + " isTownsfolk");
+                if (data.townOwned[i]) uc.println("  - town " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") and we own it");
+                else uc.println("  - town " + i + " is at (" + mineLoc.x + ", " + mineLoc.y + ") and we don't own it");
             }
         }
 
@@ -63,8 +66,8 @@ public class Base extends RecruitmentUnit {
         if (data.currentRound % 100 == 25) {
             uc.println("Round " + data.currentRound + " Army Report:\n  - Combat Units: " + data.nCombatUnit +
                     "\n  - Soldiers: " + data.nSoldier + " out of " + data.nRequestedSoldier +
-                    "\n  - Archers: " + data.nArcher  + " out of " + data.nRequestedArcher +
-                    "\n  - Mages: " + data.nMage    + " out of " + data.nRequestedMage);
+                    "\n  - Archers: " + data.nArcher + " out of " + data.nRequestedArcher +
+                    "\n  - Mages: " + data.nMage + " out of " + data.nRequestedMage);
         }
     }
 
@@ -129,15 +132,15 @@ public class Base extends RecruitmentUnit {
 
         if(woodStock                           > data.economyThreshold && data.tradingWood    == 0){
             data.tradingWood    = 20;
-            uc.println("Trading Wood now!");
+            //uc.println("Trading Wood now!");
         }
         if(ironStock   *data.ironMultiplier    > data.economyThreshold && data.tradingIron    == 0){
             data.tradingIron    = 20;
-            uc.println("Trading Iron now!");
+            //uc.println("Trading Iron now!");
         }
         if(crystalStock*data.crystalMultiplier > data.economyThreshold && data.tradingCrystal == 0) {
             data.tradingCrystal = 20;
-            uc.println("Trading crystals now!");
+            //uc.println("Trading crystals now!");
         }
 
     }

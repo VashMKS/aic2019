@@ -148,32 +148,33 @@ public class Tools {
     }
 
     // checks if a certain mine has been reported before
-    boolean reportedMine(Location loc){
+    int reportedMine(Location loc){
         //uc.println("let's check if this mine has been reported");
         for(int i = 0; i < data.nMine; i++) {
             //uc.println("*checks list*");
-            int mineLocChannel = data.nMineCh + 1 + 2*i;
+            int mineLocChannel = data.nMineCh + data.channelsPerMine*i + 1;
             Location mineLoc = decodeLocation(uc.read(mineLocChannel));
             if (loc.isEqual(mineLoc)) {
                 //uc.println("found it!");
-                return true;
+                return i;
             }
         }
-        return false;
+        return -1;
     }
 
     // checks if a certain town has been reported before
-    boolean reportedTown(Location loc) {
+    int reportedTown(Location loc) {
         //uc.println("let's check if this town has been reported");
         for(int i = 0; i < data.nTown; i++) {
             //uc.println("*checks list*");
-            Location townLoc = decodeLocation(uc.read(data.nTownCh + 1 +2*i));
+            int townLocChannel = data.nTownCh + data.channelsPerTown*i + 1;
+            Location townLoc = decodeLocation(uc.read(townLocChannel));
             if (loc.isEqual(townLoc)) {
                 //uc.println("found it!");
-                return true;
+                return i;
             }
         }
-        return false;
+        return -1;
     }
 
     // converts any amount of resources to base currency (wood)
