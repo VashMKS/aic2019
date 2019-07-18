@@ -11,16 +11,25 @@ public class CombatUnit extends MovingUnit {
     void move(){
         Location target = new Location();
 
-        if(uc.getRound() <= 75 || data.nCombatUnit < 10 ){
+        chooseTownToAttack();
+
+        if(data.nCombatUnit > 14) data.armyReadyToAttack = true;
+        if(data.nCombatUnit < 6 ) data.armyReadyToAttack = false;
+
+        if(uc.getRound() <= 75 || !data.armyReadyToAttack ){
             target.x = (3*data.allyBase.x + data.enemyBase.x)/4;
             target.y = (3*data.allyBase.y + data.enemyBase.y)/4;
         } else {
-            if (data.townToAttack == -1) {
-                target.x = (data.allyBase.x + data.enemyBase.x)/2;
-                target.y = (data.allyBase.y + data.enemyBase.y)/2;
-            } else {
+            if (data.townToAttack != -1) {
                 int townLocChannel = data.nTownCh + data.channelsPerTown * data.townToAttack + 1;
                 target = tools.decodeLocation(uc.read(townLocChannel));
+            }else if(uc.read(data.neutralLocCh) != 0) {
+                Location neutralLoc = tools.decodeLocation( uc.read(data.neutralLocCh) );
+                target = neutralLoc;
+            }else{
+
+                target.x = (data.allyBase.x + data.enemyBase.x)/2;
+                target.y = (data.allyBase.y + data.enemyBase.y)/2;
             }
         }
 
@@ -30,6 +39,28 @@ public class CombatUnit extends MovingUnit {
             uc.drawLine(uc.getLocation(), target, "#0000ff" );
             movement.moveTo(target);
         }
+
+    }
+
+    public void chooseTownToAttack(){
+
+        boolean found = false;
+        int minDist  = data.INF;
+
+        for(int i = 0; i < data.nTown; ++i){
+            int townLocChannel = data.nTownCh + data.channelsPerTown*i + 1;
+            int townOwnerChannel = townLocChannel + 1;
+            int townsDistSqToBaseChannel = townLocChannel + 2;
+
+            if(uc.read(townOwnerChannel) == 0 && uc.read(townsDistSqToBaseChannel) < minDist){
+                data.townToAttack = i;
+                minDist = uc.read(townsDistSqToBaseChannel);
+                found = true;
+            }
+
+        }
+
+        if (!found) data.townToAttack = -1;
 
     }
 
@@ -53,8 +84,8 @@ public class CombatUnit extends MovingUnit {
 
     public int targetPriority(UnitInfo unit) {
         if(unit.getType() == UnitType.MAGE)     return 10;
-        if(unit.getType() == UnitType.SOLDIER)  return 9;
         if(unit.getType() == UnitType.ARCHER)   return 8;
+        if(unit.getType() == UnitType.SOLDIER)  return 9;
         if(unit.getType() == UnitType.KNIGHT)   return 7;
         if(unit.getType() == UnitType.TOWER)    return 6;
         if(unit.getType() == UnitType.BASE)     return 5;

@@ -99,8 +99,9 @@ class RecruitmentUnit extends Structure {
     void trySpawnArmy() {
 
         boolean spawnSoldier =(data.nSoldier <= data.nRequestedSoldier);
-        boolean spawnArcher  =(data.nArcher  <= data.nRequestedArcher) && (data.nSoldier > 5 );
-        boolean spawnMage    =(data.nMage    <= data.nRequestedMage)   && (data.nArcher  > 10 );
+        boolean spawnArcher  =(data.nArcher  <= data.nRequestedArcher) && (data.nSoldier > 2);
+        boolean spawnKnight  =(data.nKnight  <= data.nRequestedKnight) && (data.nArcher  > 4);
+        boolean spawnMage    =(data.nMage    <= data.nRequestedMage)   && (data.nArcher  > 6);
 
         boolean done = false;
 
@@ -108,17 +109,26 @@ class RecruitmentUnit extends Structure {
             if(!done && spawnSoldier) done = trySpawnSoldier();
             if(!done && spawnArcher ) done = trySpawnArcher();
             if(!done && spawnMage   ) done = trySpawnMage();
+            if(!done && spawnKnight ) done = trySpawnKnight();
+        }
+        if (data.nCombatUnit%4 == 1){
+            if(!done && spawnArcher ) done = trySpawnArcher();
+            if(!done && spawnMage   ) done = trySpawnMage();
+            if(!done && spawnKnight ) done = trySpawnKnight();
+            if(!done && spawnSoldier) done = trySpawnSoldier();
         }
         if (data.nCombatUnit%4 == 2){
             if(!done && spawnMage   ) done = trySpawnMage();
+            if(!done && spawnKnight ) done = trySpawnKnight();
             if(!done && spawnSoldier) done = trySpawnSoldier();
             if(!done && spawnArcher ) done = trySpawnArcher();
 
         }
-        if (data.nCombatUnit%4 == 1 || data.nCombatUnit%4 == 3){
+        if (data.nCombatUnit%4 == 3){
+            if(!done && spawnKnight ) done = trySpawnKnight();
+            if(!done && spawnSoldier) done = trySpawnSoldier();
             if(!done && spawnArcher ) done = trySpawnArcher();
             if(!done && spawnMage   ) done = trySpawnMage();
-            if(!done && spawnSoldier) done = trySpawnSoldier();
         }
 
         if(spawnSoldier) request(UnitType.SOLDIER, data.nRequestedSoldier - data.nSoldier);
@@ -195,6 +205,32 @@ class RecruitmentUnit extends Structure {
                 // Update current data
                 data.nUnit = data.nUnit + 1;
                 data.nMage = data.nMage + 1;
+                data.nCombatUnit = data.nCombatUnit + 1;
+                done = true;
+            }
+
+        }
+
+        return done;
+    }
+
+    boolean trySpawnKnight(){
+
+        boolean done = false;
+        for (Direction dir : data.dirs) {
+            if (!done && uc.canSpawn(dir, UnitType.KNIGHT)) {
+                uc.spawn(dir, UnitType.KNIGHT);
+                // Report to the Comm Channel
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
+                uc.write(data.knightCh, uc.read(data.knightCh + 1));
+                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
+                // Reset Next Slot
+                uc.write(data.unitResetCh, 0);
+                uc.write(data.knightCh, 0);
+                uc.write(data.combatUnitResetCh, 0);
+                // Update current data
+                data.nUnit = data.nUnit + 1;
+                data.nKnight = data.nKnight + 1;
                 data.nCombatUnit = data.nCombatUnit + 1;
                 done = true;
             }

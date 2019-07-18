@@ -34,7 +34,7 @@ public class Data {
     int enemyContactCh          = 104;    // Ch 104
     int neutralOnSightCh        = 105;    // Ch 105
     int neutralContactCh        = 106;    // Ch 106
-    int enemyLocCh              = 107;    // Ch 107
+    int neutralLocCh = 107;    // Ch 107
     int requestedSoldiersCh     = 108;    // Ch 108
     int requestedArchersCh      = 109;    // Ch 109
     int requestedKnightCh       = 110;    // Ch 110
@@ -81,7 +81,7 @@ public class Data {
     boolean hostileOnSight;                     boolean hostileContact;
     boolean neutralOnSight;                     boolean neutralContact;
     boolean enemyOnSight;                       boolean enemyContact;
-    Location enemyLoc; // currently unused
+    Location neutralLoc; // currently unused
 
     // Worker variables
     int nWorkerMax = 16;        int nMinerMax = 16;             int nMinerPerMine = 1;
@@ -97,8 +97,8 @@ public class Data {
     int economyThreshold = 200;
 
     // Army variables TODO: demanar unitats de forma dinamica
-    int nRequestedSoldier = 25; int nRequestedArcher = 15;      int nRequestedMage = 5;
-    int townToAttack;
+    int nRequestedSoldier = 15; int nRequestedArcher = 15;      int nRequestedMage = 5;
+    int nRequestedKnight = 10;  int townToAttack;               boolean armyReadyToAttack;
 
     // Explorer variables
     Direction prefDir;
@@ -117,7 +117,10 @@ public class Data {
         enemyBase    = enemyTeam.getInitialLocation();
         allyBase     = allyTeam.getInitialLocation();
         turnsAlive   = 0;
-        townToAttack = 0;
+
+        // Army Initializer
+        townToAttack = -1;
+        armyReadyToAttack = false;
 
         // Base Initializer
         if (uc.getType() == UnitType.BASE) {
@@ -271,7 +274,7 @@ public class Data {
         enemyOnSight   = (uc.read(enemyOnSightCh) == 1);
         enemyContact   = (uc.read(enemyContactCh) == 1);
 
-        enemyLoc = tools.decodeLocation(uc.read(enemyLocCh));
+        neutralLoc = tools.decodeLocation(uc.read(neutralLocCh));
 
         // Reset Contact every 20 rounds
         if (currentRound%20 == 0) {
