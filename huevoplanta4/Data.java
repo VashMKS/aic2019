@@ -98,7 +98,8 @@ public class Data {
 
     // Army variables TODO: demanar unitats de forma dinamica
     int nRequestedSoldier = 15; int nRequestedArcher = 15;      int nRequestedMage = 5;
-    int nRequestedKnight = 10;  int townToAttack;               boolean armyReadyToAttack;
+    int nRequestedKnight = 10;  int townToAttack;               int towerToAttack;
+    boolean armyReadyToAttack;  boolean armyReadyToSiege;
 
     // Explorer variables
     Direction prefDir;
@@ -120,6 +121,7 @@ public class Data {
 
         // Army Initializer
         townToAttack = -1;
+        towerToAttack = -1;
         armyReadyToAttack = false;
 
         // Base Initializer

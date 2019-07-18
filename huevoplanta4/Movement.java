@@ -116,6 +116,58 @@ public class Movement {
 
     }
 
+    boolean doMicroCatapult(Location target){
+
+        // if(!uc.canMove()) uc.println("I'm on cooldown");
+
+        UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
+        Location myLoc = uc.getLocation();
+        if (uc.canMove() && (enemiesAround.length > 0 || myLoc.distanceSquared(data.enemyBase) <= 72 ||
+            myLoc.distanceSquared(target) <= 72) ) {
+            //uc.println(uc.getType() + " report in Round: " + uc.getRound());
+            MicroInfo[] micro = new MicroInfo[9];
+            for (int i = 0; i < 9; ++i) {
+                micro[i] = new MicroInfo(uc.getLocation().add(data.dirs[i]));
+                micro[i].canAttackTarget(target);
+            }
+            for (int i = 0; i < Math.min(enemiesAround.length,10); ++i) {
+                UnitInfo enemy = enemiesAround[i];
+                for (MicroInfo m : micro) m.update(enemy);
+            }
+
+            //Siempre nos podemos quedar quietos
+            int bestIndex = 8;
+
+            for (int i = 8; i >= 0; --i) {
+                if (!uc.canMove( data.dirs[i]) ) continue;
+                /*
+                uc.println("Info in " + data.dirs[i] + " (" + micro[i].loc.x + " " + micro[i].loc.y + "). " +
+                            " MinDistance to enemy: " + micro[i].minDistToEnemy + ", maxDamage: " + micro[i].maxDamage +
+                            ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack() );
+                */
+                if (uc.getType() == UnitType.WORKER || uc.getType() == UnitType.EXPLORER){
+                    if (micro[i].isBetterExplorer(micro[bestIndex])) bestIndex = i;
+                }
+                if (uc.getType() == UnitType.ARCHER || uc.getType() == UnitType.MAGE) {
+                    if (micro[i].isBetterRanged(micro[bestIndex])) bestIndex = i;
+                }
+                if (uc.getType() == UnitType.SOLDIER || uc.getType() == UnitType.KNIGHT){
+                    if (micro[i].isBetterMelee(micro[bestIndex])) bestIndex = i;
+                }
+            }
+
+            //uc.println("The best direction is: " + data.dirs[bestIndex]);
+
+            uc.drawLine(uc.getLocation(), uc.getLocation().add(data.dirs[bestIndex]), "FF69B4");
+            uc.move(data.dirs[bestIndex]);
+            return true;
+        }
+
+        return false;
+
+    }
+
+
     class MicroInfo{
         int maxDamage = 0;
         int minDistToEnemy = 1000;
@@ -152,7 +204,7 @@ public class Movement {
             int d = loc.distanceSquared(enemy.getLocation());
 
             if (d <= uc.getType().attackRangeSquared && d >= uc.getType().minAttackRangeSquared
-                && !uc.isObstructed(loc, enemy.getLocation())) {
+                && !uc.isObstructed(loc, enemy.getLocation()) ) {
 
                 canAttack = true;
 
@@ -167,24 +219,30 @@ public class Movement {
                 minDistToEnemy = d;
             }
 
-            if (d <= enemy.getType().attackRangeSquared &&
-                d >= enemy.getType().minAttackRangeSquared) {
+            if (d <= enemy.getType().attackRangeSquared && d >= enemy.getType().minAttackRangeSquared
+                && !uc.isObstructed(loc, enemy.getLocation())) {
 
                 maxDamage += enemy.getType().attack;
             }
         }
 
+        /*
         void senseImpact(){
             //mira si el siguiente turno impactara una catapulta en el sitio
             if (uc.senseImpact(loc) <= uc.getType().movementDelay ) maxDamage += 20;
         }
-
-        /*
-        boolean canAttack(){
-            return (uc.getType().attackRangeSquared >= minDistToEnemy &&
-                    uc.getType().minAttackRangeSquared <= minDistToEnemy);
-        }
         */
+
+
+        void canAttackTarget(Location target){
+
+            int distToTarget = uc.getLocation().distanceSquared(target);
+
+            if (uc.getType().attackRangeSquared >= distToTarget && uc.getType().minAttackRangeSquared <= distToTarget){
+                if(uc.canAttack() ) canAttack = true;
+            }
+        }
+
 
 
         boolean isBetterMelee(MicroInfo mic) {
@@ -320,6 +378,46 @@ public class Movement {
             return false;
 
         }
+
+        boolean isBetterCatapult (Movement.MicroInfo mic){
+
+            float preference = 0;
+
+            int dmg = uc.getType().attack;
+
+            //Prioriza no entrar en el rango de vision de la Base enemiga
+            if(!tooCloseToEnemyBase && mic.tooCloseToEnemyBase) preference += 100;
+            if(tooCloseToEnemyBase && !mic.tooCloseToEnemyBase) preference -= 100;
+
+            //Prioriza las casillas en las que menos daño le pueden hacer
+            if(maxDamage < mic.maxDamage) preference += 10*(mic.maxDamage - maxDamage);
+            if(maxDamage > mic.maxDamage) preference -= 10*(maxDamage - mic.maxDamage);
+
+            if(uc.canAttack() ) {
+                //Prioriza poder atacar
+                if (canAttack && !mic.canAttack) preference += 5;
+                if (!canAttack && mic.canAttack) preference -= 5;
+
+            }
+
+            //prioriza alejarse del enemigo
+            if(minDistToEnemy > mic.minDistToEnemy) preference += 1;
+            if(minDistToEnemy < mic.minDistToEnemy) preference -= 1;
+
+            //prioriza no moverse en diagonal (genera mas cooldown)
+            if(!isDiagonal && mic.isDiagonal) preference += 0.5;
+            if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
+
+            //prioriza acercarse al objectivo
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
+
+            //Si las posiciones son equivalentes mejor no cambiar
+            if (preference >= 0) return true;
+            return false;
+
+        }
+
 
     }
 
