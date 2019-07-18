@@ -1,4 +1,5 @@
 BUGFIXES
+- les tropes van a (0,0) quan no tenen res a fer
 - contem malament el nombre d'explorers [fixed, typo a RecruitmentUnit.trySpawnExplorer]
 - contem malament el nombre de soldiers [fixed, typo a Data]
 - reclutem massa d'algunes unitats tot i tenir hardcap (e.g. explorers) [fixed, es passen de bytecode i per tant no es reporten, per arreglar-ho cal fer-los eficients]
