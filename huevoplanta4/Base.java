@@ -66,8 +66,7 @@ public class Base extends RecruitmentUnit {
             uc.println("Round " + data.currentRound + " Town Report:");
             for (int i = 0; i < data.nTown; i++) {
                 Location townLoc = data.townLocations[i];
-                if (data.townOwned[i]) uc.println("  - town " + i + " at (" + townLoc.x + ", " + townLoc.y + ") is owned by us");
-                else uc.println("  - town " + i + " at (" + townLoc.x + ", " + townLoc.y + ") is not owned by us");
+                uc.println("  - town " + i + " at (" + townLoc.x + ", " + townLoc.y + "), owned: " + data.townOwned[i]);
             }
         }
 

@@ -35,39 +35,53 @@ public class Explorer extends CombatUnit {
         uc.write(data.unitResetCh, 0);
         uc.write(data.explorerResetCh, 0);
         //uc.write(data.combatUnitResetCh, 0);
+        if (data.isTownScout) {
+            // Report to the Comm Channel
+            uc.write(data.townScoutReportCh, uc.read(data.townScoutReportCh) + 1);
+            // Reset Next Slot
+            uc.write(data.townScoutResetCh, 0);
+        }
     }
 
     @Override
     void move() {
         if(!movement.doMicro(data.prefDir)) {
-            if (uc.canMove(data.prefDir)) uc.move(data.prefDir);
-            else{
-                double r = Math.random();
-                boolean done = false;
-                if(r < 0.5){
-                    for(int i = 0; i < 8; ++i){
-                        if(done) continue;
-                        data.prefDir = data.prefDir.rotateLeft();
-                        if(uc.canMove(data.prefDir) ){
-                            uc.move(data.prefDir);
-                            done = true;
+
+            if (data.isTownScout) {
+                movement.moveTo(data.townLocations[data.townScoutCurrentTownIndex]);
+            } else {
+                if (uc.canMove(data.prefDir)) uc.move(data.prefDir);
+                else {
+                    double r = Math.random();
+                    boolean done = false;
+                    if (r < 0.5) {
+                        for (int i = 0; i < 8; ++i) {
+                            if (done) continue;
+                            data.prefDir = data.prefDir.rotateLeft();
+                            if (uc.canMove(data.prefDir)) {
+                                uc.move(data.prefDir);
+                                done = true;
+                            }
                         }
-                    }
-                }else{
-                    for(int i = 0; i < 8; ++i) {
-                        if (done) continue;
-                        data.prefDir = data.prefDir.rotateRight();
-                        if (uc.canMove(data.prefDir)) {
-                            uc.move(data.prefDir);
-                            done = true;
+                    } else {
+                        for (int i = 0; i < 8; ++i) {
+                            if (done) continue;
+                            data.prefDir = data.prefDir.rotateRight();
+                            if (uc.canMove(data.prefDir)) {
+                                uc.move(data.prefDir);
+                                done = true;
+                            }
                         }
                     }
                 }
             }
-        }else{
+        } else {
             double r = Math.random();
-            if(r <0.5) data.prefDir = data.prefDir.rotateLeft();
+            if (r <0.5) data.prefDir = data.prefDir.rotateLeft();
             else data.prefDir = data.prefDir.rotateRight();
         }
+
     }
+
+
 }

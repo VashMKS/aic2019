@@ -1,25 +1,35 @@
+/================================= TODO ===================================/
+
 BUGFIXES
-- les tropes van a (0,0) quan no tenen res a fer
+- els exploradors peten per bytecode quan veuen moltes unitats enemigues
+
+IMPROVEMENTS
+- current bugpath sucks...
+- better condition to spend resources in army than (round > 25)
+- one explorer assigned to patroling the conquered towns to make sure they stay conquered
+
+CORNER CASES
+- les mines poden no ser accessibles -> no fer workers (o pocs i que en busquin) (es pot implementar un vector mineIsReachable de booleans??)
+
+/================================= SOLVED =================================/
+
+BUGFIXES
+- les tropes van a (0,0) quan no tenen res a fer [fixed]
 - contem malament el nombre d'explorers [fixed, typo a RecruitmentUnit.trySpawnExplorer]
 - contem malament el nombre de soldiers [fixed, typo a Data]
 - reclutem massa d'algunes unitats tot i tenir hardcap (e.g. explorers) [fixed, es passen de bytecode i per tant no es reporten, per arreglar-ho cal fer-los eficients]
 - reportMines/Towns peten per bytecode quan hi ha moltes mines [fixed, ara reportem mines properes i amb limit d'iteracions]
-- els exploradors peten per bytecode quan veuen moltes unitats enemigues
 
 IMPROVEMENTS
-- townScout needs Explorer.move() implementation
-- better condition to spend resources in army than (round > 25)
+- army accumulates before attacking (check nCombatUnits > some number) [done]
+- army attacks first unconquered towns (townOwned[i] == 0), then locations of neutral units, then accumulates at the center of the map [done]
+- townScout needs Explorer.move() implementation [done]
 - report miners dynamically and scrap the health thresholding system [done]
-- vector de towns capturades (reportar towns capturades) [townConquered]
-- vector de mines amb cap, ordenades per distància a la base
+- vector de towns capturades (reportar towns capturades) [done, townOwned]
+- vector de mines amb cap, ordenades per distància a la base [done]
 - si el worker anava a deixar recursos en una town que ens han pres, actualitzar el lloc on els workers deixen els recursos a la base [fixed by calling data.assignTown()]
-- apuntar posicions d'unitats neutrals com a possibles towns
-- current bugpath sucks...
-- army accumulates before attacking (check nCombatUnits > some number)
-- army attacks first unconquered towns (townConquered[i] == 0), then locations of neutral units, then ???
-- one explorer assigned to patroling the conquered towns to make sure they stay conquered
+- apuntar posicions d'unitats neutrals com a possibles towns [done]
 
 CORNER CASES
 - en alguns mapes (e.g. tot el nostre camp de visió són mines) reportResources() peta per temps. Podem posar un limit al nombre d'iteracions d'aquesta funció (e.g. 10) [done]
-- les mines poden no ser accessibles -> no fer workers (o pocs i que en busquin) (es pot implementar un vector mineIsReachable de booleans??)
 - si la base està rodejada de mines els workers la bloquejen, implementar que mai s'assignin totes les mines adjacents a la base [done]

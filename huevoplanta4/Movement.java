@@ -89,13 +89,13 @@ public class Movement {
 
             for (int i = 8; i >= 0; --i) {
                 if (!uc.canMove( data.dirs[i]) ) continue;
-
+                /*
                 uc.println("Info in " + data.dirs[i] + " (" + micro[i].loc.x + " " + micro[i].loc.y + "). " +
-                        " MinDistance to enemy: " + micro[i].minDistToEnemy + ", maxDamage: " + micro[i].maxDamage +
-                        ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack +
-                        ", Too close to the enemy base: " + micro[i].tooCloseToEnemyBase + ", Going to the prefered Dir " +
-                        targetDir + ": " + micro[i].onRouteToTarget);
-
+                           " MinDistance to enemy: " + micro[i].minDistToEnemy + ", maxDamage: " + micro[i].maxDamage +
+                           ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack +
+                           ", Too close to the enemy base: " + micro[i].tooCloseToEnemyBase +
+                           ", Going to the prefered Dir " + targetDir + ": " + micro[i].onRouteToTarget);
+                */
                 if (uc.getType() == UnitType.WORKER || uc.getType() == UnitType.EXPLORER){
                     if (micro[i].isBetterExplorer(micro[bestIndex])) bestIndex = i;
                 }
@@ -107,7 +107,7 @@ public class Movement {
                 }
             }
 
-            uc.println("The best direction is: " + data.dirs[bestIndex]);
+            //uc.println("The best direction is: " + data.dirs[bestIndex]);
 
             uc.drawLine(uc.getLocation(), uc.getLocation().add(data.dirs[bestIndex]), "FF69B4");
             uc.move(data.dirs[bestIndex]);
@@ -161,7 +161,7 @@ public class Movement {
 
             //uc.println("The best direction is: " + data.dirs[bestIndex]);
 
-            uc.drawLine(uc.getLocation(), uc.getLocation().add(data.dirs[bestIndex]), "FF69B4");
+            //uc.drawLine(uc.getLocation(), uc.getLocation().add(data.dirs[bestIndex]), "FF69B4");
             uc.move(data.dirs[bestIndex]);
             return true;
         }
@@ -172,7 +172,7 @@ public class Movement {
 
 
     class MicroInfo{
-        int maxDamage = 0;
+        float maxDamage = 0;
         int minDistToEnemy = 1000;
         int minEnemyHealth = 1000;
         boolean canAttack = false;
@@ -200,10 +200,7 @@ public class Movement {
             if(uc.getLocation().directionTo(loc) == targetDir) onRouteToTarget = true;
         }
 
-
-
         void update(UnitInfo enemy) {
-
 
             int d = loc.distanceSquared(enemy.getLocation());
 
@@ -218,7 +215,7 @@ public class Movement {
 
             }
 
-            if(enemy.getType() == UnitType.WORKER || enemy.getType() == UnitType.EXPLORER) return;
+            if (enemy.getType() == UnitType.WORKER || enemy.getType() == UnitType.EXPLORER) return;
 
             //Solo guardamos las distancias a unidades que podamos ver
             if (d < minDistToEnemy && !uc.isObstructed(loc, enemy.getLocation() ) ){
@@ -293,8 +290,7 @@ public class Movement {
             if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.25;
 
             //Si las posiciones son equivalentes mejor no cambiar
-            if (preference >= 0) return true;
-            return false;
+            return (preference >= 0);
 
         }
 
@@ -341,8 +337,7 @@ public class Movement {
             if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.25;
 
             //Si las posiciones son equivalentes mejor no cambiar
-            if (preference >= 0) return true;
-            return false;
+            return (preference >= 0);
 
         }
 
@@ -379,14 +374,12 @@ public class Movement {
             if(!isDiagonal && mic.isDiagonal) preference += 0.5;
             if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
 
-
             //Si las posiciones son equivalentes mejor no cambiar
-            if (preference >= 0) return true;
-            return false;
+            return (preference >= 0);
 
         }
 
-        boolean isBetterCatapult (Movement.MicroInfo mic){
+        boolean isBetterCatapult (Movement.MicroInfo mic) {
 
             float preference = 0;
 
@@ -417,11 +410,10 @@ public class Movement {
 
             //prioriza acercarse al objectivo
             if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
-            if(!onRouteToTarget && mic.onRouteToTarget) preference += 0.25;
+            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.25;
 
             //Si las posiciones son equivalentes mejor no cambiar
-            if (preference >= 0) return true;
-            return false;
+            return (preference >= 0);
 
         }
 

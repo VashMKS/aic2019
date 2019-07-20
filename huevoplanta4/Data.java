@@ -21,7 +21,8 @@ public class Data {
     int barracksCh,         barracksReportCh,       barracksResetCh;        // Ch 24, 25, 26
     int towerCh,            towerReportCh,          towerResetCh;           // Ch 27, 28, 29
     int combatUnitCh,       combatUnitReportCh,     combatUnitResetCh;      // Ch 30, 31, 32
-    int minerCh,            minerReportCh,          minerResetCh;           // Ch 33, 34, 35
+    int townScoutCh,        townScoutReportCh,      townScoutResetCh;       // Ch 33, 34, 35
+    int minerCh,            minerReportCh,          minerResetCh;           // Ch 36, 37, 38
     int requestWoodCh,      requestWoodReportCh,    requestWoodResetCh;     // Ch 42, 43, 44
     int requestIronCh,      requestIronReportCh,    requestIronResetCh;     // Ch 45, 46, 47
     int requestCrystalCh,   requestCrystalReportCh, requestCrystalResetCh;  // Ch 48, 49, 50
@@ -34,7 +35,7 @@ public class Data {
     int enemyContactCh          = 104;    // Ch 104
     int neutralOnSightCh        = 105;    // Ch 105
     int neutralContactCh        = 106;    // Ch 106
-    int neutralLocCh = 107;    // Ch 107
+    int neutralLocCh            = 107;    // Ch 107
     int requestedSoldiersCh     = 108;    // Ch 108
     int requestedArchersCh      = 109;    // Ch 109
     int requestedKnightCh       = 110;    // Ch 110
@@ -62,9 +63,9 @@ public class Data {
     // Unit Count Info
     int nUnit;                  int nCombatUnit;                int nBarracks;
     int nWorker;                int nMiner;                     int nExplorer;
-    int nSoldier;               int nArcher;                    int nKnight;
-    int nMage;                  int nCatapult;                  int nTower;
-
+    int nTownScout;             int nSoldier;                   int nArcher;
+    int nKnight;                int nMage;                      int nCatapult;
+    int nTower;
 
     // Mine Info
     int nMine;                  int nMineMax = 8;               int channelsPerMine = 10;
@@ -73,8 +74,8 @@ public class Data {
     int mineMaxDistSqToBase;    int mineMaxDistSqToBaseIndex;
 
     // Town Info
-    int nTown;                  int channelsPerTown = 4;
-    Location[] townLocations;   boolean[] townOwned;            int[] townDistSqToBase;
+    int nTown;                  int channelsPerTown = 10;       Location[] townLocations;
+    boolean[] townOwned;        int[] townDistSqToBase;         int[] townLastVisited;
 
     // Enemy Intel
     // true when in field of vision             // true when adjacent
@@ -97,12 +98,12 @@ public class Data {
     int economyThreshold = 200;
 
     // Army variables TODO: demanar unitats de forma dinamica
-    int nRequestedSoldier = 15; int nRequestedArcher = 15;      int nRequestedMage = 5;
-    int nRequestedKnight = 10;  int townToAttack;               int towerToAttack;
+    int nRequestedSoldier = 35; int nRequestedArcher = 25;      int nRequestedMage = 5;
+    int nRequestedKnight = 0;   int townToAttack;               int towerToAttack;
     boolean armyReadyToAttack;  boolean armyReadyToSiege;
 
     // Explorer variables
-    Direction prefDir;
+    Direction prefDir;          boolean isTownScout;            int townScoutCurrentTownIndex;
 
     /* ------------------------------------------------ CONSTRUCTOR ------------------------------------------------ */
 
@@ -141,7 +142,11 @@ public class Data {
         }
 
         // Explorer Initializer
-        if (uc.getType() == UnitType.EXPLORER) prefDir = allyBase.directionTo(enemyBase);
+        if (uc.getType() == UnitType.EXPLORER) {
+            prefDir = allyBase.directionTo(enemyBase);
+            isTownScout = false;
+            townScoutCurrentTownIndex = 0;
+        }
 
     }
 
@@ -165,6 +170,7 @@ public class Data {
         // Class specific updates
         updateBase();
         updateWorker();
+        updateExplorer();
     }
 
     void updateGeneral() {
@@ -190,13 +196,17 @@ public class Data {
         mageResetCh            = 18 + y;    catapultResetCh        = 21 + y;    barracksResetCh        = 24 + y;
         mageCh                 = 18 + z;    catapultCh             = 21 + z;    barracksCh             = 24 + z;
 
-        towerReportCh          = 27 + x;    combatUnitReportCh     = 30 + x;    minerReportCh          = 33 + x;
-        towerResetCh           = 27 + y;    combatUnitResetCh      = 30 + y;    minerResetCh           = 33 + y;
-        towerCh                = 27 + z;    combatUnitCh           = 30 + z;    minerCh                = 33 + z;
+        towerReportCh          = 27 + x;    combatUnitReportCh     = 30 + x;    townScoutReportCh      = 33 + x;
+        towerResetCh           = 27 + y;    combatUnitResetCh      = 30 + y;    townScoutResetCh       = 33 + y;
+        towerCh                = 27 + z;    combatUnitCh           = 30 + z;    townScoutCh            = 33 + z;
 
-        requestWoodReportCh    = 42 + x;    requestIronReportCh    = 45 + x;    requestCrystalReportCh = 48 + x;
-        requestWoodResetCh     = 42 + y;    requestIronResetCh     = 45 + y;    requestCrystalResetCh  = 48 + y;
-        requestWoodCh          = 42 + z;    requestIronCh          = 45 + z;    requestCrystalCh       = 48 + z;
+        minerReportCh          = 36 + x;    requestWoodReportCh    = 42 + x;    requestIronReportCh    = 45 + x;
+        minerResetCh           = 36 + y;    requestWoodResetCh     = 42 + y;    requestIronResetCh     = 45 + y;
+        minerCh                = 36 + z;    requestWoodCh          = 42 + z;    requestIronCh          = 45 + z;
+
+        requestCrystalReportCh = 48 + x;
+        requestCrystalResetCh  = 48 + y;
+        requestCrystalCh       = 48 + z;
     }
 
     void updateCommInfo() {
@@ -212,6 +222,7 @@ public class Data {
         nBarracks                = uc.read(barracksCh);
         nTower                   = uc.read(towerCh);
         nMiner                   = uc.read(minerCh);
+        nTownScout               = uc.read(townScoutCh);
         mineMinDistSqToBase      = uc.read(mineMinDistSqToBaseCh);
         mineMinDistSqToBaseIndex = uc.read(mineMinDistSqToBaseIndexCh);
         mineMaxDistSqToBase      = uc.read(mineMaxDistSqToBaseCh);
@@ -256,14 +267,17 @@ public class Data {
         townLocations    = new Location[nTown];
         townOwned        = new boolean[nTown];
         townDistSqToBase = new int[nTown];
+        townLastVisited  = new int[nTown];
         for (int i = 0; i < nTown; i++) {
             int townLocChannel = nTownCh + channelsPerTown*i + 1;
-            int townOwnedChannel = townLocChannel + 1;
+            int townOwnedChannel         = townLocChannel + 1;
             int townsDistSqToBaseChannel = townLocChannel + 2;
+            int townLastVisitedChannel   = townLocChannel + 3;
 
             townLocations[i]    = tools.decodeLocation(uc.read(townLocChannel));
             townOwned[i]        = (uc.read(townOwnedChannel) == 1);
             townDistSqToBase[i] = uc.read(townsDistSqToBaseChannel);
+            townLastVisited[i]  = uc.read(townLastVisitedChannel);
         }
     }
 
@@ -309,7 +323,7 @@ public class Data {
         if (type.equals(UnitType.WORKER)) {
 
             // update dynamic channels
-            myMineLocCh = nMineCh + channelsPerMine*myMineIndex + 1;
+            myMineLocCh         = nMineCh + channelsPerMine*myMineIndex + 1;
             myMineMinerReportCh = nMineCh + channelsPerMine*myMineIndex + 2 + x;
             myMineMinerResetCh  = nMineCh + channelsPerMine*myMineIndex + 2 + y;
             myMineMinerCh       = nMineCh + channelsPerMine*myMineIndex + 2 + z;
@@ -319,6 +333,34 @@ public class Data {
 
             // look for things to do and places to go
             assignJob();
+        }
+    }
+
+    // Explorer specific update
+    void updateExplorer() {
+        if (type.equals(UnitType.EXPLORER)) {
+            // assign a scout to check towns regularly
+            if (nTownScout == 0 && !isTownScout && currentRound > 100 && nTown > 0) {
+                isTownScout = true;
+                uc.write(townScoutCh, nTownScout+1);
+                nTownScout += 1;
+                uc.println("Explorer promoted to scout!");
+            }
+
+            updateTownScout();
+        }
+    }
+
+    void updateTownScout() {
+        if (isTownScout) {
+            // cicle through towns until we find one that hasn't been visited in 50 rounds
+            for (int i = 0; i < nTown; i++) {
+                int index = (townScoutCurrentTownIndex + i)%nTown;
+                if (currentRound - townLastVisited[index] > 25) {
+                    townScoutCurrentTownIndex = index;
+                    return;
+                }
+            }
         }
     }
 
