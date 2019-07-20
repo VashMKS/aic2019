@@ -89,11 +89,13 @@ public class Movement {
 
             for (int i = 8; i >= 0; --i) {
                 if (!uc.canMove( data.dirs[i]) ) continue;
-                /*
+
                 uc.println("Info in " + data.dirs[i] + " (" + micro[i].loc.x + " " + micro[i].loc.y + "). " +
-                            " MinDistance to enemy: " + micro[i].minDistToEnemy + ", maxDamage: " + micro[i].maxDamage +
-                            ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack() );
-                */
+                        " MinDistance to enemy: " + micro[i].minDistToEnemy + ", maxDamage: " + micro[i].maxDamage +
+                        ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack +
+                        ", Too close to the enemy base: " + micro[i].tooCloseToEnemyBase + ", Going to the prefered Dir " +
+                        targetDir + ": " + micro[i].onRouteToTarget);
+
                 if (uc.getType() == UnitType.WORKER || uc.getType() == UnitType.EXPLORER){
                     if (micro[i].isBetterExplorer(micro[bestIndex])) bestIndex = i;
                 }
@@ -105,7 +107,7 @@ public class Movement {
                 }
             }
 
-            //uc.println("The best direction is: " + data.dirs[bestIndex]);
+            uc.println("The best direction is: " + data.dirs[bestIndex]);
 
             uc.drawLine(uc.getLocation(), uc.getLocation().add(data.dirs[bestIndex]), "FF69B4");
             uc.move(data.dirs[bestIndex]);
@@ -143,7 +145,8 @@ public class Movement {
                 /*
                 uc.println("Info in " + data.dirs[i] + " (" + micro[i].loc.x + " " + micro[i].loc.y + "). " +
                             " MinDistance to enemy: " + micro[i].minDistToEnemy + ", maxDamage: " + micro[i].maxDamage +
-                            ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack() );
+                            ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack +
+                            ", Too close to the enemy base: " + micro[i].tooCloseToEnemyBase);
                 */
                 if (uc.getType() == UnitType.WORKER || uc.getType() == UnitType.EXPLORER){
                     if (micro[i].isBetterExplorer(micro[bestIndex])) bestIndex = i;
@@ -189,7 +192,7 @@ public class Movement {
 
             if(loc.distanceSquared(data.enemyBase) <= 50 ) tooCloseToEnemyBase = true;
 
-            if (uc.senseImpact(loc) <= uc.getType().movementDelay ) maxDamage += 20;
+            if (uc.senseImpact(loc) > 0 && uc.senseImpact(loc) <= uc.getType().movementDelay ) maxDamage += 20;
 
         }
 
@@ -200,6 +203,7 @@ public class Movement {
 
 
         void update(UnitInfo enemy) {
+
 
             int d = loc.distanceSquared(enemy.getLocation());
 
@@ -213,6 +217,8 @@ public class Movement {
                 }
 
             }
+
+            if(enemy.getType() == UnitType.WORKER || enemy.getType() == UnitType.EXPLORER) return;
 
             //Solo guardamos las distancias a unidades que podamos ver
             if (d < minDistToEnemy && !uc.isObstructed(loc, enemy.getLocation() ) ){
@@ -284,7 +290,7 @@ public class Movement {
 
             //prioriza acercarse al objectivo
             if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
-            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
+            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.25;
 
             //Si las posiciones son equivalentes mejor no cambiar
             if (preference >= 0) return true;
@@ -332,7 +338,7 @@ public class Movement {
 
             //prioriza acercarse al objectivo
             if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
-            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
+            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.25;
 
             //Si las posiciones son equivalentes mejor no cambiar
             if (preference >= 0) return true;
@@ -355,8 +361,8 @@ public class Movement {
             if(maxDamage > mic.maxDamage) preference -= (maxDamage - mic.maxDamage);
 
             //prioriza alejarse del enemigo
-            if(minDistToEnemy > mic.minDistToEnemy) preference += 1;
-            if(minDistToEnemy < mic.minDistToEnemy) preference -= 1;
+            if(minDistToEnemy > mic.minDistToEnemy) preference += 2;
+            if(minDistToEnemy < mic.minDistToEnemy) preference -= 2;
 
             if(uc.canAttack() ) {
                 //Prioriza las casillas en las que puede hacer killingBlow
@@ -365,13 +371,14 @@ public class Movement {
 
             }
 
+            //prioriza acercarse al objectivo
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 1;
+            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 1;
+
             //prioriza no moverse en diagonal (genera mas cooldown)
             if(!isDiagonal && mic.isDiagonal) preference += 0.5;
             if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
 
-            //prioriza acercarse al objectivo
-            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
-            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
 
             //Si las posiciones son equivalentes mejor no cambiar
             if (preference >= 0) return true;
@@ -410,7 +417,7 @@ public class Movement {
 
             //prioriza acercarse al objectivo
             if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
-            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
+            if(!onRouteToTarget && mic.onRouteToTarget) preference += 0.25;
 
             //Si las posiciones son equivalentes mejor no cambiar
             if (preference >= 0) return true;
