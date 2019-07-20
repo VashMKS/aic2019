@@ -29,13 +29,14 @@ public class Data {
     int myMineMinerCh,      myMineMinerReportCh,    myMineMinerResetCh;     // Ch variable within the mine vector
 
     // Comm Channels (static)
-    int hostileOnSightCh        = 101;    // Ch 101
-    int hostileContactCh        = 102;    // Ch 102
-    int enemyOnSightCh          = 103;    // Ch 103
-    int enemyContactCh          = 104;    // Ch 104
-    int neutralOnSightCh        = 105;    // Ch 105
-    int neutralContactCh        = 106;    // Ch 106
-    int neutralLocCh            = 107;    // Ch 107
+    int hostileOnSightCh        = 100;    // Ch 100
+    int hostileContactCh        = 101;    // Ch 101
+    int enemyOnSightCh          = 102;    // Ch 102
+    int enemyContactCh          = 103;    // Ch 103
+    int neutralOnSightCh        = 104;    // Ch 104
+    int neutralContactCh        = 105;    // Ch 105
+    int neutralLocCh            = 106;    // Ch 106
+    int towerLocCh              = 107;    // Ch 107
     int requestedSoldiersCh     = 108;    // Ch 108
     int requestedArchersCh      = 109;    // Ch 109
     int requestedKnightCh       = 110;    // Ch 110
@@ -82,7 +83,7 @@ public class Data {
     boolean hostileOnSight;                     boolean hostileContact;
     boolean neutralOnSight;                     boolean neutralContact;
     boolean enemyOnSight;                       boolean enemyContact;
-    Location neutralLoc; // currently unused
+    Location neutralLoc;                        Location towerLoc;
 
     // Worker variables
     int nWorkerMax = 16;        int nMinerMax = 16;             int nMinerPerMine = 1;
@@ -291,6 +292,7 @@ public class Data {
         enemyContact   = (uc.read(enemyContactCh) == 1);
 
         neutralLoc = tools.decodeLocation(uc.read(neutralLocCh));
+        towerLoc   = tools.decodeLocation(uc.read(towerLocCh));
 
         // Reset Contact every 20 rounds
         if (currentRound%20 == 0) {

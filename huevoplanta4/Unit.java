@@ -25,13 +25,32 @@ public class Unit {
 
     // report hostile (enemy + neutral) units on sight and adjacent
     void reportEnemies () {
+
+        //if (nonAllyUnitsOnSight.length > 0) uc.write(data.hostileOnSightCh, 1);
+
+        if (uc.canSenseLocation(data.towerLoc)) {
+            UnitInfo unit = uc.senseUnit(data.towerLoc);
+            if (unit != null && !unit.getType().equals(UnitType.TOWER)) {
+                Location loc = unit.getLocation();
+                uc.write(data.towerLocCh, tools.encodeLocation(loc.x, loc.y));
+                uc.println("Tower found at (" + loc.x + ", " + loc.y + ")");
+            }
+        }
+
         UnitInfo[] nonAllyUnitsOnSight = uc.senseUnits(data.allyTeam, true);
 
-        if (nonAllyUnitsOnSight.length > 0) uc.write(data.hostileOnSightCh, 1);
-
         for (UnitInfo unit : nonAllyUnitsOnSight) {
+
+            if (unit.getType() == UnitType.TOWER) {
+                if (tools.encodeLocation(data.towerLoc.x, data.towerLoc.y) == 0) {
+                    Location loc = unit.getLocation();
+                    uc.write(data.towerLocCh, tools.encodeLocation(loc.x, loc.y));
+                    uc.println("Tower down confirmed");
+                }
+            }
+
             // checks if the hostile unit is reachable
-            boolean adjacent = tools.areAdjacent(uc.getLocation(), unit.getLocation());
+            /*boolean adjacent = tools.areAdjacent(uc.getLocation(), unit.getLocation());
             if (adjacent) {
                 if (!data.hostileContact) {
                     data.hostileContact = true;
@@ -55,7 +74,7 @@ public class Unit {
                         uc.write(data.enemyContactCh, 1);
                     }
                 }
-            }
+            }*/
         }
     }
 
