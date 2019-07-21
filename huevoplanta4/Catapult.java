@@ -37,8 +37,8 @@ public class Catapult extends CombatUnit {
 
         Location target = new Location();
 
-        if(data.nCombatUnit > 14 && data.nCatapult > 2) data.armyReadyToSiege = true;
-        if(data.nCombatUnit < 6 ) data.armyReadyToSiege = false;
+        if(data.nCombatUnit > 20 && data.nCatapult >  2) data.armyReadyToSiege = true;
+        if(data.nCombatUnit < 11 || data.nCatapult == 0) data.armyReadyToSiege = false;
 
         if(uc.getRound() <= 75 || !data.armyReadyToAttack ){
             target.x = (3*data.allyBase.x + data.enemyBase.x)/4;

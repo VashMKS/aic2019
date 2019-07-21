@@ -121,7 +121,7 @@ public class Movement {
     boolean doMicroCatapult(Location target){
 
         if(!uc.canMove()){
-            uc.println("I'm on cooldown");
+            //uc.println("I'm on cooldown");
             return false;
         }
 
@@ -129,12 +129,13 @@ public class Movement {
         UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
         Location myLoc = uc.getLocation();
         if (enemiesAround.length > 0 || myLoc.distanceSquared(data.enemyBase) <= 72 ||
-            myLoc.distanceSquared(target) <= 72 ) {
-            uc.println(uc.getType() + " report in Round: " + uc.getRound());
+            (data.towerFound && myLoc.distanceSquared(target) <= 72 ) ){
+            //uc.println(uc.getType() + " report in Round: " + uc.getRound());
             MicroInfo[] micro = new MicroInfo[9];
             for (int i = 0; i < 9; ++i) {
                 micro[i] = new MicroInfo(uc.getLocation().add(data.dirs[i]));
                 micro[i].canAttackTarget(target);
+                micro[i].checkTargetDirection(myLoc.directionTo(target));
             }
             for (int i = 0; i < Math.min(enemiesAround.length,10); ++i) {
                 UnitInfo enemy = enemiesAround[i];
@@ -283,15 +284,16 @@ public class Movement {
             if(minDistToEnemy < mic.minDistToEnemy) preference += 1;
             if(minDistToEnemy > mic.minDistToEnemy) preference -= 1;
 
+            //prioriza acercarse al objectivo
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.75;
+            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.75;
+
             if(!isDiagonal && mic.isDiagonal) preference += 0.5;
             if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
 
-            //prioriza acercarse al objectivo
-            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
-            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.25;
 
             //Si las posiciones son equivalentes mejor no cambiar
-            return (preference >= 0);
+            return (preference > 0);
 
         }
 
@@ -330,15 +332,16 @@ public class Movement {
             //if(minDistToEnemy > mic.minDistToEnemy) preference += 1;
             //if(minDistToEnemy < mic.minDistToEnemy) preference -= 1;
 
+            //prioriza acercarse al objectivo
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.75;
+            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.75;
+
+            //prioriza no moverse en diagonal (genera mas cooldown)
             if(!isDiagonal && mic.isDiagonal) preference += 0.5;
             if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
 
-            //prioriza acercarse al objectivo
-            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
-            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.25;
-
             //Si las posiciones son equivalentes mejor no cambiar
-            return (preference >= 0);
+            return (preference > 0);
 
         }
 
@@ -376,7 +379,7 @@ public class Movement {
             if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
 
             //Si las posiciones son equivalentes mejor no cambiar
-            return (preference >= 0);
+            return (preference > 0);
 
         }
 
@@ -403,16 +406,16 @@ public class Movement {
             if(minDistToEnemy > mic.minDistToEnemy) preference += 1;
             if(minDistToEnemy < mic.minDistToEnemy) preference -= 1;
 
+            //prioriza acercarse al objectivo
+            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.75;
+            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.75;
+
             //prioriza no moverse en diagonal (genera mas cooldown)
             if(!isDiagonal && mic.isDiagonal) preference += 0.5;
             if(isDiagonal && !mic.isDiagonal) preference -= 0.5;
 
-            //prioriza acercarse al objectivo
-            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.25;
-            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.25;
-
             //Si las posiciones son equivalentes mejor no cambiar
-            return (preference >= 0);
+            return (preference > 0);
 
         }
 

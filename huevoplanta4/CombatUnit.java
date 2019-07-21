@@ -17,8 +17,8 @@ public class CombatUnit extends MovingUnit {
         if(data.nCombatUnit > 14) data.armyReadyToAttack = true;
         if(data.nCombatUnit < 6 ) data.armyReadyToAttack = false;
 
-        if(data.nCombatUnit > 14 && data.nCatapult >  2) data.armyReadyToSiege = true;
-        if(data.nCombatUnit < 6  || data.nCatapult == 0) data.armyReadyToSiege = false;
+        if(data.nCombatUnit > 20 && data.nCatapult >  2) data.armyReadyToSiege = true;
+        if(data.nCombatUnit < 11 || data.nCatapult == 0) data.armyReadyToSiege = false;
 
         if(!data.armyReadyToAttack ){
             target.x = (4*data.allyBase.x + data.enemyBase.x)/5;
