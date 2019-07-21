@@ -132,7 +132,7 @@ public class Unit {
     // scans for mines and reports new findings to the comm channels
     void reportResources() {
 
-        if(data.nMine > 8) return;
+        //if(data.nMine > 8) return;
 
         ResourceInfo[] minesOnSight = uc.senseResources();
         if(minesOnSight.length > 0) {
@@ -187,21 +187,24 @@ public class Unit {
     // scans for towns and reports new findings to the comm channels
     void reportTowns() {
         TownInfo[] townsOnSight = uc.senseTowns();
-        if(townsOnSight.length > 0 && data.nTown < 10) {
+        if(townsOnSight.length > 0) {
             //uc.println("town scan successful, potential new towns: " + townsOnSight.length);
             for (TownInfo town : townsOnSight) {
                 boolean newTownFound = false;
                 Location townLoc = town.getLocation();
-                //uc.println("  checking location (" + townLoc.x + " " + townLoc.y + ")");
+
                 int index = tools.reportedTown(townLoc);
+
+                //uc.println("  checking location (" + townLoc.x + " " + townLoc.y + ")");
+
                 if (index == -1) {
                     //uc.println(" new town found, storing location");
                     int townLocChannel = data.nTownCh + data.channelsPerTown*data.nTown + 1;
-                    int townOwnerChannel = townLocChannel + 1;
-                    int townsDistSqToBaseChannel = townLocChannel + 2;
+                    //int townOwnerChannel = townLocChannel + 1;
+                    int townDistSqToBaseChannel = townLocChannel + 2;
                     uc.write(townLocChannel, tools.encodeLocation(townLoc.x,townLoc.y));
-                    uc.write(townOwnerChannel, 0);
-                    uc.write(townsDistSqToBaseChannel, townLoc.distanceSquared(data.allyBase));
+                    //uc.write(townOwnerChannel, 0);
+                    uc.write(townDistSqToBaseChannel, townLoc.distanceSquared(data.allyBase));
                     uc.write(data.nTownCh, data.nTown+1);
                     newTownFound = true;
                 } else {
@@ -216,28 +219,15 @@ public class Unit {
                     }
                 }
 
+                // report in which round we are visiting this town
+                int townLastVisitedChannel = data.nTownCh + data.channelsPerTown*index + 4;
+                uc.write(townLastVisitedChannel, data.currentRound);
+
                 if (newTownFound) data.updateTowns();
             }
             //uc.println("so far " + uc.read(data.nTownCh) + " towns discovered");
         }
     }
 
-    void reportTownControl() {
-        TownInfo[] townsOnSight = uc.senseTowns();
 
-        if (townsOnSight.length > 0) {
-            for (TownInfo townInfo : townsOnSight) {
-
-                int townLocChannel = data.nTownCh + data.channelsPerTown*data.townToAttack + 1;
-                Location loc = townInfo.getLocation();
-
-                if(tools.decodeLocation(uc.read(townLocChannel)).isEqual(loc)){
-                    if (townInfo.getOwner() == data.allyTeam) {
-                        data.townToAttack += 1;
-                        data.townToAttack = data.townToAttack % data.nTown;
-                    }
-                }
-            }
-        }
-    }
 }

@@ -54,8 +54,8 @@ class RecruitmentUnit extends Structure {
             if (!done && uc.canSpawn(dir, UnitType.WORKER)) {
                 uc.spawn(dir, UnitType.WORKER);
                 // Report to the Comm Channel
-                uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
-                uc.write(data.workerReportCh, uc.read(data.workerReportCh + 1));
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
+                uc.write(data.workerReportCh, uc.read(data.workerReportCh) + 1);
                 // Reset Next Slot
                 uc.write(data.unitResetCh, 0);
                 uc.write(data.workerResetCh, 0);
@@ -80,8 +80,8 @@ class RecruitmentUnit extends Structure {
             if (!done && uc.canSpawn(dir, UnitType.EXPLORER)) {
                 uc.spawn(dir, UnitType.EXPLORER);
                 // Report to the Comm Channel
-                uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
-                uc.write(data.explorerReportCh, uc.read(data.explorerReportCh)+1);
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
+                uc.write(data.explorerReportCh, uc.read(data.explorerReportCh) + 1);
                 // Reset Next Slot
                 uc.write(data.unitResetCh, 0);
                 uc.write(data.explorerResetCh, 0);

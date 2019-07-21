@@ -22,22 +22,23 @@ public class Data {
     int towerCh,            towerReportCh,          towerResetCh;           // Ch 27, 28, 29
     int combatUnitCh,       combatUnitReportCh,     combatUnitResetCh;      // Ch 30, 31, 32
     int minerCh,            minerReportCh,          minerResetCh;           // Ch 33, 34, 35
+    int townScoutCh,        townScoutReportCh,      townScoutResetCh;       // Ch 36, 37, 38
     int requestWoodCh,      requestWoodReportCh,    requestWoodResetCh;     // Ch 42, 43, 44
     int requestIronCh,      requestIronReportCh,    requestIronResetCh;     // Ch 45, 46, 47
     int requestCrystalCh,   requestCrystalReportCh, requestCrystalResetCh;  // Ch 48, 49, 50
     int myMineMinerCh,      myMineMinerReportCh,    myMineMinerResetCh;     // Ch variable within the mine vector
 
     // Comm Channels (static)
-    int hostileOnSightCh        = 101;    // Ch 101
-    int hostileContactCh        = 102;    // Ch 102
-    int enemyOnSightCh          = 103;    // Ch 103
-    int enemyContactCh          = 104;    // Ch 104
-    int neutralOnSightCh        = 105;    // Ch 105
-    int neutralContactCh        = 106;    // Ch 106
+    //int hostileOnSightCh        = 101;    // Ch 101
+    //int hostileContactCh        = 102;    // Ch 102
+    //int enemyOnSightCh          = 103;    // Ch 103
+    //int enemyContactCh          = 104;    // Ch 104
+    //int neutralOnSightCh        = 105;    // Ch 105
+    //int neutralContactCh        = 106;    // Ch 106
     int enemyLocCh              = 107;    // Ch 107
     int enemyFoundCh            = 109;    // Ch 109
     int neutralLocCh            = 110;    // Ch 110
-    int neutralFoundCh          = 111;
+    int neutralFoundCh          = 111;    // Ch 111
     int spawnBarrackCh          = 112;    // Ch 112
 
     int mineMaxDistSqToBaseIndexCh = 9996;   // Ch 9996
@@ -65,6 +66,7 @@ public class Data {
     int nWorker;                int nMiner;                     int nExplorer;
     int nSoldier;               int nArcher;                    int nKnight;
     int nMage;                  int nCatapult;                  int nTower;
+    int nTownScout;
 
 
     // Mine Info
@@ -74,8 +76,9 @@ public class Data {
     int mineMaxDistSqToBase;    int mineMaxDistSqToBaseIndex;
 
     // Town Info
-    int nTown;                  int channelsPerTown = 4;
+    int nTown;                  int channelsPerTown = 10;
     Location[] townLocations;   boolean[] townOwned;            int[] townDistSqToBase;
+    int[] townLastVisited;
 
     // Enemy Intel
     // true when in field of vision             // true when adjacent
@@ -103,7 +106,7 @@ public class Data {
     int townToAttack;           boolean armyReadyToAttack = false;
 
     // Explorer variables
-    Direction prefDir;
+    Direction prefDir;          boolean isTownScout;            int townScoutCurrentTownIndex;
 
     /* ------------------------------------------------ CONSTRUCTOR ------------------------------------------------ */
 
@@ -162,6 +165,7 @@ public class Data {
         // Class specific updates
         updateBase();
         updateWorker();
+        updateExplorer();
     }
 
     void updateGeneral() {
@@ -194,6 +198,10 @@ public class Data {
         requestWoodReportCh    = 42 + x;    requestIronReportCh    = 45 + x;    requestCrystalReportCh = 48 + x;
         requestWoodResetCh     = 42 + y;    requestIronResetCh     = 45 + y;    requestCrystalResetCh  = 48 + y;
         requestWoodCh          = 42 + z;    requestIronCh          = 45 + z;    requestCrystalCh       = 48 + z;
+
+        townScoutReportCh      = 36 + x;
+        townScoutResetCh       = 36 + y;
+        townScoutCh            = 36 + z;
     }
 
     void updateCommInfo() {
@@ -209,6 +217,7 @@ public class Data {
         nBarracks                = uc.read(barracksCh);
         nTower                   = uc.read(towerCh);
         nMiner                   = uc.read(minerCh);
+        nTownScout               = uc.read(townScoutCh);
         mineMinDistSqToBase      = uc.read(mineMinDistSqToBaseCh);
         mineMinDistSqToBaseIndex = uc.read(mineMinDistSqToBaseIndexCh);
         mineMaxDistSqToBase      = uc.read(mineMaxDistSqToBaseCh);
@@ -253,14 +262,17 @@ public class Data {
         townLocations    = new Location[nTown];
         townOwned        = new boolean[nTown];
         townDistSqToBase = new int[nTown];
+        townLastVisited  = new int[nTown];
         for (int i = 0; i < nTown; i++) {
             int townLocChannel = nTownCh + channelsPerTown*i + 1;
             int townOwnedChannel = townLocChannel + 1;
             int townsDistSqToBaseChannel = townLocChannel + 2;
+            int townLastVisitedChannel   = townLocChannel + 3;
 
             townLocations[i]    = tools.decodeLocation(uc.read(townLocChannel));
             townOwned[i]        = (uc.read(townOwnedChannel) == 1);
             townDistSqToBase[i] = uc.read(townsDistSqToBaseChannel);
+            townLastVisited[i]  = uc.read(townLastVisitedChannel);
         }
     }
 
@@ -326,6 +338,34 @@ public class Data {
 
             // look for things to do and places to go
             assignJob();
+        }
+    }
+
+    // Explorer specific update
+    void updateExplorer() {
+        if (type.equals(UnitType.EXPLORER)) {
+            // assign a scout to check towns regularly
+            if (nTownScout == 0 && !isTownScout && currentRound > 100 && nTown > 0) {
+                isTownScout = true;
+                uc.write(townScoutCh, nTownScout+1);
+                nTownScout += 1;
+                //uc.println("Explorer promoted to scout!");
+            }
+
+            updateTownScout();
+        }
+    }
+
+    void updateTownScout() {
+        if (isTownScout) {
+            // cicle through towns until we find one that hasn't been visited in 50 rounds
+            for (int i = 0; i < nTown; i++) {
+                int index = (townScoutCurrentTownIndex + i)%nTown;
+                if (currentRound - townLastVisited[index] > 25) {
+                    townScoutCurrentTownIndex = index;
+                    return;
+                }
+            }
         }
     }
 
