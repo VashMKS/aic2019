@@ -15,13 +15,23 @@ class RecruitmentUnit extends Structure {
             }
             //TODO: poner una condicion mejor
             if(uc.getRound() > 25){
-                trySpawnArmy();
+
+                if(data.towerFound){
+                    trySpawnCatapult();
+                    if(uc.getWood() > 180 && uc.getIron() > 60) trySpawnArmy();
+                }
+                else trySpawnArmy();
             }
+
         }
 
         // Barracks
         if (uc.getType() == UnitType.BARRACKS) {
-            trySpawnArmy();
+            if(data.towerFound){
+                trySpawnCatapult();
+                if(uc.getWood() > 180 && uc.getIron() > 60) trySpawnArmy();
+            }
+            else trySpawnArmy();
         }
 
         // Both
@@ -92,8 +102,29 @@ class RecruitmentUnit extends Structure {
         }
     }
 
+    void trySpawnCatapult() {
+
+        boolean done = false;
+        boolean spawnCatapult  =(data.nCatapult  <= data.nRequestedCatapult) && data.towerFound;
+
+        for (Direction dir : data.dirs) {
+            if (!done && spawnCatapult && uc.canSpawn(dir, UnitType.CATAPULT)) {
+                uc.spawn(dir, UnitType.CATAPULT);
+                // Report to the Comm Channel
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
+                uc.write(data.catapultReportCh, uc.read(data.catapultReportCh)+1);
+                // Reset Next Slot
+                uc.write(data.unitResetCh, 0);
+                uc.write(data.catapultResetCh, 0);
+                // Update current data
+                data.nUnit = data.nUnit + 1;
+                data.nCatapult = data.nCatapult + 1;
+                done = true;
+            }
+        }
+    }
+
     // spawn army
-    // TODO: better composition
     void trySpawnArmy() {
 
         boolean spawnSoldier =(data.nSoldier <= data.nRequestedSoldier);
@@ -129,9 +160,19 @@ class RecruitmentUnit extends Structure {
             if(!done && spawnMage   ) done = trySpawnMage();
         }
 
+        if(!done && tools.currency(uc.getWood(),uc.getIron(),uc.getCrystal()) > 1000){
+            data.nRequestedSoldier = 2*data.nRequestedSoldier;
+            data.nRequestedArcher  = 2*data.nRequestedArcher;
+            data.nRequestedKnight  = 2*data.nRequestedKnight;
+            data.nRequestedMage    = 2*data.nRequestedMage;
+        }
+
+
+
         if(spawnSoldier) request(UnitType.SOLDIER, data.nRequestedSoldier - data.nSoldier);
         if(spawnArcher)  request(UnitType.ARCHER , data.nRequestedArcher - data.nArcher );
-        if(spawnMage)    request(UnitType.MAGE , data.nRequestedMage - data.nMage );
+        if(spawnKnight)  request(UnitType.KNIGHT , data.nRequestedKnight - data.nKnight );
+        if(spawnMage)    request(UnitType.MAGE   , data.nRequestedMage - data.nMage );
 
     }
 

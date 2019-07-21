@@ -102,9 +102,9 @@ public class Data {
     int economyThreshold = 200;
 
     // Army variables TODO: demanar unitats de forma dinamica
-    int nRequestedSoldier = 35; int nRequestedArcher = 25;      int nRequestedMage = 5;
-    int nRequestedKnight = 0;   int townToAttack;               int towerToAttack;
-    boolean armyReadyToAttack;  boolean armyReadyToSiege;
+    int nRequestedSoldier = 15; int nRequestedArcher = 15;      int nRequestedMage = 5;
+    int nRequestedKnight = 10;  int nRequestedCatapult = 3;     int townToAttack;
+    int towerToAttack;          boolean armyReadyToAttack;      boolean armyReadyToSiege;
 
     // Explorer variables
     Direction prefDir;          boolean isTownScout;            int townScoutCurrentTownIndex;

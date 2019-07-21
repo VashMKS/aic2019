@@ -1,9 +1,6 @@
 package huevoplanta4;
 
-import aic2019.Location;
-import aic2019.UnitController;
-import aic2019.UnitInfo;
-import aic2019.UnitType;
+import aic2019.*;
 
 public class Base extends RecruitmentUnit {
 
@@ -78,27 +75,32 @@ public class Base extends RecruitmentUnit {
                     "\n  - Mages: " + data.nMage + " out of " + data.nRequestedMage);
         }
     }
-    
+
 
     public void attack() {
 
-        UnitInfo[] unitsAround = uc.senseUnits(data.allyTeam, true);
+        UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
         Location target = uc.getLocation();
         float priority = 0;
 
-        for (UnitInfo unit : unitsAround) {
+        for (int i = 0; i < Math.min(enemiesAround.length, 6); ++i) {
 
-            if(!uc.canAttack(unit.getLocation())) continue;
+            UnitInfo unit = enemiesAround[i];
 
-            //TODO: falta mirar les caselles al voltant de les unitats enemigues
-            float unitPriority = areaAttackPriority( unit.getLocation() );
-            //uc.println("My target is at " + unit.getLocation().x + " " + unit.getLocation().y + " with priority " + unitPriority );
+            for (Direction d : data.dirs) {
 
-            if (unitPriority > priority) {
-                priority = unitPriority;
-                target = unit.getLocation();
+                Location loc = unit.getLocation().add(d);
+
+                if (!uc.canAttack(loc)) continue;
+
+                float unitPriority = areaAttackPriority(loc);
+                //uc.println("My target is at " + unit.getLocation().x + " " + unit.getLocation().y + " with priority " + unitPriority );
+
+                if (unitPriority > priority) {
+                    priority = unitPriority;
+                    target = loc;
+                }
             }
-
         }
         if(!target.isEqual(uc.getLocation()) )uc.attack(target);
     }

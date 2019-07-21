@@ -120,13 +120,17 @@ public class Movement {
 
     boolean doMicroCatapult(Location target){
 
-        // if(!uc.canMove()) uc.println("I'm on cooldown");
+        if(!uc.canMove()){
+            uc.println("I'm on cooldown");
+            return false;
+        }
+
 
         UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
         Location myLoc = uc.getLocation();
-        if (uc.canMove() && (enemiesAround.length > 0 || myLoc.distanceSquared(data.enemyBase) <= 72 ||
-            myLoc.distanceSquared(target) <= 72) ) {
-            //uc.println(uc.getType() + " report in Round: " + uc.getRound());
+        if (enemiesAround.length > 0 || myLoc.distanceSquared(data.enemyBase) <= 72 ||
+            myLoc.distanceSquared(target) <= 72 ) {
+            uc.println(uc.getType() + " report in Round: " + uc.getRound());
             MicroInfo[] micro = new MicroInfo[9];
             for (int i = 0; i < 9; ++i) {
                 micro[i] = new MicroInfo(uc.getLocation().add(data.dirs[i]));
@@ -148,18 +152,11 @@ public class Movement {
                             ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack +
                             ", Too close to the enemy base: " + micro[i].tooCloseToEnemyBase);
                 */
-                if (uc.getType() == UnitType.WORKER || uc.getType() == UnitType.EXPLORER){
-                    if (micro[i].isBetterExplorer(micro[bestIndex])) bestIndex = i;
-                }
-                if (uc.getType() == UnitType.ARCHER || uc.getType() == UnitType.MAGE) {
-                    if (micro[i].isBetterRanged(micro[bestIndex])) bestIndex = i;
-                }
-                if (uc.getType() == UnitType.SOLDIER || uc.getType() == UnitType.KNIGHT){
-                    if (micro[i].isBetterMelee(micro[bestIndex])) bestIndex = i;
-                }
+                if (micro[i].isBetterCatapult(micro[bestIndex])) bestIndex = i;
+
             }
 
-            //uc.println("The best direction is: " + data.dirs[bestIndex]);
+            uc.println("The best direction is: " + data.dirs[bestIndex]);
 
             //uc.drawLine(uc.getLocation(), uc.getLocation().add(data.dirs[bestIndex]), "FF69B4");
             uc.move(data.dirs[bestIndex]);
@@ -178,11 +175,13 @@ public class Movement {
         boolean canAttack = false;
         boolean isDiagonal = false;
         boolean tooCloseToEnemyBase = false;
+        boolean tooCloseToTower = false;
         boolean onRouteToTarget = false;
 
         Location loc;
 
         public MicroInfo (Location _loc){
+
             this.loc = _loc;
 
             if(loc.directionTo(uc.getLocation()) == Direction.NORTHEAST  || loc.directionTo(uc.getLocation()) == Direction.NORTHWEST ||
@@ -191,6 +190,8 @@ public class Movement {
             }
 
             if(loc.distanceSquared(data.enemyBase) <= 50 ) tooCloseToEnemyBase = true;
+
+            if(data.towerFound && loc.distanceSquared(data.towerLoc) <= 32) tooCloseToTower = true;
 
             if (uc.senseImpact(loc) > 0 && uc.senseImpact(loc) <= uc.getType().movementDelay ) maxDamage += 20;
 
@@ -229,12 +230,6 @@ public class Movement {
             }
         }
 
-        /*
-        void senseImpact(){
-            //mira si el siguiente turno impactara una catapulta en el sitio
-            if (uc.senseImpact(loc) <= uc.getType().movementDelay ) maxDamage += 20;
-        }
-        */
 
 
         void canAttackTarget(Location target){
@@ -258,6 +253,12 @@ public class Movement {
             //Prioriza no entrar en el rango de vision de la Base enemiga
             if(!tooCloseToEnemyBase && mic.tooCloseToEnemyBase) preference += 10;
             if(tooCloseToEnemyBase && !mic.tooCloseToEnemyBase) preference -= 10;
+
+            //Prioriza no entrar en el rango de vision de torres si no estamos en Siege mode
+            if(!data.armyReadyToSiege) {
+                if (!tooCloseToTower && mic.tooCloseToTower) preference += 7;
+                if (tooCloseToTower && !mic.tooCloseToTower) preference -= 7;
+            }
 
             //Prioriza lo primero no morir este turno
             if (maxDamage < hp && mic.maxDamage >= hp) preference += 10;
@@ -383,8 +384,6 @@ public class Movement {
 
             float preference = 0;
 
-            int dmg = uc.getType().attack;
-
             //Prioriza no entrar en el rango de vision de la Base enemiga
             if(!tooCloseToEnemyBase && mic.tooCloseToEnemyBase) preference += 100;
             if(tooCloseToEnemyBase && !mic.tooCloseToEnemyBase) preference -= 100;
@@ -393,7 +392,7 @@ public class Movement {
             if(maxDamage < mic.maxDamage) preference += 10*(mic.maxDamage - maxDamage);
             if(maxDamage > mic.maxDamage) preference -= 10*(maxDamage - mic.maxDamage);
 
-            if(uc.canAttack() ) {
+            if(uc.canAttack() && data.armyReadyToSiege) {
                 //Prioriza poder atacar
                 if (canAttack && !mic.canAttack) preference += 5;
                 if (!canAttack && mic.canAttack) preference -= 5;

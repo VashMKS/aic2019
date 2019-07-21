@@ -37,15 +37,15 @@ public class Catapult extends CombatUnit {
 
         Location target = new Location();
 
-        if(data.nCombatUnit > 20 && data.nCatapult > 2) data.armyReadyToSiege = true;
-        if(data.nCombatUnit < 10 ) data.armyReadyToSiege = false;
+        if(data.nCombatUnit > 14 && data.nCatapult > 2) data.armyReadyToSiege = true;
+        if(data.nCombatUnit < 6 ) data.armyReadyToSiege = false;
 
         if(uc.getRound() <= 75 || !data.armyReadyToAttack ){
             target.x = (3*data.allyBase.x + data.enemyBase.x)/4;
             target.y = (3*data.allyBase.y + data.enemyBase.y)/4;
         } else {
-            if (data.towerToAttack != -1) {
-                //TODO: Write here target
+            if (data.towerFound) {
+                target = data.towerLoc;
             }else{
 
                 target.x = (data.allyBase.x + data.enemyBase.x)/2;
@@ -53,7 +53,8 @@ public class Catapult extends CombatUnit {
             }
         }
 
-        //uc.println("We are currently on Town " + data.townToAttack + " of " + data.nTown + ". My target is at " + target.x + " " + target.y);
+        uc.println("My target is at (" + target.x + ", " + target.y + "). towerFound = " + data.towerFound);
+
 
         if(!movement.doMicroCatapult(target)){
             uc.drawLine(uc.getLocation(), target, "#0000ff" );
@@ -67,8 +68,8 @@ public class Catapult extends CombatUnit {
         Location target = new Location();
         boolean readyToAttack = false;
 
-        if (data.towerToAttack != -1) {
-            //TODO: Write here target
+        if (data.towerFound) {
+            target = data.towerLoc;
             readyToAttack = true;
         }
 
@@ -83,11 +84,11 @@ public class Catapult extends CombatUnit {
         // Report to the Comm Channel
         uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
         uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh)+1);
-        uc.write(data.soldierReportCh, uc.read(data.soldierReportCh)+1);
+        uc.write(data.catapultReportCh, uc.read(data.catapultReportCh)+1);
         // Reset Next Slot
         uc.write(data.unitResetCh, 0);
         uc.write(data.combatUnitResetCh, 0);
-        uc.write(data.soldierResetCh, 0);
+        uc.write(data.catapultResetCh, 0);
     }
 
 }
