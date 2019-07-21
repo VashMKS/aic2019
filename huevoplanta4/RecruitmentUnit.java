@@ -21,9 +21,7 @@ class RecruitmentUnit extends Structure {
 
         // Barracks
         if (uc.getType() == UnitType.BARRACKS) {
-            if (data.nCombatUnit < 2 || data.hostileContact) {
-                trySpawnArmy();
-            }
+            trySpawnArmy();
         }
 
         // Both
@@ -61,7 +59,7 @@ class RecruitmentUnit extends Structure {
                 uc.write(data.unitResetCh, 0);
                 uc.write(data.workerResetCh, 0);
                 // Update current data
-                data.nUnit = data.nUnit + 1;
+                data.nUnit   = data.nUnit + 1;
                 data.nWorker = data.nWorker + 1;
                 done = true;
             }

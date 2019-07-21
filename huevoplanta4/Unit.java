@@ -25,32 +25,13 @@ public class Unit {
 
     // report hostile (enemy + neutral) units on sight and adjacent
     void reportEnemies () {
+        /*UnitInfo[] nonAllyUnitsOnSight = uc.senseUnits(data.allyTeam, true);
 
-        //if (nonAllyUnitsOnSight.length > 0) uc.write(data.hostileOnSightCh, 1);
-
-        if (uc.canSenseLocation(data.towerLoc)) {
-            UnitInfo unit = uc.senseUnit(data.towerLoc);
-            if (unit != null && !unit.getType().equals(UnitType.TOWER)) {
-                Location loc = unit.getLocation();
-                uc.write(data.towerLocCh, tools.encodeLocation(loc.x, loc.y));
-                uc.println("Tower found at (" + loc.x + ", " + loc.y + ")");
-            }
-        }
-
-        UnitInfo[] nonAllyUnitsOnSight = uc.senseUnits(data.allyTeam, true);
+        if (nonAllyUnitsOnSight.length > 0) uc.write(data.hostileOnSightCh, 1);
 
         for (UnitInfo unit : nonAllyUnitsOnSight) {
-
-            if (unit.getType() == UnitType.TOWER) {
-                if (tools.encodeLocation(data.towerLoc.x, data.towerLoc.y) == 0) {
-                    Location loc = unit.getLocation();
-                    uc.write(data.towerLocCh, tools.encodeLocation(loc.x, loc.y));
-                    uc.println("Tower down confirmed");
-                }
-            }
-
             // checks if the hostile unit is reachable
-            /*boolean adjacent = tools.areAdjacent(uc.getLocation(), unit.getLocation());
+            boolean adjacent = tools.areAdjacent(uc.getLocation(), unit.getLocation());
             if (adjacent) {
                 if (!data.hostileContact) {
                     data.hostileContact = true;
@@ -74,29 +55,65 @@ public class Unit {
                         uc.write(data.enemyContactCh, 1);
                     }
                 }
-            }*/
+            }
+        }*/
+
+        if (data.towerFound && uc.canSenseLocation(data.towerLoc)) {
+            UnitInfo unit = uc.senseUnit(data.towerLoc);
+            if (unit == null) {
+                uc.write(data.towerFoundCh, 0);
+                data.towerFound = false;
+                uc.println("Tower down confirmed");
+            } else if (unit.getType() != UnitType.TOWER || unit.getTeam() == data.allyTeam) {
+                uc.write(data.towerFoundCh, 0);
+                data.towerFound = false;
+                uc.println("Tower down confirmed");
+            }
         }
+
+        if (!data.towerFound) {
+            UnitInfo[] nonAllyUnitsOnSight = uc.senseUnits(data.allyTeam, true);
+
+            for (UnitInfo unit : nonAllyUnitsOnSight) {
+
+                if (unit.getType() == UnitType.TOWER) {
+                    Location loc = unit.getLocation();
+                    uc.write(data.towerLocCh, tools.encodeLocation(loc.x, loc.y));
+                    uc.write(data.towerFoundCh, 1);
+                    data.towerFound = true;
+                    uc.println("Tower found at (" + loc.x + ", " + loc.y + ")");
+                    return;
+                }
+
+            }
+        }
+
+
     }
 
     void reportNeutralLocation(){
 
-        if(uc.read(data.neutralLocCh) != 0) {
+        if(data.neutralFound) {
             if(uc.canSenseLocation(data.neutralLoc)) {
 
                 //uc.println("checking position (" + neutralLoc.x + ", " + neutralLoc.y + ")");
 
                 UnitInfo[] units = uc.senseUnits(data.neutralLoc, 2, Team.NEUTRAL);
                 if(units.length == 0) {
-                    //uc.println("No neutral here, proceed");
                     uc.write(data.neutralLocCh, 0);
+                    uc.write(data.neutralFoundCh, 0);
+                    data.neutralFound = false;
+                    //uc.println("No neutral hostile here, proceed");
                 }
             }
         } else {
             UnitInfo[] neutralsOnSight = uc.senseUnits(Team.NEUTRAL, false);
             if (neutralsOnSight.length > 0) {
-                //uc.println("found a neutral unit on (" + neutralLoc.x + " " + neutralLoc.y + ")" );
                 Location neutralLoc = neutralsOnSight[0].getLocation();
                 uc.write(data.neutralLocCh, tools.encodeLocation(neutralLoc.x, neutralLoc.y));
+                uc.write(data.neutralFoundCh, 1);
+                data.neutralFound = true;
+                //uc.println("found a neutral unit on (" + neutralLoc.x + " " + neutralLoc.y + ")" );
             }
         }
 

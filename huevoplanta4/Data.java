@@ -29,17 +29,19 @@ public class Data {
     int myMineMinerCh,      myMineMinerReportCh,    myMineMinerResetCh;     // Ch variable within the mine vector
 
     // Comm Channels (static)
-    int hostileOnSightCh        = 100;    // Ch 100
-    int hostileContactCh        = 101;    // Ch 101
-    int enemyOnSightCh          = 102;    // Ch 102
-    int enemyContactCh          = 103;    // Ch 103
-    int neutralOnSightCh        = 104;    // Ch 104
-    int neutralContactCh        = 105;    // Ch 105
-    int neutralLocCh            = 106;    // Ch 106
+    //int hostileOnSightCh        = ;    // Ch
+    //int hostileContactCh        = ;    // Ch
+    //int enemyOnSightCh          = ;    // Ch
+    //int enemyContactCh          = ;    // Ch
+    //int neutralOnSightCh        = ;    // Ch
+    //int neutralContactCh        = ;    // Ch
+    int neutralLocCh            = 105;    // Ch 105
+    int neutralFoundCh          = 106;    // Ch 106
     int towerLocCh              = 107;    // Ch 107
-    int requestedSoldiersCh     = 108;    // Ch 108
-    int requestedArchersCh      = 109;    // Ch 109
-    int requestedKnightCh       = 110;    // Ch 110
+    int towerFoundCh            = 108;    // Ch 108
+    //int requestedSoldiersCh     = 108;    // Ch 108
+    //int requestedArchersCh      = 109;    // Ch 109
+    //int requestedKnightCh       = 110;    // Ch 110
 
     int mineMaxDistSqToBaseIndexCh = 9996;   // Ch 9996
     int mineMaxDistSqToBaseCh      = 9997;   // Ch 9997
@@ -80,10 +82,11 @@ public class Data {
 
     // Enemy Intel
     // true when in field of vision             // true when adjacent
-    boolean hostileOnSight;                     boolean hostileContact;
-    boolean neutralOnSight;                     boolean neutralContact;
-    boolean enemyOnSight;                       boolean enemyContact;
-    Location neutralLoc;                        Location towerLoc;
+    //boolean hostileOnSight;                     boolean hostileContact;
+    //boolean neutralOnSight;                     boolean neutralContact;
+    //boolean enemyOnSight;                       boolean enemyContact;
+    Location neutralLoc;                        boolean neutralFound;
+    Location towerLoc;                          boolean towerFound;
 
     // Worker variables
     int nWorkerMax = 16;        int nMinerMax = 16;             int nMinerPerMine = 1;
@@ -284,18 +287,20 @@ public class Data {
 
     void updateEnemyIntel() {
 
-        hostileOnSight = (uc.read(hostileOnSightCh) == 1);
-        hostileContact = (uc.read(hostileContactCh) == 1);
-        neutralOnSight = (uc.read(neutralOnSightCh) == 1);
-        neutralContact = (uc.read(neutralContactCh) == 1);
-        enemyOnSight   = (uc.read(enemyOnSightCh) == 1);
-        enemyContact   = (uc.read(enemyContactCh) == 1);
+        //hostileOnSight = (uc.read(hostileOnSightCh) == 1);
+        //hostileContact = (uc.read(hostileContactCh) == 1);
+        //neutralOnSight = (uc.read(neutralOnSightCh) == 1);
+        //neutralContact = (uc.read(neutralContactCh) == 1);
+        //enemyOnSight   = (uc.read(enemyOnSightCh) == 1);
+        //enemyContact   = (uc.read(enemyContactCh) == 1);
 
-        neutralLoc = tools.decodeLocation(uc.read(neutralLocCh));
-        towerLoc   = tools.decodeLocation(uc.read(towerLocCh));
+        neutralLoc   = tools.decodeLocation(uc.read(neutralLocCh));
+        neutralFound = (uc.read(neutralFoundCh) == 1);
+        towerLoc     = tools.decodeLocation(uc.read(towerLocCh));
+        towerFound   = (uc.read(towerFoundCh) == 1);
 
         // Reset Contact every 20 rounds
-        if (currentRound%20 == 0) {
+        /*if (currentRound%20 == 0) {
             uc.write(hostileContactCh, 0);
             uc.write(neutralContactCh, 0);
             uc.write(enemyContactCh, 0);
@@ -303,7 +308,7 @@ public class Data {
 
         hostileContact = (uc.read(hostileContactCh) == 1);
         neutralContact = (uc.read(neutralContactCh) == 1);
-        enemyContact   = (uc.read(enemyContactCh) == 1);
+        enemyContact   = (uc.read(enemyContactCh) == 1);*/
     }
 
     // Base specific updates
@@ -346,7 +351,7 @@ public class Data {
                 isTownScout = true;
                 uc.write(townScoutCh, nTownScout+1);
                 nTownScout += 1;
-                uc.println("Explorer promoted to scout!");
+                //uc.println("Explorer promoted to scout!");
             }
 
             updateTownScout();
