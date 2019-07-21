@@ -17,8 +17,8 @@ public class CombatUnit extends MovingUnit {
         if(data.nCombatUnit > 14) data.armyReadyToAttack = true;
         if(data.nCombatUnit < 6 ) data.armyReadyToAttack = false;
 
-        if(data.nCombatUnit > 20 && data.nCatapult >  2) data.armyReadyToSiege = true;
-        if(data.nCombatUnit < 11 || data.nCatapult == 0) data.armyReadyToSiege = false;
+        if(data.nCombatUnit > 14 && data.nCatapult >  2) data.armyReadyToSiege = true;
+        if(data.nCombatUnit < 6  || data.nCatapult == 0) data.armyReadyToSiege = false;
 
         if(!data.armyReadyToAttack ){
             target.x = (4*data.allyBase.x + data.enemyBase.x)/5;
@@ -27,8 +27,8 @@ public class CombatUnit extends MovingUnit {
             if (data.townToAttack != -1) {
                 int townLocChannel = data.nTownCh + data.channelsPerTown * data.townToAttack + 1;
                 target = tools.decodeLocation(uc.read(townLocChannel));
-            } else if (uc.read(data.neutralLocCh) != 0) {
-                target = tools.decodeLocation(uc.read(data.neutralLocCh));
+            } else if (data.neutralFound) {
+                target = data.neutralLoc;
             } else {
                 target.x = (data.allyBase.x + data.enemyBase.x)/2;
                 target.y = (data.allyBase.y + data.enemyBase.y)/2;

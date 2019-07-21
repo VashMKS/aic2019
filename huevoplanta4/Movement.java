@@ -152,14 +152,13 @@ public class Movement {
                             " MinDistance to enemy: " + micro[i].minDistToEnemy + ", maxDamage: " + micro[i].maxDamage +
                             ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack +
                             ", Too close to the enemy base: " + micro[i].tooCloseToEnemyBase +
-                            ", Going to the prefered Dir " + myLoc.directionTo(target) + ": " +
-                            micro[i].onRouteToTarget);
+                            ", Distance to Traget "  + micro[i].distToTarget);
                 */
                 if (micro[i].isBetterCatapult(micro[bestIndex])) bestIndex = i;
 
             }
 
-            uc.println("The best direction is: " + data.dirs[bestIndex]);
+            //uc.println("The best direction is: " + data.dirs[bestIndex]);
 
             uc.move(data.dirs[bestIndex]);
             return true;
@@ -204,6 +203,7 @@ public class Movement {
             if(uc.getLocation().directionTo(loc) == targetDir) onRouteToTarget = true;
         }
 
+
         void update(UnitInfo enemy) {
 
             int d = loc.distanceSquared(enemy.getLocation());
@@ -237,7 +237,7 @@ public class Movement {
 
         void canAttackTarget(Location target){
 
-            distToTarget = uc.getLocation().distanceSquared(target);
+            distToTarget = loc.distanceSquared(target);
 
             if (uc.getType().attackRangeSquared >= distToTarget && uc.getType().minAttackRangeSquared <= distToTarget){
                 if(uc.canAttack() ) canAttack = true;
@@ -264,8 +264,8 @@ public class Movement {
             }
 
             //Prioriza lo primero no morir este turno
-            if (maxDamage < hp && mic.maxDamage >= hp) preference += 10;
-            if (maxDamage >= hp && mic.maxDamage < hp) preference -= 10;
+            //if (maxDamage < hp && mic.maxDamage >= hp) preference += 10;
+            //if (maxDamage >= hp && mic.maxDamage < hp) preference -= 10;
 
             if (uc.canAttack() ) {
 
@@ -311,8 +311,8 @@ public class Movement {
             if(tooCloseToEnemyBase && !mic.tooCloseToEnemyBase) preference -= 20;
 
             //Prioriza lo primero no morir este turno
-            if (maxDamage < hp && mic.maxDamage >= hp) preference += 10;
-            if (maxDamage >= hp && mic.maxDamage < hp) preference -= 10;
+            //if (maxDamage < hp && mic.maxDamage >= hp) preference += 10;
+            //if (maxDamage >= hp && mic.maxDamage < hp) preference -= 10;
 
             if(uc.canAttack() ) {
 
@@ -399,8 +399,8 @@ public class Movement {
 
             if(uc.canAttack() && data.armyReadyToSiege) {
                 //Prioriza poder atacar
-                if (canAttack && !mic.canAttack) preference += 5;
-                if (!canAttack && mic.canAttack) preference -= 5;
+                if (canAttack && !mic.canAttack) preference += 10;
+                if (!canAttack && mic.canAttack) preference -= 10;
 
             }
 
@@ -423,6 +423,8 @@ public class Movement {
 
 
     }
+
+
 
 
 }

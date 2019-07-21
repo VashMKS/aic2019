@@ -16,7 +16,7 @@ class RecruitmentUnit extends Structure {
             //TODO: poner una condicion mejor
             if(uc.getRound() > 25){
 
-                if(data.towerFound && data.nCatapult < 2){
+                if(data.towerFound){
                     trySpawnCatapult();
                     if(uc.getWood() > 180 && uc.getIron() > 60) trySpawnArmy();
                 }
@@ -111,8 +111,8 @@ class RecruitmentUnit extends Structure {
             if (!done && spawnCatapult && uc.canSpawn(dir, UnitType.CATAPULT)) {
                 uc.spawn(dir, UnitType.CATAPULT);
                 // Report to the Comm Channel
-                uc.write(data.unitReportCh, uc.read(data.unitReportCh)+1);
-                uc.write(data.catapultReportCh, uc.read(data.catapultReportCh)+1);
+                uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
+                uc.write(data.catapultReportCh, uc.read(data.catapultReportCh) + 1);
                 // Reset Next Slot
                 uc.write(data.unitResetCh, 0);
                 uc.write(data.catapultResetCh, 0);
