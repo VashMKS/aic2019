@@ -177,8 +177,8 @@ public class Tools {
         return -1;
     }
 
-    // converts any amount of resources to base currency (wood)
-    float currency(float wood, float iron, float crystal) {
+    // converts any amount of resources to base valueOf (wood)
+    float valueOf(float wood, float iron, float crystal) {
         return wood + data.ironMultiplier*iron + data.crystalMultiplier*crystal;
     }
 

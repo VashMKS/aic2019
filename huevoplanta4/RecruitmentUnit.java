@@ -16,7 +16,7 @@ class RecruitmentUnit extends Structure {
             //TODO: poner una condicion mejor
             if(uc.getRound() > 25){
 
-                if(data.towerFound){
+                if(data.towerFound && data.nCatapult < 2){
                     trySpawnCatapult();
                     if(uc.getWood() > 180 && uc.getIron() > 60) trySpawnArmy();
                 }
@@ -134,40 +134,38 @@ class RecruitmentUnit extends Structure {
 
         boolean done = false;
 
-        if (data.nCombatUnit%4 == 0){
+        if (data.nCombatUnit%4 == 0) {
             if(!done && spawnSoldier) done = trySpawnSoldier();
             if(!done && spawnArcher ) done = trySpawnArcher();
             if(!done && spawnMage   ) done = trySpawnMage();
             if(!done && spawnKnight ) done = trySpawnKnight();
         }
-        if (data.nCombatUnit%4 == 1){
+        if (data.nCombatUnit%4 == 1) {
             if(!done && spawnArcher ) done = trySpawnArcher();
             if(!done && spawnMage   ) done = trySpawnMage();
             if(!done && spawnKnight ) done = trySpawnKnight();
             if(!done && spawnSoldier) done = trySpawnSoldier();
         }
-        if (data.nCombatUnit%4 == 2){
+        if (data.nCombatUnit%4 == 2) {
             if(!done && spawnMage   ) done = trySpawnMage();
             if(!done && spawnKnight ) done = trySpawnKnight();
             if(!done && spawnSoldier) done = trySpawnSoldier();
             if(!done && spawnArcher ) done = trySpawnArcher();
 
         }
-        if (data.nCombatUnit%4 == 3){
+        if (data.nCombatUnit%4 == 3) {
             if(!done && spawnKnight ) done = trySpawnKnight();
             if(!done && spawnSoldier) done = trySpawnSoldier();
             if(!done && spawnArcher ) done = trySpawnArcher();
             if(!done && spawnMage   ) done = trySpawnMage();
         }
 
-        if(!done && tools.currency(uc.getWood(),uc.getIron(),uc.getCrystal()) > 1000){
+        if(!done && tools.valueOf(uc.getWood(),uc.getIron(),uc.getCrystal()) > 1000) {
             data.nRequestedSoldier = 2*data.nRequestedSoldier;
             data.nRequestedArcher  = 2*data.nRequestedArcher;
             data.nRequestedKnight  = 2*data.nRequestedKnight;
             data.nRequestedMage    = 2*data.nRequestedMage;
         }
-
-
 
         if(spawnSoldier) request(UnitType.SOLDIER, data.nRequestedSoldier - data.nSoldier);
         if(spawnArcher)  request(UnitType.ARCHER , data.nRequestedArcher - data.nArcher );
@@ -184,8 +182,8 @@ class RecruitmentUnit extends Structure {
                 uc.spawn(dir, UnitType.SOLDIER);
                 // Report to the Comm Channel
                 uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
-                uc.write(data.soldierReportCh, uc.read(data.soldierReportCh + 1));
-                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
+                uc.write(data.soldierReportCh, uc.read(data.soldierReportCh) + 1);
+                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh) + 1);
                 // Reset Next Slot
                 uc.write(data.unitResetCh, 0);
                 uc.write(data.soldierResetCh, 0);
@@ -210,8 +208,8 @@ class RecruitmentUnit extends Structure {
                 uc.spawn(dir, UnitType.ARCHER);
                 // Report to the Comm Channel
                 uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
-                uc.write(data.archerReportCh, uc.read(data.archerReportCh + 1));
-                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
+                uc.write(data.archerReportCh, uc.read(data.archerReportCh) + 1);
+                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh) + 1);
                 // Reset Next Slot
                 uc.write(data.unitResetCh, 0);
                 uc.write(data.archerResetCh, 0);
@@ -235,8 +233,8 @@ class RecruitmentUnit extends Structure {
                 uc.spawn(dir, UnitType.MAGE);
                 // Report to the Comm Channel
                 uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
-                uc.write(data.mageCh, uc.read(data.mageCh + 1));
-                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
+                uc.write(data.mageCh, uc.read(data.mageCh) + 1);
+                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh) + 1);
                 // Reset Next Slot
                 uc.write(data.unitResetCh, 0);
                 uc.write(data.mageResetCh, 0);
@@ -261,8 +259,8 @@ class RecruitmentUnit extends Structure {
                 uc.spawn(dir, UnitType.KNIGHT);
                 // Report to the Comm Channel
                 uc.write(data.unitReportCh, uc.read(data.unitReportCh) + 1);
-                uc.write(data.knightCh, uc.read(data.knightCh + 1));
-                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh + 1));
+                uc.write(data.knightCh, uc.read(data.knightCh) + 1);
+                uc.write(data.combatUnitReportCh, uc.read(data.combatUnitReportCh) + 1);
                 // Reset Next Slot
                 uc.write(data.unitResetCh, 0);
                 uc.write(data.knightCh, 0);

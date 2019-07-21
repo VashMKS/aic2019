@@ -92,7 +92,7 @@ public class Data {
     int nWorkerMax = 16;        int nMinerMax = 16;             int nMinerPerMine = 1;
     boolean isMiner;            boolean onDelivery;
     Location myMine;            int myMineIndex;                int myMineLocCh;
-    int myMineDistSqToBaseCh;   boolean hasTown;
+    int myMineDistSqToBaseCh;   int myMineDistSqToBase;         boolean hasTown;
     Location myTown;            int myTownIndex;                int myTownLocCh;
 
     // Base variables

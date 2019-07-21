@@ -1,9 +1,6 @@
 package huevoplanta4;
 
-import aic2019.Direction;
-import aic2019.Location;
-import aic2019.UnitController;
-import aic2019.UnitType;
+import aic2019.*;
 
 public class Worker extends MovingUnit {
 
@@ -71,21 +68,49 @@ public class Worker extends MovingUnit {
         }
     }
 
+    // if adjacent to the base or an owned town, deliver carried resources
     void deliver(){
-        if(tools.alliesAround(2, UnitType.BASE) > 0){
+        if(tools.alliesAround(2, UnitType.BASE) > 0) {
             Direction d = uc.getLocation().directionTo(data.allyBase);
             if(uc.canDeposit(d)) {
                 //uc.println("resources delivered successfully");
                 uc.deposit(d);
                 data.onDelivery = false;
+                return;
+            }
+        }
+
+        TownInfo[] nearbyOwnedTowns = uc.senseTowns(data.allyTeam, false, 2);
+
+        if(nearbyOwnedTowns.length > 0) {
+            Location myLoc = uc.getLocation();
+            for (TownInfo town : nearbyOwnedTowns) {
+                Direction dir = myLoc.directionTo(town.getLocation());
+                if(uc.canDeposit(dir)) {
+                    //uc.println("resources delivered successfully");
+                    uc.deposit(dir);
+                    data.onDelivery = false;
+                    return;
+                }
             }
         }
     }
 
+    // if adjacent to an owned town, repair it
     void repair() {
-        // TODO: if adjacent to an owned town repair it
+        Location myLoc = uc.getLocation();
+        TownInfo[] nearbyOwnedTowns = uc.senseTowns(data.allyTeam, false, 2);
+
+        for (TownInfo town : nearbyOwnedTowns) {
+            if (town.getLoyalty() < town.getMaxLoyalty()) {
+                Location loc = town.getLocation();
+                Direction dir = myLoc.directionTo(loc);
+                if (uc.canRepair(dir)) uc.repair(dir);
+            }
+        }
     }
 
+    // if on top of a mine, gather resources
     void gather(){
         if(uc.canGather()) uc.gather();
     }
@@ -97,8 +122,17 @@ public class Worker extends MovingUnit {
         Location target = uc.getLocation().add(dir);
 
         if (data.isMiner) {
-            // TODO: make that 50 less arbitrary (maybe depend on distance to the base)
-            if (data.onDelivery || tools.currency(uc.getInfo().getWood(), uc.getInfo().getIron(), uc.getInfo().getCrystal()) > 50) {
+            // calculate how much should miners gather resources before delivering
+            int maxGather = 50;
+            // TODO: make maxGather less arbitrary (maybe depend on distance to the delivery point)
+            /*if (data.hasTown) {
+                int myMineDistSqToMyTown = data.myMine.distanceSquared(data.myTown);
+                // update maxGather based on distance to nearest town
+            } else {
+                // update maxGather based on distance to base
+            }*/
+
+            if (data.onDelivery || tools.valueOf(uc.getInfo().getWood(), uc.getInfo().getIron(), uc.getInfo().getCrystal()) > maxGather) {
 
                 if (data.hasTown) target = data.myTown;
                 else target = data.allyBase;
@@ -120,12 +154,13 @@ public class Worker extends MovingUnit {
 
     }
 
+    // if we have many resources, fortify your mine
     void buildTower(){
 
         Location myLoc = uc.getLocation();
 
         if(data.requestedWood > 0 && data.requestedIron > 0) return;
-        if(uc.getWood() < 1000 && uc.getIron() < 500) return;
+        if(tools.valueOf(uc.getWood(), uc.getIron(), uc.getCrystal()) < 2000) return;
 
         if (myLoc.isEqual(data.myMine) ) {
 

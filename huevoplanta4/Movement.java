@@ -152,13 +152,14 @@ public class Movement {
                             " MinDistance to enemy: " + micro[i].minDistToEnemy + ", maxDamage: " + micro[i].maxDamage +
                             ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack +
                             ", Too close to the enemy base: " + micro[i].tooCloseToEnemyBase +
-                            ", Going to the prefered Dir " + myLoc.directionTo(target) + ": " + micro[i].onRouteToTarget);
+                            ", Going to the prefered Dir " + myLoc.directionTo(target) + ": " +
+                            micro[i].onRouteToTarget);
                 */
                 if (micro[i].isBetterCatapult(micro[bestIndex])) bestIndex = i;
 
             }
 
-            //uc.println("The best direction is: " + data.dirs[bestIndex]);
+            uc.println("The best direction is: " + data.dirs[bestIndex]);
 
             uc.move(data.dirs[bestIndex]);
             return true;
@@ -202,7 +203,6 @@ public class Movement {
         void checkTargetDirection(Direction targetDir){
             if(uc.getLocation().directionTo(loc) == targetDir) onRouteToTarget = true;
         }
-
 
         void update(UnitInfo enemy) {
 
@@ -423,8 +423,6 @@ public class Movement {
 
 
     }
-
-
 
 
 }
