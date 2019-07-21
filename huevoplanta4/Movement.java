@@ -129,7 +129,7 @@ public class Movement {
         UnitInfo[] enemiesAround = uc.senseUnits(data.allyTeam, true);
         Location myLoc = uc.getLocation();
         if (enemiesAround.length > 0 || myLoc.distanceSquared(data.enemyBase) <= 72 ||
-            (data.towerFound && myLoc.distanceSquared(target) <= 72 ) ){
+            (data.armyReadyToSiege && myLoc.distanceSquared(target) <= 72 ) ){
             //uc.println(uc.getType() + " report in Round: " + uc.getRound());
             MicroInfo[] micro = new MicroInfo[9];
             for (int i = 0; i < 9; ++i) {
@@ -151,15 +151,15 @@ public class Movement {
                 uc.println("Info in " + data.dirs[i] + " (" + micro[i].loc.x + " " + micro[i].loc.y + "). " +
                             " MinDistance to enemy: " + micro[i].minDistToEnemy + ", maxDamage: " + micro[i].maxDamage +
                             ", minEnemyHealth: " + micro[i].minEnemyHealth + ", CanAttack: " + micro[i].canAttack +
-                            ", Too close to the enemy base: " + micro[i].tooCloseToEnemyBase);
+                            ", Too close to the enemy base: " + micro[i].tooCloseToEnemyBase +
+                            ", Going to the prefered Dir " + myLoc.directionTo(target) + ": " + micro[i].onRouteToTarget);
                 */
                 if (micro[i].isBetterCatapult(micro[bestIndex])) bestIndex = i;
 
             }
 
-            uc.println("The best direction is: " + data.dirs[bestIndex]);
+            //uc.println("The best direction is: " + data.dirs[bestIndex]);
 
-            //uc.drawLine(uc.getLocation(), uc.getLocation().add(data.dirs[bestIndex]), "FF69B4");
             uc.move(data.dirs[bestIndex]);
             return true;
         }
@@ -173,6 +173,7 @@ public class Movement {
         float maxDamage = 0;
         int minDistToEnemy = 1000;
         int minEnemyHealth = 1000;
+        int distToTarget = 1000;
         boolean canAttack = false;
         boolean isDiagonal = false;
         boolean tooCloseToEnemyBase = false;
@@ -201,6 +202,7 @@ public class Movement {
         void checkTargetDirection(Direction targetDir){
             if(uc.getLocation().directionTo(loc) == targetDir) onRouteToTarget = true;
         }
+
 
         void update(UnitInfo enemy) {
 
@@ -235,7 +237,7 @@ public class Movement {
 
         void canAttackTarget(Location target){
 
-            int distToTarget = uc.getLocation().distanceSquared(target);
+            distToTarget = uc.getLocation().distanceSquared(target);
 
             if (uc.getType().attackRangeSquared >= distToTarget && uc.getType().minAttackRangeSquared <= distToTarget){
                 if(uc.canAttack() ) canAttack = true;
@@ -407,8 +409,8 @@ public class Movement {
             if(minDistToEnemy < mic.minDistToEnemy) preference -= 1;
 
             //prioriza acercarse al objectivo
-            if(onRouteToTarget && !mic.onRouteToTarget) preference += 0.75;
-            if(!onRouteToTarget && mic.onRouteToTarget) preference -= 0.75;
+            if(distToTarget < mic.distToTarget) preference += 0.75;
+            if(distToTarget > mic.distToTarget) preference -= 0.75;
 
             //prioriza no moverse en diagonal (genera mas cooldown)
             if(!isDiagonal && mic.isDiagonal) preference += 0.5;
