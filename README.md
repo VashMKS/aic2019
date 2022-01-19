@@ -7,5 +7,5 @@ Note: the GPLv3 license only applies to the contents of the `src` folder. The re
 # Team
 We are both mathematics students at FME-UPC, the faculty of mathematics at Universitat Politècnica de Catalunya, Barcelona, Spain
 
-Dídac Fernández - [VashMKS](https://github.com/VashMKS) on git  
+Dídac Fernández - [didac-94](https://github.com/didac-94) on git  
 Adrián Hernández - [meave96](https://github.com/meave96) on git
